@@ -124,7 +124,9 @@ const Today = () => {
               {getTimeOfDay()},{" "}
               <span className="text-primary">Sahabat</span>
             </motion.h1>
-            <p className="mt-1 text-xs text-muted-foreground">{hijriDate}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {selectedDate.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })} • {hijriDate}
+            </p>
           </div>
           <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
             <PopoverTrigger asChild>
