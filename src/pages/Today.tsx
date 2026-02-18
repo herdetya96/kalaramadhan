@@ -166,7 +166,7 @@ const Today = () => {
           className="mt-3 rounded-[30px] gradient-countdown p-4 shadow-countdown relative overflow-hidden">
 
             {/* Decorative circles */}
-            <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-primary-foreground/5" />
+            
             <div className="absolute -left-4 -bottom-4 h-16 w-16 rounded-full bg-primary-foreground/5" />
 
             <div className="relative z-10">
