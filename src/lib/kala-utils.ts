@@ -41,7 +41,7 @@ export function formatHijriDate(date: Date): string {
   return `${h.day} ${h.monthName} ${h.year}H`;
 }
 
-// Prayer times (static defaults - can be enhanced with API later)
+// Prayer times
 export interface PrayerSchedule {
   name: string;
   time: string;
@@ -62,17 +62,61 @@ export const WAJIB_PRAYERS = DEFAULT_PRAYERS.filter(
   p => ["Subuh", "Dzuhur", "Ashar", "Maghrib", "Isya"].includes(p.name)
 );
 
-export function getNextPrayer(now: Date): { prayer: PrayerSchedule; remainingMinutes: number; remainingSeconds: number } | null {
+function timeToMinutes(time: string): number {
+  const [h, m] = time.split(":").map(Number);
+  return h * 60 + m;
+}
+
+function buildPrayerSchedule(timings: Record<string, string>): PrayerSchedule[] {
+  const clean = (t: string) => t.replace(/\s*\(.*\)/, "");
+  const map: { apiKey: string; name: string }[] = [
+    { apiKey: "Imsak", name: "Imsak" },
+    { apiKey: "Fajr", name: "Subuh" },
+    { apiKey: "Sunrise", name: "Terbit" },
+    { apiKey: "Dhuhr", name: "Dzuhur" },
+    { apiKey: "Asr", name: "Ashar" },
+    { apiKey: "Maghrib", name: "Maghrib" },
+    { apiKey: "Isha", name: "Isya" },
+  ];
+  return map.map(({ apiKey, name }) => {
+    const time = clean(timings[apiKey] || "00:00");
+    return { name, time, minutes: timeToMinutes(time) };
+  });
+}
+
+export async function fetchPrayerTimes(
+  lat: number, lon: number, date: Date
+): Promise<PrayerSchedule[]> {
+  const dateStr = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
+  const cacheKey = `kala-prayers-${dateStr}-${lat.toFixed(2)}-${lon.toFixed(2)}`;
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) return JSON.parse(cached);
+
+  const res = await fetch(
+    `https://api.aladhan.com/v1/timings/${dateStr}?latitude=${lat}&longitude=${lon}&method=20`
+  );
+  const data = await res.json();
+  if (data.code !== 200) throw new Error("API error");
+  const prayers = buildPrayerSchedule(data.data.timings);
+  localStorage.setItem(cacheKey, JSON.stringify(prayers));
+  return prayers;
+}
+
+export function getWajibFromPrayers(prayers: PrayerSchedule[]): PrayerSchedule[] {
+  return prayers.filter(p => ["Subuh", "Dzuhur", "Ashar", "Maghrib", "Isya"].includes(p.name));
+}
+
+export function getNextPrayer(now: Date, prayerList: PrayerSchedule[] = WAJIB_PRAYERS): { prayer: PrayerSchedule; remainingMinutes: number; remainingSeconds: number } | null {
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
   const currentSeconds = now.getSeconds();
   
-  for (const prayer of WAJIB_PRAYERS) {
+  for (const prayer of prayerList) {
     if (prayer.minutes > currentMinutes) {
       const totalSec = (prayer.minutes - currentMinutes) * 60 - currentSeconds;
       return { prayer, remainingMinutes: prayer.minutes - currentMinutes, remainingSeconds: totalSec };
     }
   }
-  const subuh = WAJIB_PRAYERS[0];
+  const subuh = prayerList[0];
   const totalSec = ((1440 - currentMinutes) + subuh.minutes) * 60 - currentSeconds;
   return { prayer: subuh, remainingMinutes: (1440 - currentMinutes) + subuh.minutes, remainingSeconds: totalSec };
 }

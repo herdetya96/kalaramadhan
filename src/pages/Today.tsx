@@ -6,8 +6,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import {
   WAJIB_PRAYERS, DEFAULT_PRAYERS, getNextPrayer, formatCountdown,
-  isRamadan, formatHijriDate, getDailyTrivia,
-  loadDayData, saveDayData, getDayKey, type DayData } from
+  isRamadan, formatHijriDate, getDailyTrivia, fetchPrayerTimes, getWajibFromPrayers,
+  loadDayData, saveDayData, getDayKey, type DayData, type PrayerSchedule } from
 "@/lib/kala-utils";
 
 const SUNNAH_TASKS = [
@@ -41,6 +41,9 @@ const Today = () => {
   const [nextPrayerName, setNextPrayerName] = useState("");
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [userLocation, setUserLocation] = useState<string>("Memuat lokasi...");
+  const [prayers, setPrayers] = useState<PrayerSchedule[]>(DEFAULT_PRAYERS);
+  const [wajibPrayers, setWajibPrayers] = useState<PrayerSchedule[]>(WAJIB_PRAYERS);
+  const [userCoords, setUserCoords] = useState<{ lat: number; lon: number } | null>(null);
 
   // GPS location detection
   useEffect(() => {
@@ -56,6 +59,7 @@ const Today = () => {
       async (pos) => {
         try {
           const { latitude, longitude } = pos.coords;
+          setUserCoords({ lat: latitude, lon: longitude });
           const res = await fetch(
             `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=id`
           );
@@ -65,11 +69,14 @@ const Today = () => {
           const locationStr = city ? `${city}, ${state}` : state || "Lokasi ditemukan";
           setUserLocation(locationStr);
           localStorage.setItem("kala-user-location", locationStr);
+          localStorage.setItem("kala-user-coords", JSON.stringify({ lat: latitude, lon: longitude }));
         } catch {
           setUserLocation("Gagal memuat lokasi");
         }
       },
       () => {
+        const savedCoords = localStorage.getItem("kala-user-coords");
+        if (savedCoords) setUserCoords(JSON.parse(savedCoords));
         if (!saved) setUserLocation("Izinkan akses lokasi");
       },
       { enableHighAccuracy: true, timeout: 10000 }
@@ -85,15 +92,29 @@ const Today = () => {
     setDayData(loadDayData(selectedDate));
   }, [selectedDate]);
 
+  // Fetch prayer times from API when coords or date change
+  useEffect(() => {
+    if (!userCoords) return;
+    fetchPrayerTimes(userCoords.lat, userCoords.lon, selectedDate)
+      .then((fetched) => {
+        setPrayers(fetched);
+        setWajibPrayers(getWajibFromPrayers(fetched));
+      })
+      .catch(() => {
+        setPrayers(DEFAULT_PRAYERS);
+        setWajibPrayers(WAJIB_PRAYERS);
+      });
+  }, [userCoords, selectedDate]);
+
   const updateDayData = useCallback((newData: DayData) => {
     setDayData(newData);
     saveDayData(selectedDate, newData);
   }, [selectedDate]);
 
-  // Live countdown timer - updates every second
+  // Live countdown timer - uses dynamic prayer times
   useEffect(() => {
     const update = () => {
-      const next = getNextPrayer(new Date());
+      const next = getNextPrayer(new Date(), wajibPrayers);
       if (next) {
         setCountdownData(formatCountdown(next.remainingSeconds));
         setNextPrayerName(next.prayer.name);
@@ -102,7 +123,7 @@ const Today = () => {
     update();
     const interval = setInterval(update, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [wajibPrayers]);
 
   const togglePrayer = (index: number) => {
     const newCompleted = [...dayData.prayerCompleted];
@@ -142,8 +163,8 @@ const Today = () => {
     setSelectedDate(d);
   };
 
-  const imsakPrayer = DEFAULT_PRAYERS.find((p) => p.name === "Imsak");
-  const maghribPrayer = DEFAULT_PRAYERS.find((p) => p.name === "Maghrib");
+  const imsakPrayer = prayers.find((p) => p.name === "Imsak");
+  const maghribPrayer = prayers.find((p) => p.name === "Maghrib");
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -292,7 +313,7 @@ const Today = () => {
               🕌 Jadwal Imsakiyah
             </h2>
             <div className="grid grid-cols-4 gap-2">
-              {DEFAULT_PRAYERS.filter((p) => ["Imsak", "Subuh", "Maghrib", "Isya"].includes(p.name)).map((p) =>
+              {prayers.filter((p) => ["Imsak", "Subuh", "Maghrib", "Isya"].includes(p.name)).map((p) =>
             <div key={p.name} className="text-center rounded-xl bg-accent/40 py-2.5 px-1">
                   <p className="text-[10px] text-muted-foreground font-medium">{p.name}</p>
                   <p className="text-sm font-bold text-foreground mt-0.5">{p.time}</p>
@@ -329,7 +350,7 @@ const Today = () => {
 
         {/* Prayer list */}
         <div className="space-y-2.5">
-          {WAJIB_PRAYERS.map((prayer, i) =>
+          {wajibPrayers.map((prayer, i) =>
           <motion.button
             key={prayer.name}
             initial={{ y: 10, opacity: 0 }}
