@@ -40,6 +40,41 @@ const Today = () => {
   const [countdownData, setCountdownData] = useState({ hours: "00", minutes: "00", seconds: "00" });
   const [nextPrayerName, setNextPrayerName] = useState("");
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [userLocation, setUserLocation] = useState<string>("Memuat lokasi...");
+
+  // GPS location detection
+  useEffect(() => {
+    const saved = localStorage.getItem("kala-user-location");
+    if (saved) setUserLocation(saved);
+
+    if (!navigator.geolocation) {
+      setUserLocation("Lokasi tidak tersedia");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=id`
+          );
+          const data = await res.json();
+          const city = data.address?.city || data.address?.town || data.address?.village || data.address?.county || "";
+          const state = data.address?.state || "";
+          const locationStr = city ? `${city}, ${state}` : state || "Lokasi ditemukan";
+          setUserLocation(locationStr);
+          localStorage.setItem("kala-user-location", locationStr);
+        } catch {
+          setUserLocation("Gagal memuat lokasi");
+        }
+      },
+      () => {
+        if (!saved) setUserLocation("Izinkan akses lokasi");
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, []);
 
   const isToday = getDayKey(selectedDate) === getDayKey(realToday);
   const ramadan = isRamadan(selectedDate);
@@ -157,7 +192,7 @@ const Today = () => {
               <p className="text-sm font-bold text-foreground">Ramadan Hari ke-{ramadan.dayOfRamadan}</p>
               <div className="flex items-center gap-1 mt-0.5">
                 <MapPin className="h-3 w-3 text-muted-foreground" />
-                <p className="text-xs text-muted-foreground">Jakarta, Indonesia</p>
+                <p className="text-xs text-muted-foreground">{userLocation}</p>
               </div>
             </div>
           </motion.div>
