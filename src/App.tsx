@@ -2,26 +2,48 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Welcome from "./pages/Welcome";
+import Today from "./pages/Today";
+import Tracker from "./pages/Tracker";
+import Qibla from "./pages/Qibla";
+import Tools from "./pages/Tools";
+import SettingsPage from "./pages/SettingsPage";
+import BottomNav from "./components/BottomNav";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+const AppLayout = ({ children }: { children: React.ReactNode }) => (
+  <div className="mx-auto max-w-md min-h-screen relative">
+    {children}
+    <BottomNav />
+  </div>
 );
+
+const App = () => {
+  const isOnboarded = localStorage.getItem("kala_onboarded") === "true";
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={isOnboarded ? <Navigate to="/today" replace /> : <Navigate to="/welcome" replace />} />
+            <Route path="/welcome" element={<div className="mx-auto max-w-md"><Welcome /></div>} />
+            <Route path="/today" element={<AppLayout><Today /></AppLayout>} />
+            <Route path="/tracker" element={<AppLayout><Tracker /></AppLayout>} />
+            <Route path="/qibla" element={<AppLayout><Qibla /></AppLayout>} />
+            <Route path="/tools" element={<AppLayout><Tools /></AppLayout>} />
+            <Route path="/settings" element={<AppLayout><SettingsPage /></AppLayout>} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
