@@ -8,6 +8,9 @@ import Today from "./pages/Today";
 import Tracker from "./pages/Tracker";
 import Qibla from "./pages/Qibla";
 import Tools from "./pages/Tools";
+import ZakatCalculator from "./pages/ZakatCalculator";
+import HijriCalendar from "./pages/HijriCalendar";
+import RamadanInfo from "./pages/RamadanInfo";
 import SettingsPage from "./pages/SettingsPage";
 import BottomNav from "./components/BottomNav";
 import NotFound from "./pages/NotFound";
@@ -37,6 +40,9 @@ const App = () => {
             <Route path="/tracker" element={<AppLayout><Tracker /></AppLayout>} />
             <Route path="/qibla" element={<AppLayout><Qibla /></AppLayout>} />
             <Route path="/tools" element={<AppLayout><Tools /></AppLayout>} />
+            <Route path="/tools/zakat" element={<AppLayout><ZakatCalculator /></AppLayout>} />
+            <Route path="/tools/hijri" element={<AppLayout><HijriCalendar /></AppLayout>} />
+            <Route path="/tools/ramadan" element={<AppLayout><RamadanInfo /></AppLayout>} />
             <Route path="/settings" element={<AppLayout><SettingsPage /></AppLayout>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
