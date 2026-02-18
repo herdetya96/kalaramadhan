@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Moon, Sun, Sunrise, Sunset, CloudSun, CalendarDays, ChevronLeft, ChevronRight, Clock } from "lucide-react";
+import { Check, Moon, Sun, Sunrise, Sunset, CloudSun, CalendarDays, ChevronLeft, ChevronRight, Clock, MapPin } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -153,7 +153,10 @@ const Today = () => {
             <span className="text-2xl">🌙</span>
             <div className="flex-1">
               <p className="text-sm font-bold text-foreground">Ramadan Hari ke-{ramadan.dayOfRamadan}</p>
-              <p className="text-xs text-muted-foreground">Selamat berpuasa!</p>
+              <div className="flex items-center gap-1 mt-0.5">
+                <MapPin className="h-3 w-3 text-muted-foreground" />
+                <p className="text-xs text-muted-foreground">Jakarta, Indonesia</p>
+              </div>
             </div>
           </motion.div>
         }
