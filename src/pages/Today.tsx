@@ -163,7 +163,7 @@ const Today = () => {
           <motion.div
             initial={{ y: 10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="mt-3 rounded-2xl gradient-countdown p-4 shadow-lg relative overflow-hidden"
+            className="mt-3 rounded-[30px] gradient-countdown p-4 shadow-countdown relative overflow-hidden"
           >
             {/* Decorative circles */}
             <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-primary-foreground/5" />
