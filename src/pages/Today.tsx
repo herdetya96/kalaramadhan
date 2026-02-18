@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
-import { Check, Gift, Moon, Sun, Sunrise, Sunset, CloudSun, Timer, CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Check, Moon, Sun, Sunrise, Sunset, CloudSun, CalendarDays, ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import {
   WAJIB_PRAYERS, DEFAULT_PRAYERS, getNextPrayer, formatCountdown,
-  isRamadan, formatHijriDate, getDailyQuote,
+  isRamadan, formatHijriDate, getDailyTrivia,
   loadDayData, saveDayData, getDayKey, type DayData,
 } from "@/lib/kala-utils";
 
@@ -37,37 +37,35 @@ const Today = () => {
   const realToday = new Date();
   const [selectedDate, setSelectedDate] = useState<Date>(realToday);
   const [dayData, setDayData] = useState<DayData>(() => loadDayData(realToday));
-  const [countdown, setCountdown] = useState("");
+  const [countdownData, setCountdownData] = useState({ hours: "00", minutes: "00", seconds: "00" });
   const [nextPrayerName, setNextPrayerName] = useState("");
   const [calendarOpen, setCalendarOpen] = useState(false);
 
   const isToday = getDayKey(selectedDate) === getDayKey(realToday);
   const ramadan = isRamadan(selectedDate);
   const hijriDate = formatHijriDate(selectedDate);
-  const quote = getDailyQuote(selectedDate);
+  const trivia = getDailyTrivia(selectedDate);
 
-  // Load data when date changes
   useEffect(() => {
     setDayData(loadDayData(selectedDate));
   }, [selectedDate]);
 
-  // Save data when it changes
   const updateDayData = useCallback((newData: DayData) => {
     setDayData(newData);
     saveDayData(selectedDate, newData);
   }, [selectedDate]);
 
-  // Countdown timer
+  // Live countdown timer - updates every second
   useEffect(() => {
     const update = () => {
       const next = getNextPrayer(new Date());
       if (next) {
-        setCountdown(formatCountdown(next.remainingMinutes));
+        setCountdownData(formatCountdown(next.remainingSeconds));
         setNextPrayerName(next.prayer.name);
       }
     };
     update();
-    const interval = setInterval(update, 30000);
+    const interval = setInterval(update, 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -86,7 +84,6 @@ const Today = () => {
 
   const completedCount = dayData.prayerCompleted.filter(Boolean).length;
 
-  // Generate week around selected date
   const dayOfWeek = selectedDate.getDay();
   const weekStart = new Date(selectedDate);
   weekStart.setDate(weekStart.getDate() - dayOfWeek);
@@ -110,8 +107,8 @@ const Today = () => {
     setSelectedDate(d);
   };
 
-  // Imsak time for Ramadan
   const imsakPrayer = DEFAULT_PRAYERS.find(p => p.name === "Imsak");
+  const maghribPrayer = DEFAULT_PRAYERS.find(p => p.name === "Maghrib");
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -154,24 +151,54 @@ const Today = () => {
             className="mt-3 flex items-center gap-3 rounded-2xl bg-card p-3 shadow-sm"
           >
             <span className="text-2xl">🌙</span>
-            <div>
+            <div className="flex-1">
               <p className="text-sm font-bold text-foreground">Ramadan Hari ke-{ramadan.dayOfRamadan}</p>
-              <p className="text-xs text-muted-foreground">Imsak: {imsakPrayer?.time} • Selamat berpuasa!</p>
+              <p className="text-xs text-muted-foreground">Selamat berpuasa!</p>
             </div>
           </motion.div>
         )}
 
-        {/* Next prayer countdown */}
+        {/* Beautiful countdown */}
         {isToday && nextPrayerName && (
           <motion.div
             initial={{ y: 10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="mt-3 flex items-center gap-3 rounded-2xl gradient-primary p-3 shadow-md"
+            className="mt-3 rounded-2xl gradient-countdown p-4 shadow-lg relative overflow-hidden"
           >
-            <Timer className="h-5 w-5 text-primary-foreground" />
-            <div className="flex-1">
-              <p className="text-xs text-primary-foreground/80">{nextPrayerName} dalam</p>
-              <p className="text-lg font-bold text-primary-foreground">{countdown}</p>
+            {/* Decorative circles */}
+            <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-primary-foreground/5" />
+            <div className="absolute -left-4 -bottom-4 h-16 w-16 rounded-full bg-primary-foreground/5" />
+
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-2">
+                <Clock className="h-3.5 w-3.5 text-primary-foreground/70" />
+                <p className="text-xs font-medium text-primary-foreground/70 uppercase tracking-wider">
+                  Menuju {nextPrayerName}
+                </p>
+              </div>
+
+              {/* Digital clock style countdown */}
+              <div className="flex items-baseline gap-1">
+                <div className="flex items-center gap-1">
+                  <span className="text-4xl font-extrabold text-primary-foreground tabular-nums">
+                    {countdownData.hours}
+                  </span>
+                  <span className="text-xl font-bold text-primary-foreground/50 mb-0.5">:</span>
+                  <span className="text-4xl font-extrabold text-primary-foreground tabular-nums">
+                    {countdownData.minutes}
+                  </span>
+                  <span className="text-xl font-bold text-primary-foreground/50 mb-0.5">:</span>
+                  <span className="text-4xl font-extrabold text-primary-foreground tabular-nums">
+                    {countdownData.seconds}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex gap-8 mt-1">
+                <span className="text-[9px] text-primary-foreground/50 ml-1">jam</span>
+                <span className="text-[9px] text-primary-foreground/50">menit</span>
+                <span className="text-[9px] text-primary-foreground/50">detik</span>
+              </div>
             </div>
           </motion.div>
         )}
@@ -214,6 +241,36 @@ const Today = () => {
           >
             📅 Melihat {selectedDate.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long" })} — Tap untuk kembali ke hari ini
           </button>
+        )}
+
+        {/* Imsakiyah mini schedule (only during Ramadan) */}
+        {ramadan.isRamadan && (
+          <motion.div
+            initial={{ y: 10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="mt-4 rounded-2xl bg-card p-4 shadow-sm"
+          >
+            <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+              🕌 Jadwal Imsakiyah
+            </h2>
+            <div className="grid grid-cols-4 gap-2">
+              {DEFAULT_PRAYERS.filter(p => ["Imsak", "Subuh", "Maghrib", "Isya"].includes(p.name)).map(p => (
+                <div key={p.name} className="text-center rounded-xl bg-accent/40 py-2.5 px-1">
+                  <p className="text-[10px] text-muted-foreground font-medium">{p.name}</p>
+                  <p className="text-sm font-bold text-foreground mt-0.5">{p.time}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 flex items-center justify-between rounded-xl bg-accent/30 px-3 py-2">
+              <span className="text-xs text-muted-foreground">Durasi puasa hari ini</span>
+              <span className="text-xs font-bold text-foreground">
+                {imsakPrayer && maghribPrayer
+                  ? `${Math.floor((maghribPrayer.minutes - imsakPrayer.minutes) / 60)}j ${(maghribPrayer.minutes - imsakPrayer.minutes) % 60}m`
+                  : "-"
+                }
+              </span>
+            </div>
+          </motion.div>
         )}
 
         {/* Prayer progress */}
@@ -299,17 +356,27 @@ const Today = () => {
           ))}
         </div>
 
-        {/* Daily quote */}
+        {/* Trivia section */}
         <motion.div
           initial={{ y: 10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="mt-8 mb-4 rounded-2xl bg-accent/50 p-5"
+          className="mt-8 mb-4 rounded-2xl bg-card p-5 shadow-sm border border-border"
         >
-          <p className="text-sm font-medium text-accent-foreground italic leading-relaxed">
-            "{quote.text}"
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-xl">{trivia.emoji}</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-primary bg-accent px-2 py-0.5 rounded-full">
+              {trivia.category === "sejarah" ? "Sejarah Islam" : trivia.category === "kisah" ? "Kisah Nabi" : trivia.category === "fakta" ? "Fakta Menarik" : "Hikmah"}
+            </span>
+          </div>
+          <p className="text-sm text-foreground leading-relaxed">
+            {trivia.text}
           </p>
-          <p className="mt-2 text-xs text-muted-foreground">— {quote.source}</p>
+          {ramadan.isRamadan && (
+            <p className="mt-3 text-[10px] text-muted-foreground">
+              Trivia Ramadan hari ke-{ramadan.dayOfRamadan}
+            </p>
+          )}
         </motion.div>
       </div>
     </div>

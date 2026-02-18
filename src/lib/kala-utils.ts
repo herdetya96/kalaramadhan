@@ -1,8 +1,6 @@
 // Hijri date utilities - approximate calculation
 // Ramadan 1447H starts approximately Feb 18, 2026
 
-const HIJRI_EPOCH = 1948439.5; // Julian day of Hijri epoch
-
 function gregorianToJulian(year: number, month: number, day: number): number {
   if (month <= 2) { year -= 1; month += 12; }
   const A = Math.floor(year / 100);
@@ -64,24 +62,30 @@ export const WAJIB_PRAYERS = DEFAULT_PRAYERS.filter(
   p => ["Subuh", "Dzuhur", "Ashar", "Maghrib", "Isya"].includes(p.name)
 );
 
-export function getNextPrayer(now: Date): { prayer: PrayerSchedule; remainingMinutes: number } | null {
+export function getNextPrayer(now: Date): { prayer: PrayerSchedule; remainingMinutes: number; remainingSeconds: number } | null {
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  const currentSeconds = now.getSeconds();
   
   for (const prayer of WAJIB_PRAYERS) {
     if (prayer.minutes > currentMinutes) {
-      return { prayer, remainingMinutes: prayer.minutes - currentMinutes };
+      const totalSec = (prayer.minutes - currentMinutes) * 60 - currentSeconds;
+      return { prayer, remainingMinutes: prayer.minutes - currentMinutes, remainingSeconds: totalSec };
     }
   }
-  // After Isya, next is Subuh tomorrow
   const subuh = WAJIB_PRAYERS[0];
-  return { prayer: subuh, remainingMinutes: (1440 - currentMinutes) + subuh.minutes };
+  const totalSec = ((1440 - currentMinutes) + subuh.minutes) * 60 - currentSeconds;
+  return { prayer: subuh, remainingMinutes: (1440 - currentMinutes) + subuh.minutes, remainingSeconds: totalSec };
 }
 
-export function formatCountdown(totalMinutes: number): string {
-  const h = Math.floor(totalMinutes / 60);
-  const m = totalMinutes % 60;
-  if (h > 0) return `${h}j ${m}m`;
-  return `${m} menit`;
+export function formatCountdown(totalSeconds: number): { hours: string; minutes: string; seconds: string } {
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  return {
+    hours: h.toString().padStart(2, "0"),
+    minutes: m.toString().padStart(2, "0"),
+    seconds: s.toString().padStart(2, "0"),
+  };
 }
 
 // LocalStorage helpers for multi-date data
@@ -108,7 +112,6 @@ export function saveDayData(date: Date, data: DayData): void {
   localStorage.setItem(key, JSON.stringify(data));
 }
 
-// Get data for a range of dates (for tracker)
 export function getWeekData(startDate: Date): DayData[] {
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(startDate);
@@ -127,18 +130,68 @@ export function getMonthData(year: number, month: number): { date: Date; data: D
   return result;
 }
 
-// Daily quotes
-const QUOTES = [
-  { text: "Sesungguhnya sholat itu mencegah dari perbuatan keji dan mungkar.", source: "QS. Al-Ankabut: 45" },
-  { text: "Barangsiapa bertakwa kepada Allah, niscaya Dia akan membukakan jalan keluar baginya.", source: "QS. At-Talaq: 2" },
-  { text: "Dan mohonlah pertolongan dengan sabar dan sholat.", source: "QS. Al-Baqarah: 45" },
-  { text: "Sesungguhnya bersama kesulitan ada kemudahan.", source: "QS. Al-Insyirah: 6" },
-  { text: "Maka ingatlah kepada-Ku, niscaya Aku ingat kepadamu.", source: "QS. Al-Baqarah: 152" },
-  { text: "Dan Tuhanmu berfirman: Berdoalah kepada-Ku, niscaya akan Ku-perkenankan bagimu.", source: "QS. Al-Mu'min: 60" },
-  { text: "Allah tidak membebani seseorang melainkan sesuai dengan kesanggupannya.", source: "QS. Al-Baqarah: 286" },
+// Ramadan trivia - historical events, stories from Prophet era, fasting facts
+interface RamadanTrivia {
+  text: string;
+  category: string; // "sejarah" | "kisah" | "fakta" | "hikmah"
+  emoji: string;
+}
+
+const RAMADAN_TRIVIA: RamadanTrivia[] = [
+  // Day-specific historical events
+  { text: "Perang Badar terjadi pada 17 Ramadan 2H. 313 pasukan Muslim mengalahkan 1.000 pasukan Quraisy. Kemenangan ini disebut 'Yaumul Furqan' — hari pembeda antara kebenaran dan kebatilan.", category: "sejarah", emoji: "⚔️" },
+  { text: "Al-Quran pertama kali diturunkan pada malam Lailatul Qadar di bulan Ramadan. Malaikat Jibril menemui Rasulullah di Gua Hira dan berkata 'Iqra!' (Bacalah!).", category: "kisah", emoji: "📖" },
+  { text: "Fathu Makkah (Pembebasan Makkah) terjadi pada 20 Ramadan 8H. Rasulullah masuk ke Makkah tanpa pertumpahan darah, dan beliau memaafkan semua penduduk Quraisy.", category: "sejarah", emoji: "🕋" },
+  { text: "Rasulullah SAW bersabda: 'Barangsiapa berpuasa Ramadan karena iman dan mengharap pahala, diampuni dosa-dosanya yang telah lalu.' (HR. Bukhari & Muslim)", category: "hikmah", emoji: "🤲" },
+  { text: "Khadijah binti Khuwailid, istri pertama Rasulullah, wafat pada 10 Ramadan 10H (sebelum Hijrah). Tahun itu disebut 'Aamul Huzn' (Tahun Kesedihan).", category: "kisah", emoji: "💔" },
+  { text: "Di bulan Ramadan, pintu-pintu surga dibuka, pintu-pintu neraka ditutup, dan setan-setan dibelenggu. Ini adalah bulan penuh rahmat dan ampunan.", category: "hikmah", emoji: "🌟" },
+  { text: "Rasulullah SAW sangat dermawan, dan beliau paling dermawan di bulan Ramadan. Kedermawanan beliau seperti angin yang berhembus kencang (tidak menahan apapun).", category: "kisah", emoji: "💝" },
+  { text: "Perang Ain Jalut pada 25 Ramadan 658H: Pasukan Mamluk di bawah Saifuddin Qutuz menghentikan invasi Mongol yang telah menghancurkan Baghdad.", category: "sejarah", emoji: "🛡️" },
+  { text: "Rasulullah SAW bersabda: 'Puasa adalah perisai. Jika salah seorang dari kalian berpuasa, janganlah berkata kotor dan jangan pula berteriak.' (HR. Bukhari)", category: "hikmah", emoji: "🛡️" },
+  { text: "Pertempuran Hattin terjadi pada Ramadan 583H. Salahuddin Al-Ayyubi membebaskan Yerusalem setelah 88 tahun dikuasai tentara Salib.", category: "sejarah", emoji: "⚔️" },
+  { text: "Bilal bin Rabah, muadzin pertama dalam Islam, masuk Islam dan menderita siksaan berat di bawah terik matahari. Abu Bakar membebaskannya dengan membeli dan memerdekakannya.", category: "kisah", emoji: "📢" },
+  { text: "Lailatul Qadar lebih baik dari seribu bulan (83 tahun lebih). Rasulullah menganjurkan untuk mencarinya di 10 malam terakhir Ramadan, terutama malam ganjil.", category: "hikmah", emoji: "✨" },
+  { text: "Universitas Al-Azhar di Kairo, salah satu universitas tertua di dunia, didirikan pada Ramadan 361H oleh Dinasti Fatimiyah.", category: "sejarah", emoji: "🏛️" },
+  { text: "Rasulullah SAW berbuka puasa dengan ruthab (kurma basah). Jika tidak ada, beliau berbuka dengan tamr (kurma kering). Jika tidak ada, beliau minum air.", category: "kisah", emoji: "🌴" },
+  { text: "Imam Syafi'i biasa mengkhatamkan Al-Quran 60 kali di bulan Ramadan — dua kali setiap hari! Beliau adalah salah satu ulama paling berpengaruh dalam sejarah Islam.", category: "kisah", emoji: "📚" },
+  { text: "Rasulullah SAW bersabda: 'Ada tiga orang yang doanya tidak ditolak: pemimpin yang adil, orang yang berpuasa sampai ia berbuka, dan doa orang yang dizalimi.' (HR. Tirmidzi)", category: "hikmah", emoji: "🤲" },
+  { text: "Spanyol Islam (Al-Andalus) mencapai puncak peradabannya selama Ramadan menjadi bulan produktivitas dan ilmu pengetahuan, bukan bulan bermalas-malasan.", category: "sejarah", emoji: "🏰" },
+  { text: "Rasulullah SAW berkata: 'Sahur itu berkah, maka jangan tinggalkan sahur walau hanya seteguk air.' Makan sahur membedakan puasa Muslim dengan puasa agama lain.", category: "hikmah", emoji: "🍽️" },
+  { text: "Umar bin Khattab menetapkan sholat Tarawih berjamaah 20 rakaat di masjid pada masa kekhalifahannya. Sebelumnya, orang-orang sholat sendiri-sendiri.", category: "sejarah", emoji: "🕌" },
+  { text: "Rasulullah SAW melakukan i'tikaf 10 hari terakhir Ramadan setiap tahun. Pada tahun terakhir beliau, beliau beri'tikaf 20 hari.", category: "kisah", emoji: "🕌" },
+  { text: "Puasa mengajarkan empati. Ketika kita merasakan lapar dan haus, kita memahami penderitaan fakir miskin. Ini adalah salah satu hikmah terbesar dari puasa.", category: "hikmah", emoji: "❤️" },
+  { text: "Pada Ramadan 92H, pasukan Muslim di bawah Tariq bin Ziyad menyeberangi Selat Gibraltar dan memulai pembebasan Spanyol (Al-Andalus) dari kekuasaan Visigoth.", category: "sejarah", emoji: "⛵" },
+  { text: "Rasulullah SAW bersabda: 'Demi Dzat yang jiwa Muhammad di tangan-Nya, bau mulut orang yang berpuasa lebih harum di sisi Allah dari bau minyak kasturi.'", category: "hikmah", emoji: "🌸" },
+  { text: "Imam Bukhari memulai penyusunan kitab Sahih Bukhari, kitab hadits paling otentik, dan banyak mengerjakannya di bulan Ramadan sebagai bentuk ibadah.", category: "kisah", emoji: "📜" },
+  { text: "Zakat Fitrah wajib dikeluarkan sebelum sholat Idul Fitri. Rasulullah menetapkannya sebagai 1 sha' (±2,5 kg) makanan pokok untuk membersihkan puasa dari perbuatan sia-sia.", category: "hikmah", emoji: "🌾" },
+  { text: "Perang Tabuk terjadi pada Rajab-Ramadan 9H. Meskipun cuaca sangat panas dan jaraknya jauh, 30.000 pasukan Muslim berbaris menuju perbatasan Romawi.", category: "sejarah", emoji: "🏜️" },
+  { text: "Aisyah RA bertanya kepada Rasulullah: 'Apa yang harus kubaca jika aku mendapati Lailatul Qadar?' Beliau menjawab: 'Bacalah: Allahumma innaka afuwwun tuhibbul afwa fa'fu anni.'", category: "kisah", emoji: "🌙" },
+  { text: "Ilmuwan Muslim seperti Ibnu Sina dan Al-Khawarizmi tetap produktif di bulan Ramadan. Puasa tidak menghalangi mereka dari karya-karya besar yang mengubah dunia.", category: "sejarah", emoji: "🔬" },
+  { text: "Rasulullah SAW bersabda: 'Setiap amal anak Adam dilipat gandakan, satu kebaikan menjadi 10 hingga 700 kali lipat. Allah berfirman: Kecuali puasa, ia untuk-Ku dan Aku yang membalasnya.'", category: "hikmah", emoji: "♾️" },
+  { text: "Pada Ramadan, Rasulullah SAW mengulang hafalan Al-Quran bersama Jibril setiap malam. Tradisi ini menjadi dasar tadarus dan khataman Al-Quran di bulan Ramadan.", category: "kisah", emoji: "📖" },
 ];
 
-export function getDailyQuote(date: Date): typeof QUOTES[0] {
+export function getRamadanTrivia(dayOfRamadan: number): RamadanTrivia {
+  const index = ((dayOfRamadan - 1) % RAMADAN_TRIVIA.length);
+  return RAMADAN_TRIVIA[index];
+}
+
+// General trivia for non-Ramadan days
+const GENERAL_TRIVIA: RamadanTrivia[] = [
+  { text: "Tahukah kamu? Puasa Senin-Kamis adalah sunnah Rasulullah. Beliau bersabda: 'Amal-amal diperlihatkan pada hari Senin dan Kamis, dan aku suka amalku diperlihatkan sedang aku berpuasa.'", category: "fakta", emoji: "📅" },
+  { text: "Puasa Dawud (sehari puasa, sehari tidak) adalah puasa yang paling dicintai Allah. Nabi Dawud AS melakukannya sepanjang hidupnya.", category: "kisah", emoji: "⭐" },
+  { text: "Puasa 6 hari di bulan Syawal setelah Ramadan pahalanya seperti puasa setahun penuh. Ini karena 30 hari Ramadan + 6 hari Syawal = 36 hari × 10 = 360 hari.", category: "fakta", emoji: "🔢" },
+  { text: "Puasa Arafah (9 Dzulhijjah) menghapus dosa setahun sebelum dan setahun sesudahnya. Ini adalah hari terbaik sepanjang tahun.", category: "hikmah", emoji: "🏔️" },
+  { text: "Rasulullah SAW bersabda: 'Sholat yang paling utama setelah sholat wajib adalah sholat di tengah malam (Tahajud).' — HR. Muslim", category: "hikmah", emoji: "🌙" },
+  { text: "Puasa Asyura (10 Muharram) menghapus dosa setahun yang lalu. Nabi Musa AS dan Bani Israel diselamatkan dari Firaun pada hari ini.", category: "sejarah", emoji: "🌊" },
+  { text: "Masjidil Haram di Makkah adalah masjid terbesar di dunia, mampu menampung lebih dari 2 juta jamaah. Ka'bah di tengahnya adalah kiblat seluruh umat Islam.", category: "fakta", emoji: "🕋" },
+];
+
+export function getDailyTrivia(date: Date): RamadanTrivia {
+  const ramadan = isRamadan(date);
+  if (ramadan.isRamadan) {
+    return getRamadanTrivia(ramadan.dayOfRamadan);
+  }
   const dayOfYear = Math.floor((date.getTime() - new Date(date.getFullYear(), 0, 0).getTime()) / 86400000);
-  return QUOTES[dayOfYear % QUOTES.length];
+  return GENERAL_TRIVIA[dayOfYear % GENERAL_TRIVIA.length];
 }
