@@ -175,57 +175,81 @@ const Puasa = () => {
         <motion.div
           initial={{ y: 10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="w-full rounded-3xl p-4 flex items-center gap-4"
+          className="w-full rounded-3xl p-4 flex flex-col gap-4"
           style={{
             background: '#FFFFFF',
             border: '1px solid #F3EDE6',
           }}
         >
-          <div className="flex flex-col flex-1 gap-4">
-            <div className="flex flex-col gap-2">
-              <span className="text-lg font-semibold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
-                Puasa Hari ke-{dayOfRamadan}
-              </span>
-              <span className="text-xs" style={{ color: '#838A96', letterSpacing: '-0.15px' }}>
-                Selalu semangat ya!
-              </span>
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col flex-1 gap-4">
+              <div className="flex flex-col gap-2">
+                <span className="text-lg font-semibold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
+                  Puasa Hari ke-{dayOfRamadan}
+                </span>
+                <span className="text-xs" style={{ color: '#838A96', letterSpacing: '-0.15px' }}>
+                  Selalu semangat ya!
+                </span>
+              </div>
+              <div
+                className="flex items-center px-3 py-1.5 rounded-full self-start"
+                style={{ border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)' }}
+              >
+                <span className="text-xs font-bold" style={{ color: '#38CA5E' }}>
+                  {daysToEid > 0 ? `${daysToEid} hari menuju Lebaran!` : '🎉 Selamat Hari Raya!'}
+                </span>
+              </div>
             </div>
-            <div
-              className="flex items-center px-3 py-1.5 rounded-full self-start"
-              style={{ border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)' }}
-            >
-              <span className="text-xs font-bold" style={{ color: '#38CA5E' }}>
-                {daysToEid > 0 ? `${daysToEid} hari menuju Lebaran!` : '🎉 Selamat Hari Raya!'}
-              </span>
+
+            {/* Circular progress mini */}
+            <div className="relative flex items-center justify-center flex-shrink-0" style={{ width: 86, height: 86 }}>
+              <svg width="86" height="86" viewBox="0 0 86 86">
+                <circle cx="43" cy="43" r={radius} fill="none" stroke="#EFEFEF" strokeWidth="8" strokeLinecap="round" />
+                <circle
+                  cx="43" cy="43" r={radius}
+                  fill="none"
+                  stroke="url(#puasaGrad)"
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                  strokeDasharray={circumference}
+                  strokeDashoffset={strokeDashoffset}
+                  transform="rotate(-90 43 43)"
+                  style={{ transition: 'stroke-dashoffset 0.5s ease' }}
+                />
+                <defs>
+                  <linearGradient id="puasaGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#7DF8AD" />
+                    <stop offset="100%" stopColor="#CAFF7B" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div className="absolute flex flex-col items-center justify-center">
+                <span className="text-sm font-semibold" style={{ color: '#1D293D', letterSpacing: '-0.13px' }}>
+                  {percentage}%
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Circular progress mini */}
-          <div className="relative flex items-center justify-center flex-shrink-0" style={{ width: 86, height: 86 }}>
-            <svg width="86" height="86" viewBox="0 0 86 86">
-              <circle cx="43" cy="43" r={radius} fill="none" stroke="#EFEFEF" strokeWidth="8" strokeLinecap="round" />
-              <circle
-                cx="43" cy="43" r={radius}
-                fill="none"
-                stroke="url(#puasaGrad)"
-                strokeWidth="8"
-                strokeLinecap="round"
-                strokeDasharray={circumference}
-                strokeDashoffset={strokeDashoffset}
-                transform="rotate(-90 43 43)"
-                style={{ transition: 'stroke-dashoffset 0.5s ease' }}
-              />
-              <defs>
-                <linearGradient id="puasaGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#7DF8AD" />
-                  <stop offset="100%" stopColor="#CAFF7B" />
-                </linearGradient>
-              </defs>
-            </svg>
-            <div className="absolute flex flex-col items-center justify-center">
-              <span className="text-sm font-semibold" style={{ color: '#1D293D', letterSpacing: '-0.13px' }}>
-                {percentage}%
+          {/* Imsak & Buka Puasa times */}
+          <div className="flex gap-3 w-full">
+            <div
+              className="flex-1 flex flex-col items-center justify-center py-3 rounded-2xl"
+              style={{ background: '#FFFFFF', border: '1px solid #F3EDE6' }}
+            >
+              <span className="text-2xl font-bold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
+                {DEFAULT_PRAYERS.find(p => p.name === "Imsak")?.time || "04:55"}
               </span>
+              <span className="text-xs" style={{ color: '#838A96', letterSpacing: '-0.15px' }}>Imsak</span>
+            </div>
+            <div
+              className="flex-1 flex flex-col items-center justify-center py-3 rounded-2xl"
+              style={{ background: '#FFFFFF', border: '1px solid #F3EDE6' }}
+            >
+              <span className="text-2xl font-bold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
+                {DEFAULT_PRAYERS.find(p => p.name === "Maghrib")?.time || "18:02"}
+              </span>
+              <span className="text-xs" style={{ color: '#838A96', letterSpacing: '-0.15px' }}>Buka Puasa</span>
             </div>
           </div>
         </motion.div>
