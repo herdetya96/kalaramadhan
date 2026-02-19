@@ -45,9 +45,8 @@ const App = () => {
             <Route path="/puasa" element={<AppLayout><Puasa /></AppLayout>} />
             <Route path="/quran" element={<AppLayout><Quran /></AppLayout>} />
             <Route path="/qibla" element={<AppLayout><Qibla /></AppLayout>} />
-            <Route path="/tools" element={<AppLayout><Tools /></AppLayout>} />
+            <Route path="/tools" element={<AppLayout><ZakatCalculator /></AppLayout>} />
             <Route path="/tools/zakat" element={<AppLayout><ZakatCalculator /></AppLayout>} />
-            <Route path="/tools/hijri" element={<AppLayout><HijriCalendar /></AppLayout>} />
             <Route path="/tools/ramadan" element={<AppLayout><RamadanInfo /></AppLayout>} />
             <Route path="/settings" element={<AppLayout><SettingsPage /></AppLayout>} />
             <Route path="*" element={<NotFound />} />
