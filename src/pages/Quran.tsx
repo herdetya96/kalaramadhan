@@ -98,11 +98,20 @@ const Quran = () => {
     const surah = surahs.find((s) => s.number === selectedSurah);
     return (
       <div className="min-h-screen bg-white pb-24 relative overflow-hidden">
+        {/* bg atas - green */}
         <div
           className="absolute pointer-events-none"
           style={{
-            width: 560, height: 341, left: '50%', top: -280, transform: 'translateX(-50%)',
-            background: '#34D399', filter: 'blur(100px)', zIndex: 0,
+            width: 560, height: 341, left: '50%', top: -209, transform: 'translateX(-50%)',
+            background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0,
+          }}
+        />
+        {/* bg - blue */}
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            width: 546, height: 521, left: 19, top: -535,
+            background: '#00B4D8', filter: 'blur(100px)', transform: 'rotate(-76.22deg)', zIndex: 1,
           }}
         />
         <div className="relative z-10 flex flex-col pt-6 px-4 gap-4">
@@ -142,7 +151,7 @@ const Quran = () => {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="rounded-2xl p-4 flex flex-col gap-3"
-                  style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 4px 12px rgba(0,0,0,0.03)' }}
+                  style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}
                 >
                   {/* Ayah number badge */}
                   <div className="flex items-center justify-between">
@@ -199,11 +208,20 @@ const Quran = () => {
   // Surah list view
   return (
     <div className="min-h-screen bg-white pb-24 relative overflow-hidden">
+      {/* bg atas - green */}
       <div
         className="absolute pointer-events-none"
         style={{
-          width: 560, height: 341, left: '50%', top: -280, transform: 'translateX(-50%)',
-          background: '#34D399', filter: 'blur(100px)', zIndex: 0,
+          width: 560, height: 341, left: '50%', top: -209, transform: 'translateX(-50%)',
+          background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0,
+        }}
+      />
+      {/* bg - blue */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          width: 546, height: 521, left: 19, top: -535,
+          background: '#00B4D8', filter: 'blur(100px)', transform: 'rotate(-76.22deg)', zIndex: 1,
         }}
       />
       <div className="relative z-10 flex flex-col pt-6 px-4 gap-4">
@@ -225,21 +243,21 @@ const Quran = () => {
             onClick={() => loadSurah(progress.lastSurah)}
             className="w-full rounded-3xl p-5 flex items-center gap-4"
             style={{
-              background: 'linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 50%, #6EE7B7 100%)',
-              border: '1px solid rgba(255,255,255,0.6)',
-              boxShadow: '0px 30px 46px rgba(52, 211, 153, 0.15)',
+              background: '#FFFFFF',
+              border: '1px solid #F3EDE6',
+              boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)',
             }}
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-full" style={{ background: 'rgba(255,255,255,0.7)' }}>
-              <BookOpen className="h-5 w-5" style={{ color: '#065F46' }} strokeWidth={2} />
+            <div className="flex h-12 w-12 items-center justify-center rounded-full" style={{ background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)', border: '1px solid #FFFFFF', boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1)' }}>
+              <BookOpen className="h-5 w-5" style={{ color: '#334258' }} strokeWidth={2} />
             </div>
             <div className="flex flex-col items-start">
-              <span className="font-semibold text-base" style={{ color: '#065F46' }}>Lanjut Membaca</span>
-              <span className="text-xs" style={{ color: '#047857' }}>
+              <span className="font-semibold text-base" style={{ color: '#1D293D' }}>Lanjut Membaca</span>
+              <span className="text-xs" style={{ color: '#838A96' }}>
                 Surah {surahs.find((s) => s.number === progress.lastSurah)?.englishName || progress.lastSurah}
               </span>
             </div>
-            <ChevronRight className="h-5 w-5 ml-auto" style={{ color: '#065F46' }} />
+            <ChevronRight className="h-5 w-5 ml-auto" style={{ color: '#90A1B9' }} />
           </motion.button>
         )}
 
@@ -268,11 +286,11 @@ const Quran = () => {
                 transition={{ delay: Math.min(i * 0.01, 0.3) }}
                 onClick={() => loadSurah(surah.number)}
                 className="w-full rounded-2xl p-4 flex items-center gap-4 text-left"
-                style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 4px 12px rgba(0,0,0,0.02)' }}
+                style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}
               >
                 <div
                   className="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0 text-sm font-bold"
-                  style={{ background: '#F0FDF4', color: '#166534' }}
+                  style={{ background: '#F8F8F7', color: '#314158' }}
                 >
                   {surah.number}
                 </div>
