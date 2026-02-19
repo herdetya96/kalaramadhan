@@ -116,7 +116,7 @@ const Puasa = () => {
         }}
       />
 
-      <div className="relative z-10 flex flex-col items-center pt-6 px-4 gap-6">
+      <div className="relative z-10 flex flex-col items-center pt-6 px-4 gap-4">
         {/* Header with week nav */}
         <div className="flex items-center justify-between w-full">
           <button onClick={() => navigateWeek(-1)} className="p-2 rounded-full">
