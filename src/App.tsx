@@ -12,6 +12,7 @@ import ZakatCalculator from "./pages/ZakatCalculator";
 import HijriCalendar from "./pages/HijriCalendar";
 import RamadanInfo from "./pages/RamadanInfo";
 import SettingsPage from "./pages/SettingsPage";
+import Progress from "./pages/Progress";
 import BottomNav from "./components/BottomNav";
 import NotFound from "./pages/NotFound";
 
@@ -38,6 +39,7 @@ const App = () => {
             <Route path="/welcome" element={<div className="mx-auto max-w-md"><Welcome /></div>} />
             <Route path="/today" element={<AppLayout><Today /></AppLayout>} />
             <Route path="/tracker" element={<AppLayout><Tracker /></AppLayout>} />
+            <Route path="/progress" element={<AppLayout><Progress /></AppLayout>} />
             <Route path="/qibla" element={<AppLayout><Qibla /></AppLayout>} />
             <Route path="/tools" element={<AppLayout><Tools /></AppLayout>} />
             <Route path="/tools/zakat" element={<AppLayout><ZakatCalculator /></AppLayout>} />
