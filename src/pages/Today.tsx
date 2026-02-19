@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, ChevronLeft, ChevronRight, Clock } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Clock, ChevronRight as ChevronRightIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
+import { useNavigate } from "react-router-dom";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import {
@@ -16,6 +17,7 @@ import SunnahSection from "@/components/today/SunnahSection";
 import TriviaCard from "@/components/today/TriviaCard";
 
 const Today = () => {
+  const navigate = useNavigate();
   const realToday = new Date();
   const [selectedDate, setSelectedDate] = useState<Date>(realToday);
   const [dayData, setDayData] = useState<DayData>(() => loadDayData(realToday));
@@ -139,6 +141,55 @@ const Today = () => {
           nextPrayerTime={nextPrayerTime}
           prayers={prayers}
         />
+      </div>
+
+      {/* Puasa Check-in Card */}
+      <div className="px-4 mt-2">
+        <button
+          onClick={() => navigate('/puasa')}
+          className="w-full rounded-3xl p-4 flex flex-col gap-4 text-left"
+          style={{
+            background: '#FFFFFF',
+            border: '1px solid #F3EDE6',
+          }}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex flex-col gap-2">
+              <span className="text-lg font-semibold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
+                Check-in puasa harian
+              </span>
+              <span className="text-xs" style={{ color: '#838A96', letterSpacing: '-0.15px' }}>
+                Check-in baru bisa dilakukan setelah Maghrib ya!
+              </span>
+            </div>
+            <div
+              className="flex items-center justify-center flex-shrink-0"
+              style={{
+                width: 40, height: 40,
+                background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)',
+                border: '1px solid #FFFFFF',
+                boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1)',
+                borderRadius: 40,
+              }}
+            >
+              <ChevronRightIcon className="h-5 w-5" style={{ color: '#334258' }} strokeWidth={2} />
+            </div>
+          </div>
+          <div className="flex items-center gap-1">
+            <span
+              className="text-xs px-3 py-1.5 rounded-full"
+              style={{ border: '1px solid #F3EDE6', color: '#62748E', letterSpacing: '-0.15px' }}
+            >
+              Durasi puasa hari ini 13j 25m
+            </span>
+            <span
+              className="text-xs px-3 py-1.5 rounded-full"
+              style={{ border: '1px solid #F3EDE6', color: '#62748E', letterSpacing: '-0.15px' }}
+            >
+              Streak {(() => { let c = 0; const d = new Date(); d.setDate(d.getDate() - 1); while (true) { const data = loadDayData(d); if (data.sunnahCompleted["puasa"]) { c++; d.setDate(d.getDate() - 1); } else break; } if (loadDayData(new Date()).sunnahCompleted["puasa"]) c++; return c; })()} hari
+            </span>
+          </div>
+        </button>
       </div>
 
       {/* Week Selector */}
