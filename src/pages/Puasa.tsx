@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Check, ChevronLeft, ChevronRight } from "lucide-react";
-import { getDayKey, loadDayData, saveDayData, isRamadan, type DayData } from "@/lib/kala-utils";
+import { getDayKey, loadDayData, saveDayData, isRamadan, DEFAULT_PRAYERS, type DayData } from "@/lib/kala-utils";
 
 const PUASA_TASKS = [
   { id: "sahur", label: "Makan Sahur" },
@@ -361,6 +361,54 @@ const Puasa = () => {
                 </motion.button>
               );
             })}
+          </div>
+        </motion.div>
+
+        {/* Jadwal Imsakiyah */}
+        <motion.div
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.15 }}
+          className="w-full rounded-3xl p-4 flex flex-col gap-3"
+          style={{
+            background: '#FFFFFF',
+            border: '1px solid #F3EDE6',
+            boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)',
+          }}
+        >
+          <h2 className="text-lg font-semibold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
+            Jadwal Imsakiyah
+          </h2>
+          <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #F3EDE6' }}>
+            <div className="grid grid-cols-4 gap-0 px-4 py-2.5" style={{ background: '#F8F8F7' }}>
+              <span className="text-[10px] font-semibold" style={{ color: '#838A96' }}>Hari</span>
+              <span className="text-[10px] font-semibold text-center" style={{ color: '#838A96' }}>Imsak</span>
+              <span className="text-[10px] font-semibold text-center" style={{ color: '#838A96' }}>Subuh</span>
+              <span className="text-[10px] font-semibold text-center" style={{ color: '#838A96' }}>Maghrib</span>
+            </div>
+            <div className="max-h-64 overflow-y-auto">
+              {Array.from({ length: 30 }, (_, i) => {
+                const imsakTime = DEFAULT_PRAYERS.find(p => p.name === "Imsak")?.time || "04:25";
+                const subuhTime = DEFAULT_PRAYERS.find(p => p.name === "Subuh")?.time || "04:35";
+                const maghribTime = DEFAULT_PRAYERS.find(p => p.name === "Maghrib")?.time || "17:50";
+                const isCurrent = ramadan.isRamadan && ramadan.dayOfRamadan === i + 1;
+                return (
+                  <div
+                    key={i}
+                    className="grid grid-cols-4 gap-0 px-4 py-2.5 text-xs"
+                    style={{
+                      borderTop: '1px solid #F3EDE6',
+                      ...(isCurrent ? { background: 'linear-gradient(180deg, rgba(125,248,173,0.15) 0%, rgba(249,255,210,0.15) 100%)' } : {}),
+                    }}
+                  >
+                    <span className="font-semibold" style={{ color: isCurrent ? '#38CA5E' : '#1D293D' }}>{i + 1}</span>
+                    <span className="text-center" style={{ color: '#62748E' }}>{imsakTime}</span>
+                    <span className="text-center" style={{ color: '#62748E' }}>{subuhTime}</span>
+                    <span className="text-center" style={{ color: '#62748E' }}>{maghribTime}</span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </motion.div>
       </div>

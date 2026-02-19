@@ -1,11 +1,10 @@
 import { motion } from "framer-motion";
-import { Calculator, CalendarDays, Moon, ChevronRight } from "lucide-react";
+import { Calculator, CalendarDays, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const tools = [
   { icon: Calculator, label: "Kalkulator Zakat", desc: "Hitung zakat Maal, Profesi & Fitrah", path: "/tools/zakat" },
   { icon: CalendarDays, label: "Kalender Hijriah", desc: "Konversi tanggal & hari besar Islam", path: "/tools/hijri" },
-  { icon: Moon, label: "Info Ramadan", desc: "Jadwal imsakiyah & info puasa", path: "/tools/ramadan" },
 ];
 
 const Tools = () => {
