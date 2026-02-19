@@ -26,10 +26,10 @@ const BottomNav = () => {
               onClick={() => navigate(tab.path)}
               className="flex flex-col items-center gap-1"
             >
-              <div className={`flex items-center justify-center w-[34px] h-[34px] rounded-[14px] ${isActive ? 'bg-[#EEF2FF]' : ''}`}>
-                <Icon className="h-[22px] w-[22px]" strokeWidth={isActive ? 2.3 : 1.8} style={{ color: isActive ? '#4F39F6' : '#90A1B9' }} />
+              <div className={`flex items-center justify-center w-[34px] h-[34px] rounded-[14px] ${isActive ? 'bg-[#E8FAED]' : ''}`}>
+                <Icon className="h-[22px] w-[22px]" strokeWidth={isActive ? 2.3 : 1.8} style={{ color: isActive ? '#38CA5E' : '#90A1B9' }} />
               </div>
-              <span className="text-[10px] font-medium tracking-wide" style={{ color: isActive ? '#4F39F6' : '#90A1B9' }}>{tab.label}</span>
+              <span className="text-[10px] font-medium tracking-wide" style={{ color: isActive ? '#38CA5E' : '#90A1B9' }}>{tab.label}</span>
             </button>
           );
         })}
