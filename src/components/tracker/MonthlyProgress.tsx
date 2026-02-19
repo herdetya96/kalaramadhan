@@ -6,11 +6,12 @@ import { loadDayData, getDayKey } from "@/lib/kala-utils";
 interface MonthlyProgressProps {
   selectedDate: Date;
   onMonthChange: (dir: number) => void;
+  onDayClick?: (date: Date) => void;
 }
 
 const DAY_HEADERS = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
-const MonthlyProgress = ({ selectedDate, onMonthChange }: MonthlyProgressProps) => {
+const MonthlyProgress = ({ selectedDate, onMonthChange, onDayClick }: MonthlyProgressProps) => {
   const year = selectedDate.getFullYear();
   const month = selectedDate.getMonth();
   const todayKey = getDayKey(new Date());
@@ -127,17 +128,19 @@ const MonthlyProgress = ({ selectedDate, onMonthChange }: MonthlyProgressProps) 
           const dayKey = getDayKey(day.date);
           const isFuture = dayKey > todayKey;
           return (
-            <div
+            <button
               key={i}
-              className="aspect-square rounded-lg flex items-center justify-center text-xs font-semibold"
+              onClick={() => !isFuture && onDayClick?.(day.date!)}
+              className="aspect-square rounded-lg flex items-center justify-center text-xs font-semibold transition-transform active:scale-90"
               style={{
                 background: isFuture ? 'transparent' : getColorForDay(day.completed, day.total),
                 color: isFuture ? '#D1D5DB' : '#314158',
-                border: isToday ? '2px solid #3AE886' : 'none'
+                border: isToday ? '2px solid #3AE886' : 'none',
+                cursor: isFuture ? 'default' : 'pointer',
               }}>
 
               {day.date.getDate()}
-            </div>);
+            </button>);
 
         })}
       </div>
