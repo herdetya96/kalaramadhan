@@ -35,7 +35,7 @@ const HeroCard = ({
       {/* SVG background */}
       <img src={heroBg} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ zIndex: 0 }} />
 
-      <div className="relative flex flex-col items-center gap-[42px] p-4" style={{ zIndex: 4 }}>
+      <div className="relative items-center gap-[42px] p-4 flex flex-col shadow-md" style={{ zIndex: 4 }}>
         {/* Greeting */}
         <div className="flex flex-col items-center gap-1">
           <h1 className="font-medium text-lg" style={{ color: '#0F172B', letterSpacing: '-0.02em' }}>
