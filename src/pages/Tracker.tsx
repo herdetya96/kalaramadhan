@@ -1,16 +1,17 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Check } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, BarChart3 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import {
   WAJIB_PRAYERS, DEFAULT_PRAYERS, fetchPrayerTimes, getWajibFromPrayers,
   loadDayData, saveDayData, getDayKey, type DayData, type PrayerSchedule
 } from "@/lib/kala-utils";
 import TrackerSunnahSection from "@/components/tracker/TrackerSunnahSection";
-import MonthlyProgress from "@/components/tracker/MonthlyProgress";
 
 const DAY_LABELS = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
 const Tracker = () => {
+  const navigate = useNavigate();
   const realToday = new Date();
   const [selectedDate, setSelectedDate] = useState<Date>(realToday);
   const [dayData, setDayData] = useState<DayData>(() => loadDayData(realToday));
@@ -68,12 +69,6 @@ const Tracker = () => {
     updateDayData({ ...dayData, prayerCompleted: [true, true, true, true, true] });
   };
 
-  const [monthViewDate, setMonthViewDate] = useState(new Date());
-  const handleMonthChange = (dir: number) => {
-    const d = new Date(monthViewDate);
-    d.setMonth(d.getMonth() + dir);
-    setMonthViewDate(d);
-  };
 
   const completedCount = dayData.prayerCompleted.filter(Boolean).length;
   const percentage = Math.round((completedCount / 5) * 100);
@@ -378,8 +373,41 @@ const Tracker = () => {
         {/* Sunnah section */}
         <TrackerSunnahSection dayData={dayData} onToggleSunnah={toggleSunnah} />
 
-        {/* Monthly consistency */}
-        <MonthlyProgress selectedDate={monthViewDate} onMonthChange={handleMonthChange} />
+        {/* Progress link */}
+        <motion.button
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          onClick={() => navigate('/progress')}
+          className="w-full rounded-3xl p-5 flex items-center justify-between"
+          style={{
+            background: '#FFFFFF',
+            border: '1px solid #F3EDE6',
+            boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)',
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <div
+              className="flex h-10 w-10 items-center justify-center rounded-full"
+              style={{
+                background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)',
+                border: '1px solid #FFFFFF',
+                boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1)',
+              }}
+            >
+              <BarChart3 className="h-5 w-5" style={{ color: '#334258' }} strokeWidth={2} />
+            </div>
+            <div className="flex flex-col items-start">
+              <span className="font-semibold text-base" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
+                Progress Bulanan
+              </span>
+              <span className="text-xs" style={{ color: '#838A96' }}>
+                Lihat konsistensi ibadahmu
+              </span>
+            </div>
+          </div>
+          <ChevronRight className="h-5 w-5" style={{ color: '#90A1B9' }} />
+        </motion.button>
       </div>
     </div>
   );
