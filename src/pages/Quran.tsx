@@ -414,7 +414,7 @@ const Quran = () => {
                 style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0" style={{ background: '#F8F8F7' }}>
-                  <Bookmark className="h-4 w-4" style={{ color: '#3B82F6' }} fill="#3B82F6" />
+                  <Bookmark className="h-4 w-4" style={{ color: '#166534' }} />
                 </div>
                 <div className="flex flex-col flex-1 min-w-0">
                   <span className="font-semibold text-sm truncate" style={{ color: '#1D293D' }}>
