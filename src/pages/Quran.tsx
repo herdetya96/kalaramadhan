@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, BookOpen, ChevronRight, Loader2 } from "lucide-react";
+import { ChevronLeft, BookOpen, ChevronRight, Loader2, Bookmark } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface Surah {
   number: number;
@@ -39,7 +40,9 @@ const Quran = () => {
   const [loading, setLoading] = useState(false);
   const [surahLoading, setSurahLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const progress = getQuranProgress();
+  const [bookmarkedSurah, setBookmarkedSurah] = useState<number>(getQuranProgress().lastSurah);
+  const [bookmarkedAyah, setBookmarkedAyah] = useState<number>(getQuranProgress().lastAyah);
+  const progress = { lastSurah: bookmarkedSurah, lastAyah: bookmarkedAyah };
 
   // Fetch surah list
   useEffect(() => {
@@ -77,7 +80,6 @@ const Quran = () => {
           translation: indo[i]?.text || "",
         }));
         setAyahs(merged);
-        saveQuranProgress(surahNum, 1);
       }
     } catch {
       setAyahs([]);
@@ -85,6 +87,23 @@ const Quran = () => {
       setLoading(false);
     }
   }, []);
+
+  // Auto-scroll to bookmarked ayah after loading
+  useEffect(() => {
+    if (!loading && ayahs.length > 0 && selectedSurah === bookmarkedSurah) {
+      setTimeout(() => {
+        const el = document.getElementById(`ayah-${bookmarkedAyah}`);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 300);
+    }
+  }, [loading, ayahs, selectedSurah, bookmarkedSurah, bookmarkedAyah]);
+
+  const handleBookmark = (surahNum: number, ayahNum: number) => {
+    saveQuranProgress(surahNum, ayahNum);
+    setBookmarkedSurah(surahNum);
+    setBookmarkedAyah(ayahNum);
+    toast.success("Terakhir dibaca disimpan ✓");
+  };
 
   const filteredSurahs = surahs.filter(
     (s) =>
@@ -98,44 +117,22 @@ const Quran = () => {
     const surah = surahs.find((s) => s.number === selectedSurah);
     return (
       <div className="min-h-screen bg-white pb-24 relative overflow-hidden">
-        {/* bg atas - green */}
-        <div
-          className="absolute pointer-events-none"
-          style={{
-            width: 560, height: 341, left: '50%', top: -209, transform: 'translateX(-50%)',
-            background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0,
-          }}
-        />
-        {/* bg - blue */}
-        <div
-          className="absolute pointer-events-none"
-          style={{
-            width: 546, height: 521, left: 19, top: -535,
-            background: '#00B4D8', filter: 'blur(100px)', transform: 'rotate(-76.22deg)', zIndex: 1,
-          }}
-        />
+        <div className="absolute pointer-events-none" style={{ width: 560, height: 341, left: '50%', top: -209, transform: 'translateX(-50%)', background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0 }} />
+        <div className="absolute pointer-events-none" style={{ width: 546, height: 521, left: 19, top: -535, background: '#00B4D8', filter: 'blur(100px)', transform: 'rotate(-76.22deg)', zIndex: 1 }} />
         <div className="relative z-10 flex flex-col pt-6 px-4 gap-4">
-          {/* Header */}
           <div className="flex items-center w-full">
             <button onClick={() => { setSelectedSurah(null); setAyahs([]); }} className="p-2 rounded-full">
               <ChevronLeft className="h-6 w-6" style={{ color: '#62748E' }} strokeWidth={2} />
             </button>
             <div className="flex-1 text-center pr-10">
-              <h1 className="text-xl font-bold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
-                {surah?.englishName}
-              </h1>
-              <span className="text-xs" style={{ color: '#838A96' }}>
-                {surah?.englishNameTranslation} · {surah?.numberOfAyahs} ayat
-              </span>
+              <h1 className="text-xl font-bold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>{surah?.englishName}</h1>
+              <span className="text-xs" style={{ color: '#838A96' }}>{surah?.englishNameTranslation} · {surah?.numberOfAyahs} ayat</span>
             </div>
           </div>
 
-          {/* Bismillah */}
           {selectedSurah !== 1 && selectedSurah !== 9 && (
             <div className="text-center py-4">
-              <span className="text-2xl font-arabic" style={{ color: '#1D293D', fontFamily: "'Scheherazade New', serif" }}>
-                بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ
-              </span>
+              <span className="text-2xl font-arabic" style={{ color: '#1D293D', fontFamily: "'Scheherazade New', serif" }}>بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ</span>
             </div>
           )}
 
@@ -145,55 +142,57 @@ const Quran = () => {
             </div>
           ) : (
             <div className="flex flex-col gap-4 pb-6">
-              {ayahs.map((ayah) => (
-                <motion.div
-                  key={ayah.number}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="rounded-2xl p-4 flex flex-col gap-3"
-                  style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}
-                >
-                  {/* Ayah number badge */}
-                  <div className="flex items-center justify-between">
-                    <div
-                      className="flex items-center justify-center h-7 w-7 rounded-full text-xs font-bold"
-                      style={{ background: '#F0FDF4', color: '#166534' }}
-                    >
-                      {ayah.numberInSurah}
+              {ayahs.map((ayah) => {
+                const isBookmarked = bookmarkedSurah === selectedSurah && bookmarkedAyah === ayah.numberInSurah;
+                return (
+                  <motion.div
+                    key={ayah.number}
+                    id={`ayah-${ayah.numberInSurah}`}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    onClick={() => handleBookmark(selectedSurah, ayah.numberInSurah)}
+                    className="rounded-2xl p-4 flex flex-col gap-3 cursor-pointer transition-all active:scale-[0.99]"
+                    style={{
+                      background: '#FFFFFF',
+                      border: '1px solid #F3EDE6',
+                      boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)',
+                      borderLeft: isBookmarked ? '3px solid #38CA5E' : '1px solid #F3EDE6',
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="flex items-center justify-center h-7 w-7 rounded-full text-xs font-bold"
+                          style={{
+                            background: isBookmarked ? '#38CA5E' : '#F0FDF4',
+                            color: isBookmarked ? '#FFFFFF' : '#166534',
+                          }}
+                        >
+                          {ayah.numberInSurah}
+                        </div>
+                        {isBookmarked && <Bookmark className="h-4 w-4" style={{ color: '#38CA5E' }} fill="#38CA5E" />}
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Arabic text */}
-                  <p className="text-right text-xl leading-loose" dir="rtl" style={{ color: '#1D293D', fontFamily: "'Scheherazade New', 'Amiri', serif", lineHeight: 2.2 }}>
-                    {ayah.text}
-                  </p>
-
-                  {/* Translation */}
-                  {ayah.translation && (
-                    <p className="text-sm leading-relaxed" style={{ color: '#62748E' }}>
-                      {ayah.translation}
+                    <p className="text-right text-xl leading-loose" dir="rtl" style={{ color: '#1D293D', fontFamily: "'Scheherazade New', 'Amiri', serif", lineHeight: 2.2 }}>
+                      {ayah.text}
                     </p>
-                  )}
-                </motion.div>
-              ))}
 
-              {/* Nav buttons */}
+                    {ayah.translation && (
+                      <p className="text-sm leading-relaxed" style={{ color: '#62748E' }}>{ayah.translation}</p>
+                    )}
+                  </motion.div>
+                );
+              })}
+
               <div className="flex gap-3 pt-2">
                 {selectedSurah > 1 && (
-                  <button
-                    onClick={() => loadSurah(selectedSurah - 1)}
-                    className="flex-1 rounded-2xl p-4 flex items-center justify-center gap-2 font-semibold text-sm"
-                    style={{ background: '#F8F8F7', color: '#314158' }}
-                  >
+                  <button onClick={() => loadSurah(selectedSurah - 1)} className="flex-1 rounded-2xl p-4 flex items-center justify-center gap-2 font-semibold text-sm" style={{ background: '#F8F8F7', color: '#314158' }}>
                     <ChevronLeft className="h-4 w-4" /> Surah Sebelumnya
                   </button>
                 )}
                 {selectedSurah < 114 && (
-                  <button
-                    onClick={() => loadSurah(selectedSurah + 1)}
-                    className="flex-1 rounded-2xl p-4 flex items-center justify-center gap-2 font-semibold text-sm"
-                    style={{ background: 'linear-gradient(180deg, #6EE7B7 0%, #D1FAE5 100%)', color: '#065F46' }}
-                  >
+                  <button onClick={() => loadSurah(selectedSurah + 1)} className="flex-1 rounded-2xl p-4 flex items-center justify-center gap-2 font-semibold text-sm" style={{ background: 'linear-gradient(180deg, #6EE7B7 0%, #D1FAE5 100%)', color: '#065F46' }}>
                     Surah Selanjutnya <ChevronRight className="h-4 w-4" />
                   </button>
                 )}
@@ -208,45 +207,23 @@ const Quran = () => {
   // Surah list view
   return (
     <div className="min-h-screen bg-white pb-24 relative overflow-hidden">
-      {/* bg atas - green */}
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          width: 560, height: 341, left: '50%', top: -209, transform: 'translateX(-50%)',
-          background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0,
-        }}
-      />
-      {/* bg - blue */}
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          width: 546, height: 521, left: 19, top: -535,
-          background: '#00B4D8', filter: 'blur(100px)', transform: 'rotate(-76.22deg)', zIndex: 1,
-        }}
-      />
+      <div className="absolute pointer-events-none" style={{ width: 560, height: 341, left: '50%', top: -209, transform: 'translateX(-50%)', background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0 }} />
+      <div className="absolute pointer-events-none" style={{ width: 546, height: 521, left: 19, top: -535, background: '#00B4D8', filter: 'blur(100px)', transform: 'rotate(-76.22deg)', zIndex: 1 }} />
       <div className="relative z-10 flex flex-col pt-6 px-4 gap-4">
-        {/* Header */}
         <div className="flex items-center w-full">
           <button onClick={() => navigate(-1)} className="p-2 rounded-full">
             <ChevronLeft className="h-6 w-6" style={{ color: '#62748E' }} strokeWidth={2} />
           </button>
-          <h1 className="text-xl font-bold flex-1 text-center pr-10" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
-            Al-Quran
-          </h1>
+          <h1 className="text-xl font-bold flex-1 text-center pr-10" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>Al-Quran</h1>
         </div>
 
-        {/* Continue reading */}
         {progress.lastSurah > 0 && (
           <motion.button
             initial={{ y: 10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             onClick={() => loadSurah(progress.lastSurah)}
             className="w-full rounded-3xl p-5 flex items-center gap-4"
-            style={{
-              background: '#FFFFFF',
-              border: '1px solid #F3EDE6',
-              boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)',
-            }}
+            style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)' }}
           >
             <div className="flex h-12 w-12 items-center justify-center rounded-full" style={{ background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)', border: '1px solid #FFFFFF', boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1)' }}>
               <BookOpen className="h-5 w-5" style={{ color: '#334258' }} strokeWidth={2} />
@@ -255,13 +232,13 @@ const Quran = () => {
               <span className="font-semibold text-base" style={{ color: '#1D293D' }}>Lanjut Membaca</span>
               <span className="text-xs" style={{ color: '#838A96' }}>
                 Surah {surahs.find((s) => s.number === progress.lastSurah)?.englishName || progress.lastSurah}
+                {progress.lastAyah > 1 && `, Ayat ${progress.lastAyah}`}
               </span>
             </div>
             <ChevronRight className="h-5 w-5 ml-auto" style={{ color: '#90A1B9' }} />
           </motion.button>
         )}
 
-        {/* Search */}
         <input
           type="text"
           placeholder="Cari surah..."
@@ -271,7 +248,6 @@ const Quran = () => {
           style={{ background: '#F8F8F7', border: '1px solid #F3EDE6', color: '#1D293D' }}
         />
 
-        {/* Surah list */}
         {surahLoading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#34D399' }} />
@@ -288,19 +264,14 @@ const Quran = () => {
                 className="w-full rounded-2xl p-4 flex items-center gap-4 text-left"
                 style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}
               >
-                <div
-                  className="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0 text-sm font-bold"
-                  style={{ background: '#F8F8F7', color: '#314158' }}
-                >
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0 text-sm font-bold" style={{ background: '#F8F8F7', color: '#314158' }}>
                   {surah.number}
                 </div>
                 <div className="flex flex-col flex-1 min-w-0">
                   <span className="font-semibold text-sm truncate" style={{ color: '#1D293D' }}>{surah.englishName}</span>
                   <span className="text-xs truncate" style={{ color: '#838A96' }}>{surah.englishNameTranslation} · {surah.numberOfAyahs} ayat</span>
                 </div>
-                <span className="text-base font-arabic flex-shrink-0" style={{ color: '#1D293D', fontFamily: "'Scheherazade New', serif" }}>
-                  {surah.name}
-                </span>
+                <span className="text-base font-arabic flex-shrink-0" style={{ color: '#1D293D', fontFamily: "'Scheherazade New', serif" }}>{surah.name}</span>
               </motion.button>
             ))}
           </div>
