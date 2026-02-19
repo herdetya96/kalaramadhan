@@ -54,48 +54,48 @@ const HeroCard = ({
           </div>
         </div>
 
-        {/* Hijri badge */}
-        {ramadan.isRamadan &&
-        <div className="flex items-center justify-center px-2 py-1 rounded-full bg-white border border-white shadow-card">
-            <span className="text-sm" style={{ color: '#15A450' }}>
-              {ramadan.dayOfRamadan} Ramadan 1447H
-            </span>
-          </div>
-        }
-        {!ramadan.isRamadan &&
-        <div className="flex items-center justify-center px-2 py-1 rounded-full bg-white border border-white shadow-card">
-            <span className="text-sm" style={{ color: '#15A450' }}>{hijriDate}</span>
-          </div>
-        }
-
-        {/* Countdown */}
-        {isToday && nextPrayerName &&
+        {/* Hijri badge + Countdown grouped */}
         <div className="flex flex-col items-center gap-4">
-            <div className="flex items-center justify-center gap-4 py-1">
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-5xl font-bold tracking-tighter gradient-countdown-text">{countdownData.hours}</span>
-                <span className="text-xs" style={{ color: '#5D5D5D' }}>jam</span>
-              </div>
-              <span className="text-3xl font-bold opacity-50 -mt-5" style={{ color: '#000' }}>:</span>
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-5xl font-bold tracking-tighter gradient-countdown-text">{countdownData.minutes}</span>
-                <span className="text-xs" style={{ color: '#5D5D5D' }}>menit</span>
-              </div>
-              <span className="text-3xl font-bold opacity-50 -mt-5" style={{ color: '#000' }}>:</span>
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-5xl font-bold tracking-tighter gradient-countdown-text">{countdownData.seconds}</span>
-                <span className="text-xs" style={{ color: '#5D5D5D' }}>detik</span>
-              </div>
+          {ramadan.isRamadan ? (
+            <div className="flex items-center justify-center px-2 py-1 rounded-full bg-white border border-white shadow-card">
+              <span className="text-sm" style={{ color: '#15A450' }}>
+                {ramadan.dayOfRamadan} Ramadan 1447H
+              </span>
             </div>
+          ) : (
+            <div className="flex items-center justify-center px-2 py-1 rounded-full bg-white border border-white shadow-card">
+              <span className="text-sm" style={{ color: '#15A450' }}>{hijriDate}</span>
+            </div>
+          )}
 
-            <div className="flex items-center gap-2 opacity-90">
-              <Clock className="h-4 w-4" style={{ color: '#124D2F' }} strokeWidth={1.5} />
-              <span className="text-sm font-medium" style={{ color: '#124D2F' }}>Menuju {nextPrayerName}</span>
-              <span className="text-sm font-medium" style={{ color: '#124D2F' }}>|</span>
-              <span className="text-sm font-medium" style={{ color: '#124D2F' }}>Pukul {nextPrayerTime}</span>
-            </div>
-          </div>
-        }
+          {isToday && nextPrayerName && (
+            <>
+              <div className="flex items-center justify-center gap-4 py-1">
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-5xl font-bold tracking-tighter gradient-countdown-text">{countdownData.hours}</span>
+                  <span className="text-xs" style={{ color: '#5D5D5D' }}>jam</span>
+                </div>
+                <span className="text-3xl font-bold opacity-50 -mt-5" style={{ color: '#000' }}>:</span>
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-5xl font-bold tracking-tighter gradient-countdown-text">{countdownData.minutes}</span>
+                  <span className="text-xs" style={{ color: '#5D5D5D' }}>menit</span>
+                </div>
+                <span className="text-3xl font-bold opacity-50 -mt-5" style={{ color: '#000' }}>:</span>
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-5xl font-bold tracking-tighter gradient-countdown-text">{countdownData.seconds}</span>
+                  <span className="text-xs" style={{ color: '#5D5D5D' }}>detik</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 opacity-90">
+                <Clock className="h-4 w-4" style={{ color: '#124D2F' }} strokeWidth={1.5} />
+                <span className="text-sm font-medium" style={{ color: '#124D2F' }}>Menuju {nextPrayerName}</span>
+                <span className="text-sm font-medium" style={{ color: '#124D2F' }}>|</span>
+                <span className="text-sm font-medium" style={{ color: '#124D2F' }}>Pukul {nextPrayerTime}</span>
+              </div>
+            </>
+          )}
+        </div>
 
         {/* Imsakiyah mini schedule */}
         {ramadan.isRamadan &&
