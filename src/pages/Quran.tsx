@@ -389,6 +389,47 @@ const Quran = () => {
           </motion.button>
         )}
 
+        {/* Bookmark list */}
+        {bookmarks.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between px-1">
+              <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>Bookmark ({bookmarks.length})</span>
+            </div>
+            {bookmarks.map((bm, i) => (
+              <motion.button
+                key={`${bm.surah}-${bm.ayahNumber}`}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: Math.min(i * 0.03, 0.2) }}
+                onClick={() => {
+                  setBookmarkedSurah(prev => prev);
+                  loadSurah(bm.surah).then(() => {
+                    setTimeout(() => {
+                      const el = document.getElementById(`ayah-${bm.ayahNumber}`);
+                      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }, 500);
+                  });
+                }}
+                className="w-full rounded-2xl p-4 flex items-center gap-3 text-left"
+                style={{ background: '#FFFFFF', border: '1px solid #E0E7FF', borderLeft: '3px solid #3B82F6', boxShadow: '0px 10px 20px rgba(59, 130, 246, 0.06)' }}
+              >
+                <div className="flex h-9 w-9 items-center justify-center rounded-full flex-shrink-0" style={{ background: '#EFF6FF' }}>
+                  <Bookmark className="h-4 w-4" style={{ color: '#3B82F6' }} fill="#3B82F6" />
+                </div>
+                <div className="flex flex-col flex-1 min-w-0">
+                  <span className="font-semibold text-sm truncate" style={{ color: '#1D293D' }}>
+                    {bm.surahName} : {bm.ayahNumber}
+                  </span>
+                  <span className="text-xs truncate" style={{ color: '#838A96' }}>
+                    {bm.translation.slice(0, 60)}{bm.translation.length > 60 ? '...' : ''}
+                  </span>
+                </div>
+                <ChevronRight className="h-4 w-4 flex-shrink-0" style={{ color: '#90A1B9' }} />
+              </motion.button>
+            ))}
+          </div>
+        )}
+
         <input
           type="text"
           placeholder="Cari surah..."
