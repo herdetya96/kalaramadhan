@@ -351,7 +351,7 @@ const Tracker = () => {
                       }
                     </div>
                     <span
-                      className="font-semibold text-lg"
+                      className="font-semibold text-base"
                       style={{
                         color: completed ? '#90A1B9' : '#1D293D',
                         textDecoration: completed ? 'line-through' : 'none',
