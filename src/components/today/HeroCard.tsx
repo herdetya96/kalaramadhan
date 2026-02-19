@@ -38,7 +38,7 @@ const HeroCard = ({
       <div className="relative flex flex-col items-center gap-[42px] p-4" style={{ zIndex: 4 }}>
         {/* Greeting */}
         <div className="flex flex-col items-center gap-1">
-          <h1 className="text-xl font-medium" style={{ color: '#0F172B', letterSpacing: '-0.02em' }}>
+          <h1 className="font-medium text-lg" style={{ color: '#0F172B', letterSpacing: '-0.02em' }}>
             Gimana puasamu hari ini?
           </h1>
           <div className="flex items-center justify-center gap-1">
@@ -51,28 +51,28 @@ const HeroCard = ({
         {/* Counter section: badge + countdown + next prayer */}
         <div className="flex flex-col items-center gap-4">
           {/* Ramadan / Hijri badge */}
-          {ramadan.isRamadan ? (
-            <div className="flex items-center justify-center px-2 py-1 rounded-full" style={{
-              background: '#FFFFFF', border: '1px solid #FFFFFF',
-              boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1)',
-              borderRadius: 40,
-            }}>
+          {ramadan.isRamadan ?
+          <div className="flex items-center justify-center px-2 py-1 rounded-full" style={{
+            background: '#FFFFFF', border: '1px solid #FFFFFF',
+            boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1)',
+            borderRadius: 40
+          }}>
               <span className="text-sm" style={{ color: '#15A450', letterSpacing: '-0.15px' }}>
                 {ramadan.dayOfRamadan} Ramadan 1447H
               </span>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center px-2 py-1 rounded-full" style={{
-              background: '#FFFFFF', border: '1px solid #FFFFFF',
-              boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1)',
-              borderRadius: 40,
-            }}>
+            </div> :
+
+          <div className="flex items-center justify-center px-2 py-1 rounded-full" style={{
+            background: '#FFFFFF', border: '1px solid #FFFFFF',
+            boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1)',
+            borderRadius: 40
+          }}>
               <span className="text-sm" style={{ color: '#15A450', letterSpacing: '-0.15px' }}>{hijriDate}</span>
             </div>
-          )}
+          }
 
-          {isToday && nextPrayerName && (
-            <>
+          {isToday && nextPrayerName &&
+          <>
               {/* Countdown numbers */}
               <div className="flex items-center justify-center gap-4 py-1">
                 <div className="flex flex-col items-center gap-1">
@@ -99,27 +99,27 @@ const HeroCard = ({
                 <span className="text-sm font-medium" style={{ color: '#124D2F', letterSpacing: '-0.01em' }}>Pukul {nextPrayerTime}</span>
               </div>
             </>
-          )}
+          }
         </div>
 
         {/* Imsakiyah mini schedule */}
-        {ramadan.isRamadan && (
-          <div className="flex w-full gap-3">
-            {imsakiyahPrayers.map((p) => (
-              <div key={p.name} className="flex-1 flex flex-col items-center gap-0.5 py-2" style={{
-                background: '#FFFFFF',
-                boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1)',
-                borderRadius: 12,
-              }}>
+        {ramadan.isRamadan &&
+        <div className="flex w-full gap-3">
+            {imsakiyahPrayers.map((p) =>
+          <div key={p.name} className="flex-1 flex flex-col items-center gap-0.5 py-2" style={{
+            background: '#FFFFFF',
+            boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1)',
+            borderRadius: 12
+          }}>
                 <span className="text-xs" style={{ color: '#62748E' }}>{p.name}</span>
                 <span className="text-sm font-bold" style={{ color: '#0F172B', letterSpacing: '-0.5px' }}>{p.time}</span>
               </div>
-            ))}
+          )}
           </div>
-        )}
+        }
       </div>
-    </motion.div>
-  );
+    </motion.div>);
+
 };
 
 export default HeroCard;
