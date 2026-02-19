@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Check } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { getDayKey, loadDayData, saveDayData, isRamadan, type DayData } from "@/lib/kala-utils";
 
 const PUASA_TASKS = [
@@ -10,18 +10,21 @@ const PUASA_TASKS = [
   { id: "terawih", label: "Sholat Terawih" },
 ];
 
+const DAY_LABELS = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+
 const Puasa = () => {
   const realToday = new Date();
+  const [selectedDate, setSelectedDate] = useState<Date>(realToday);
   const [dayData, setDayData] = useState<DayData>(() => loadDayData(realToday));
 
   useEffect(() => {
-    setDayData(loadDayData(realToday));
-  }, []);
+    setDayData(loadDayData(selectedDate));
+  }, [selectedDate]);
 
   const updateDayData = useCallback((newData: DayData) => {
     setDayData(newData);
-    saveDayData(realToday, newData);
-  }, [realToday]);
+    saveDayData(selectedDate, newData);
+  }, [selectedDate]);
 
   const toggle = (id: string) => {
     const newSunnah = { ...dayData.sunnahCompleted, [id]: !dayData.sunnahCompleted[id] };
@@ -38,11 +41,29 @@ const Puasa = () => {
   const percentage = Math.round((completedCount / PUASA_TASKS.length) * 100);
 
   // Ramadan info
-  const ramadan = isRamadan(realToday);
+  const ramadan = isRamadan(selectedDate);
   const dayOfRamadan = ramadan.isRamadan ? ramadan.dayOfRamadan : 1;
 
   // Days until Eid (approx: Ramadan is 30 days)
   const daysToEid = ramadan.isRamadan ? Math.max(0, 30 - dayOfRamadan) : 0;
+
+  // Week days around selected date
+  const weekDays = useMemo(() => {
+    const startOfWeek = new Date(selectedDate);
+    const dayOfWeek = startOfWeek.getDay();
+    startOfWeek.setDate(startOfWeek.getDate() - dayOfWeek);
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(startOfWeek);
+      d.setDate(d.getDate() + i);
+      return d;
+    });
+  }, [selectedDate]);
+
+  const navigateWeek = (dir: number) => {
+    const d = new Date(selectedDate);
+    d.setDate(d.getDate() + dir * 7);
+    setSelectedDate(d);
+  };
 
   // Streak
   const streak = useMemo(() => {
@@ -60,7 +81,8 @@ const Puasa = () => {
     return count;
   }, [realToday, dayData]);
 
-  const dateTitle = realToday.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+  const dateTitle = selectedDate.toLocaleDateString("id-ID", { month: "long", day: "numeric", year: "numeric" });
+  const isToday = getDayKey(selectedDate) === getDayKey(realToday);
 
   // Circular progress
   const radius = 34;
@@ -95,14 +117,58 @@ const Puasa = () => {
       />
 
       <div className="relative z-10 flex flex-col items-center pt-6 px-4 gap-6">
-        {/* Header */}
-        <div className="flex flex-col justify-center items-center py-3">
-          <h1 className="text-xl font-bold text-center" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
-            Ramadhan Tracker
-          </h1>
-          <span className="text-sm font-medium text-center" style={{ color: '#62748E', letterSpacing: '-0.15px' }}>
-            {dateTitle}
-          </span>
+        {/* Header with week nav */}
+        <div className="flex items-center justify-between w-full">
+          <button onClick={() => navigateWeek(-1)} className="p-2 rounded-full">
+            <ChevronLeft className="h-6 w-6" style={{ color: '#62748E' }} strokeWidth={2} />
+          </button>
+          <div className="flex flex-col items-center">
+            <h1 className="text-xl font-bold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
+              {isToday ? "Ramadhan Tracker" : "Ramadhan Tracker"}
+            </h1>
+            <span className="text-sm font-medium" style={{ color: '#62748E', letterSpacing: '-0.15px' }}>
+              {dateTitle}
+            </span>
+          </div>
+          <button onClick={() => navigateWeek(1)} className="p-2 rounded-full">
+            <ChevronRight className="h-6 w-6" style={{ color: '#62748E' }} strokeWidth={2} />
+          </button>
+        </div>
+
+        {/* Week day selector */}
+        <div className="flex items-start gap-3 overflow-x-auto w-full pl-2" style={{ scrollbarWidth: 'none' }}>
+          {weekDays.map((d, i) => {
+            const isSelected = getDayKey(d) === getDayKey(selectedDate);
+            const isTodayDate = getDayKey(d) === getDayKey(realToday);
+            const dData = loadDayData(d);
+            const hasPuasa = dData.sunnahCompleted["puasa"];
+            return (
+              <button
+                key={i}
+                onClick={() => setSelectedDate(d)}
+                className="flex flex-col items-center justify-center gap-0.5 flex-shrink-0"
+                style={{
+                  width: 48, height: 64,
+                  borderRadius: isSelected ? 40 : 16,
+                  ...(isSelected ? {
+                    background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)',
+                    border: '1px solid #FFFFFF',
+                    boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)',
+                  } : {}),
+                }}
+              >
+                <span className="text-[10px] font-medium uppercase" style={{ color: isSelected ? '#314158' : '#5C5C5C', letterSpacing: '0.62px' }}>
+                  {DAY_LABELS[d.getDay()]}
+                </span>
+                <span className="text-lg font-bold" style={{ color: '#314158', letterSpacing: '-0.44px' }}>
+                  {d.getDate()}
+                </span>
+                {hasPuasa && (
+                  <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#3AE886' }} />
+                )}
+              </button>
+            );
+          })}
         </div>
 
         {/* Top card - Puasa hari ke-X */}
