@@ -1,12 +1,12 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { HandHelping, LayoutGrid, Settings, Sun, BookOpen, Moon } from "lucide-react";
+import { HandHelping, Calculator, Settings, Sun, BookOpen, Moon } from "lucide-react";
 
 const tabs = [
   { path: "/today", label: "Hari Ini", icon: Sun },
   { path: "/tracker", label: "Sholat", icon: HandHelping },
   { path: "/puasa", label: "Puasa", icon: Moon },
   { path: "/quran", label: "Quran", icon: BookOpen },
-  { path: "/tools", label: "Alat", icon: LayoutGrid },
+  { path: "/tools", label: "Zakat", icon: Calculator },
   { path: "/settings", label: "Setelan", icon: Settings },
 ];
 
