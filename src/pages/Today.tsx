@@ -178,8 +178,8 @@ const Today = () => {
           </div>
           <div className="flex items-center gap-1">
             <span
-              className="text-xs px-3 py-1.5 rounded-full"
-              style={{ border: '1px solid #F3EDE6', color: '#62748E', letterSpacing: '-0.15px' }}
+              className="text-xs font-bold px-3 py-1.5 rounded-full"
+              style={{ border: '1px solid #F3EDE6', color: '#38CA5E', letterSpacing: '-0.15px' }}
             >
               Durasi puasa hari ini 13j 25m
             </span>
