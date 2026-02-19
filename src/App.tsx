@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Welcome from "./pages/Welcome";
 import Today from "./pages/Today";
 import Tracker from "./pages/Tracker";
+import Puasa from "./pages/Puasa";
+import Quran from "./pages/Quran";
 import Qibla from "./pages/Qibla";
 import Tools from "./pages/Tools";
 import ZakatCalculator from "./pages/ZakatCalculator";
@@ -40,6 +42,8 @@ const App = () => {
             <Route path="/today" element={<AppLayout><Today /></AppLayout>} />
             <Route path="/tracker" element={<AppLayout><Tracker /></AppLayout>} />
             <Route path="/progress" element={<AppLayout><Progress /></AppLayout>} />
+            <Route path="/puasa" element={<AppLayout><Puasa /></AppLayout>} />
+            <Route path="/quran" element={<AppLayout><Quran /></AppLayout>} />
             <Route path="/qibla" element={<AppLayout><Qibla /></AppLayout>} />
             <Route path="/tools" element={<AppLayout><Tools /></AppLayout>} />
             <Route path="/tools/zakat" element={<AppLayout><ZakatCalculator /></AppLayout>} />
