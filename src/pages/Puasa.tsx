@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Check, ChevronLeft, ChevronRight } from "lucide-react";
-import { getDayKey, loadDayData, saveDayData, isRamadan, DEFAULT_PRAYERS, fetchPrayerTimes, type DayData, type PrayerSchedule } from "@/lib/kala-utils";
+import { getDayKey, loadDayData, saveDayData, isRamadan, gregorianToHijri, DEFAULT_PRAYERS, fetchPrayerTimes, type DayData, type PrayerSchedule } from "@/lib/kala-utils";
 
 const PUASA_TASKS = [
   { id: "sahur", label: "Makan Sahur" },
@@ -18,6 +18,7 @@ const Puasa = () => {
   const [dayData, setDayData] = useState<DayData>(() => loadDayData(realToday));
   const [prayers, setPrayers] = useState<PrayerSchedule[]>(DEFAULT_PRAYERS);
   const [userCoords, setUserCoords] = useState<{ lat: number; lon: number } | null>(null);
+  const [imsakiyahData, setImsakiyahData] = useState<{ imsak: string; subuh: string; maghrib: string }[]>([]);
 
   // Load coords
   useEffect(() => {
@@ -32,13 +33,40 @@ const Puasa = () => {
     }
   }, []);
 
-  // Fetch prayer times based on location
+  // Fetch prayer times for selected date
   useEffect(() => {
     if (!userCoords) return;
     fetchPrayerTimes(userCoords.lat, userCoords.lon, selectedDate)
       .then((fetched) => setPrayers(fetched))
       .catch(() => setPrayers(DEFAULT_PRAYERS));
   }, [userCoords, selectedDate]);
+
+  // Fetch full Ramadan month imsakiyah from Aladhan hijri calendar API
+  useEffect(() => {
+    if (!userCoords) return;
+    const hijri = gregorianToHijri(realToday);
+    const ramadanYear = hijri.month <= 9 ? hijri.year : hijri.year + 1;
+    const cacheKey = `kala-imsakiyah-${ramadanYear}-${userCoords.lat.toFixed(2)}-${userCoords.lon.toFixed(2)}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      setImsakiyahData(JSON.parse(cached));
+      return;
+    }
+    fetch(`https://api.aladhan.com/v1/hijriCalendar/9/${ramadanYear}?latitude=${userCoords.lat}&longitude=${userCoords.lon}&method=20`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.code === 200 && data.data) {
+          const schedule = data.data.map((day: any) => ({
+            imsak: day.timings.Imsak?.split(' ')[0] || '-',
+            subuh: day.timings.Fajr?.split(' ')[0] || '-',
+            maghrib: day.timings.Maghrib?.split(' ')[0] || '-',
+          }));
+          setImsakiyahData(schedule);
+          localStorage.setItem(cacheKey, JSON.stringify(schedule));
+        }
+      })
+      .catch(() => {});
+  }, [userCoords]);
 
   useEffect(() => {
     setDayData(loadDayData(selectedDate));
@@ -434,10 +462,11 @@ const Puasa = () => {
               <span className="text-[10px] font-semibold text-center" style={{ color: '#838A96' }}>Maghrib</span>
             </div>
             <div className="max-h-64 overflow-y-auto">
-              {Array.from({ length: 30 }, (_, i) => {
-                const imsakTime = prayers.find(p => p.name === "Imsak")?.time || "04:25";
-                const subuhTime = prayers.find(p => p.name === "Subuh")?.time || "04:35";
-                const maghribTime = prayers.find(p => p.name === "Maghrib")?.time || "17:50";
+              {Array.from({ length: imsakiyahData.length || 30 }, (_, i) => {
+                const daySchedule = imsakiyahData[i];
+                const imsakTime = daySchedule?.imsak || prayers.find(p => p.name === "Imsak")?.time || "-";
+                const subuhTime = daySchedule?.subuh || prayers.find(p => p.name === "Subuh")?.time || "-";
+                const maghribTime = daySchedule?.maghrib || prayers.find(p => p.name === "Maghrib")?.time || "-";
                 const isCurrent = ramadan.isRamadan && ramadan.dayOfRamadan === i + 1;
                 return (
                   <div
