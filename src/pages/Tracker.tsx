@@ -4,8 +4,8 @@ import { ChevronLeft, ChevronRight, Check, BarChart3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   WAJIB_PRAYERS, DEFAULT_PRAYERS, fetchPrayerTimes, getWajibFromPrayers,
-  loadDayData, saveDayData, getDayKey, type DayData, type PrayerSchedule
-} from "@/lib/kala-utils";
+  loadDayData, saveDayData, getDayKey, type DayData, type PrayerSchedule } from
+"@/lib/kala-utils";
 import TrackerSunnahSection from "@/components/tracker/TrackerSunnahSection";
 
 const DAY_LABELS = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
@@ -17,7 +17,7 @@ const Tracker = () => {
   const [dayData, setDayData] = useState<DayData>(() => loadDayData(realToday));
   const [prayers, setPrayers] = useState<PrayerSchedule[]>(DEFAULT_PRAYERS);
   const [wajibPrayers, setWajibPrayers] = useState<PrayerSchedule[]>(WAJIB_PRAYERS);
-  const [userCoords, setUserCoords] = useState<{ lat: number; lon: number } | null>(null);
+  const [userCoords, setUserCoords] = useState<{lat: number;lon: number;} | null>(null);
 
   // Load coords
   useEffect(() => {
@@ -38,15 +38,15 @@ const Tracker = () => {
 
   useEffect(() => {
     if (!userCoords) return;
-    fetchPrayerTimes(userCoords.lat, userCoords.lon, selectedDate)
-      .then((fetched) => {
-        setPrayers(fetched);
-        setWajibPrayers(getWajibFromPrayers(fetched));
-      })
-      .catch(() => {
-        setPrayers(DEFAULT_PRAYERS);
-        setWajibPrayers(WAJIB_PRAYERS);
-      });
+    fetchPrayerTimes(userCoords.lat, userCoords.lon, selectedDate).
+    then((fetched) => {
+      setPrayers(fetched);
+      setWajibPrayers(getWajibFromPrayers(fetched));
+    }).
+    catch(() => {
+      setPrayers(DEFAULT_PRAYERS);
+      setWajibPrayers(WAJIB_PRAYERS);
+    });
   }, [userCoords, selectedDate]);
 
   const updateDayData = useCallback((newData: DayData) => {
@@ -71,7 +71,7 @@ const Tracker = () => {
 
 
   const completedCount = dayData.prayerCompleted.filter(Boolean).length;
-  const percentage = Math.round((completedCount / 5) * 100);
+  const percentage = Math.round(completedCount / 5 * 100);
 
   // Week days around selected date
   const weekDays = useMemo(() => {
@@ -115,7 +115,7 @@ const Tracker = () => {
   // Circular progress
   const radius = 120;
   const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+  const strokeDashoffset = circumference - percentage / 100 * circumference;
 
   return (
     <div className="min-h-screen bg-white pb-24 relative overflow-hidden">
@@ -128,11 +128,11 @@ const Tracker = () => {
           transform: 'translateX(-50%)',
           background: '#CCFF3F',
           filter: 'blur(100px)',
-          zIndex: 0,
-        }}
-      />
+          zIndex: 0
+        }} />
 
-      <div className="relative z-10 flex flex-col items-center pt-6 gap-6 px-4">
+
+      <div className="relative z-10 flex flex-col items-center pt-6 px-4 gap-[16px]">
         {/* Header with month nav */}
         <div className="flex items-center justify-between w-full">
           <button onClick={() => navigateWeek(-1)} className="p-2 rounded-full">
@@ -165,24 +165,24 @@ const Tracker = () => {
                   ...(isSelected ? {
                     background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)',
                     border: '1px solid #FFFFFF',
-                    boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)',
-                  } : {}),
-                }}
-              >
+                    boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)'
+                  } : {})
+                }}>
+
                 <span
                   className="text-[10px] font-medium uppercase"
-                  style={{ color: isSelected ? '#314158' : '#5C5C5C', letterSpacing: '0.62px' }}
-                >
+                  style={{ color: isSelected ? '#314158' : '#5C5C5C', letterSpacing: '0.62px' }}>
+
                   {DAY_LABELS[d.getDay()]}
                 </span>
                 <span
                   className="text-lg font-bold"
-                  style={{ color: '#314158', letterSpacing: '-0.44px' }}
-                >
+                  style={{ color: '#314158', letterSpacing: '-0.44px' }}>
+
                   {d.getDate()}
                 </span>
-              </button>
-            );
+              </button>);
+
           })}
         </div>
 
@@ -191,8 +191,8 @@ const Tracker = () => {
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           className="relative flex items-center justify-center"
-          style={{ width: 280, height: 280 }}
-        >
+          style={{ width: 280, height: 280 }}>
+
           <svg width="280" height="280" viewBox="0 0 280 280" className="absolute">
             {/* Background circle */}
             <circle
@@ -200,8 +200,8 @@ const Tracker = () => {
               fill="none"
               stroke="#EFEFEF"
               strokeWidth="20"
-              strokeLinecap="round"
-            />
+              strokeLinecap="round" />
+
             {/* Progress arc */}
             <circle
               cx="140" cy="140" r={radius}
@@ -212,8 +212,8 @@ const Tracker = () => {
               strokeDasharray={circumference}
               strokeDashoffset={strokeDashoffset}
               transform="rotate(-90 140 140)"
-              style={{ transition: 'stroke-dashoffset 0.5s ease' }}
-            />
+              style={{ transition: 'stroke-dashoffset 0.5s ease' }} />
+
             <defs>
               <linearGradient id="progressGrad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#7DF8AD" />
@@ -242,9 +242,9 @@ const Tracker = () => {
           style={{
             background: '#FFFFFF',
             border: '1px solid #F3EDE6',
-            boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)',
-          }}
-        >
+            boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)'
+          }}>
+
           <div className="flex flex-col gap-2">
             <span className="text-lg font-semibold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
               {streak > 0 ? `${streak} hari beruntun salat 5 waktu!` : 'Mulai streak salat 5 waktumu!'}
@@ -260,9 +260,9 @@ const Tracker = () => {
               background: 'linear-gradient(180deg, #F87D7D 0%, #FFE2D2 100%)',
               border: '1px solid #FFFFFF',
               boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1)',
-              borderRadius: 40,
-            }}
-          >
+              borderRadius: 40
+            }}>
+
             <span className="text-lg">🔥</span>
           </div>
         </motion.div>
@@ -276,9 +276,9 @@ const Tracker = () => {
           style={{
             background: '#FFFFFF',
             border: '1px solid #F3EDE6',
-            boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)',
-          }}
-        >
+            boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)'
+          }}>
+
           {/* Header row */}
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
@@ -287,8 +287,8 @@ const Tracker = () => {
             <div className="flex items-center gap-2">
               <span
                 className="text-xs font-bold px-4 py-2 rounded-full"
-                style={{ background: '#F8F8F7', color: '#314158' }}
-              >
+                style={{ background: '#F8F8F7', color: '#314158' }}>
+
                 {completedCount}/5
               </span>
               <button
@@ -298,9 +298,9 @@ const Tracker = () => {
                   background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)',
                   border: '1px solid #FFFFFF',
                   boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1)',
-                  color: '#314158',
-                }}
-              >
+                  color: '#314158'
+                }}>
+
                 Selesaikan semua
               </button>
             </div>
@@ -312,9 +312,9 @@ const Tracker = () => {
               className="h-full rounded-full"
               style={{ background: 'linear-gradient(90deg, #3AE886 0%, #46C0F1 100%)' }}
               initial={{ width: 0 }}
-              animate={{ width: `${(completedCount / 5) * 100}%` }}
-              transition={{ duration: 0.4 }}
-            />
+              animate={{ width: `${completedCount / 5 * 100}%` }}
+              transition={{ duration: 0.4 }} />
+
           </div>
 
           {/* Prayer items */}
@@ -332,40 +332,40 @@ const Tracker = () => {
                   style={{
                     background: '#FFFFFF',
                     border: '1px solid #F3EDE6',
-                    boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)',
-                  }}
-                >
+                    boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)'
+                  }}>
+
                   <div className="flex items-center gap-4">
                     <div
                       className="flex h-10 w-10 items-center justify-center rounded-full"
                       style={completed ? {
                         background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)',
                         border: '1px solid #FFFFFF',
-                        boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1)',
+                        boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1)'
                       } : {
-                        background: '#F8F8F7',
-                      }}
-                    >
-                      {completed && (
-                        <Check className="h-5 w-5" style={{ color: '#334258' }} strokeWidth={2.5} />
-                      )}
+                        background: '#F8F8F7'
+                      }}>
+
+                      {completed &&
+                      <Check className="h-5 w-5" style={{ color: '#334258' }} strokeWidth={2.5} />
+                      }
                     </div>
                     <span
                       className="font-semibold text-lg"
                       style={{
                         color: completed ? '#90A1B9' : '#1D293D',
                         textDecoration: completed ? 'line-through' : 'none',
-                        letterSpacing: '-0.44px',
-                      }}
-                    >
+                        letterSpacing: '-0.44px'
+                      }}>
+
                       {prayer.name}
                     </span>
                   </div>
                   <span className="text-sm" style={{ color: '#90A1B9', letterSpacing: '-0.15px' }}>
                     {prayer.time}
                   </span>
-                </motion.button>
-              );
+                </motion.button>);
+
             })}
           </div>
         </motion.div>
@@ -383,18 +383,18 @@ const Tracker = () => {
           style={{
             background: '#FFFFFF',
             border: '1px solid #F3EDE6',
-            boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)',
-          }}
-        >
+            boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)'
+          }}>
+
           <div className="flex items-center gap-3">
             <div
               className="flex h-10 w-10 items-center justify-center rounded-full"
               style={{
                 background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)',
                 border: '1px solid #FFFFFF',
-                boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1)',
-              }}
-            >
+                boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1)'
+              }}>
+
               <BarChart3 className="h-5 w-5" style={{ color: '#334258' }} strokeWidth={2} />
             </div>
             <div className="flex flex-col items-start">
@@ -409,8 +409,8 @@ const Tracker = () => {
           <ChevronRight className="h-5 w-5" style={{ color: '#90A1B9' }} />
         </motion.button>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default Tracker;
