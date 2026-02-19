@@ -151,6 +151,7 @@ const Today = () => {
           style={{
             background: '#FFFFFF',
             border: '1px solid #F3EDE6',
+            boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)',
           }}
         >
           <div className="flex items-center justify-between w-full">
