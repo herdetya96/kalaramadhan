@@ -124,7 +124,8 @@ const MonthlyProgress = ({ selectedDate, onMonthChange }: MonthlyProgressProps) 
         {calendarDays.map((day, i) => {
           if (!day.date) return <div key={`empty-${i}`} />;
           const isToday = getDayKey(day.date) === todayKey;
-          const isFuture = day.date > new Date();
+          const dayKey = getDayKey(day.date);
+          const isFuture = dayKey > todayKey;
           return (
             <div
               key={i}
