@@ -6,9 +6,9 @@ interface HeroCardProps {
   selectedDate: Date;
   hijriDate: string;
   locationShort: string;
-  ramadan: { isRamadan: boolean; dayOfRamadan: number };
+  ramadan: {isRamadan: boolean;dayOfRamadan: number;};
   isToday: boolean;
-  countdownData: { hours: string; minutes: string; seconds: string };
+  countdownData: {hours: string;minutes: string;seconds: string;};
   nextPrayerName: string;
   nextPrayerTime: string;
   prayers: PrayerSchedule[];
@@ -22,7 +22,7 @@ const HeroCard = ({
     weekday: "long", day: "numeric", month: "long", year: "numeric"
   });
 
-  const imsakiyahPrayers = prayers.filter(p => ["Imsak", "Subuh", "Maghrib", "Isya"].includes(p.name));
+  const imsakiyahPrayers = prayers.filter((p) => ["Imsak", "Subuh", "Maghrib", "Isya"].includes(p.name));
 
   return (
     <motion.div
@@ -32,16 +32,16 @@ const HeroCard = ({
       style={{
         background: '#F6FFE7',
         border: '1px solid #FFFFFF',
-        boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1), inset 0px -6px 14px rgba(0, 0, 0, 0.05), inset 0px -16px 34px 10px rgba(255, 255, 255, 0.65)',
-      }}
-    >
+        boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1), inset 0px -6px 14px rgba(0, 0, 0, 0.05), inset 0px -16px 34px 10px rgba(255, 255, 255, 0.65)'
+      }}>
+
       {/* Blurred decorative blobs */}
       <div className="absolute -top-[217px] -left-[67px] w-[560px] h-[341px] rounded-full" style={{ background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0 }} />
       <div className="absolute top-[200px] left-[8px] w-[560px] h-[341px] rounded-full" style={{ background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0 }} />
       <div className="absolute top-[180px] -left-[65px] w-[546px] h-[521px] rounded-full" style={{ background: '#74F7B1', filter: 'blur(100px)', zIndex: 0 }} />
       <div className="absolute top-[150px] -left-[110px] w-[546px] h-[521px] rounded-full" style={{ background: '#00B4D8', filter: 'blur(100px)', zIndex: 0, transform: 'rotate(-76deg)' }} />
 
-      <div className="relative z-10 flex flex-col items-center gap-4">
+      <div className="relative z-10 flex flex-col items-center gap-[42px]">
         {/* Greeting */}
         <div className="flex flex-col items-center gap-1 mt-8">
           <h1 className="text-xl font-medium tracking-tight" style={{ color: '#0F172B' }}>
@@ -55,22 +55,22 @@ const HeroCard = ({
         </div>
 
         {/* Hijri badge */}
-        {ramadan.isRamadan && (
-          <div className="flex items-center justify-center px-2 py-1 rounded-full bg-white border border-white shadow-card">
+        {ramadan.isRamadan &&
+        <div className="flex items-center justify-center px-2 py-1 rounded-full bg-white border border-white shadow-card">
             <span className="text-sm" style={{ color: '#15A450' }}>
               {ramadan.dayOfRamadan} Ramadan 1447H
             </span>
           </div>
-        )}
-        {!ramadan.isRamadan && (
-          <div className="flex items-center justify-center px-2 py-1 rounded-full bg-white border border-white shadow-card">
+        }
+        {!ramadan.isRamadan &&
+        <div className="flex items-center justify-center px-2 py-1 rounded-full bg-white border border-white shadow-card">
             <span className="text-sm" style={{ color: '#15A450' }}>{hijriDate}</span>
           </div>
-        )}
+        }
 
         {/* Countdown */}
-        {isToday && nextPrayerName && (
-          <div className="flex flex-col items-center gap-4">
+        {isToday && nextPrayerName &&
+        <div className="flex flex-col items-center gap-4">
             <div className="flex items-center justify-center gap-4 py-1">
               <div className="flex flex-col items-center gap-1">
                 <span className="text-5xl font-bold tracking-tighter gradient-countdown-text">{countdownData.hours}</span>
@@ -95,22 +95,22 @@ const HeroCard = ({
               <span className="text-sm font-medium" style={{ color: '#124D2F' }}>Pukul {nextPrayerTime}</span>
             </div>
           </div>
-        )}
+        }
 
         {/* Imsakiyah mini schedule */}
-        {ramadan.isRamadan && (
-          <div className="flex w-full gap-3">
-            {imsakiyahPrayers.map((p) => (
-              <div key={p.name} className="flex-1 flex flex-col items-center gap-0.5 py-2 bg-white rounded-xl shadow-card">
+        {ramadan.isRamadan &&
+        <div className="flex w-full gap-3">
+            {imsakiyahPrayers.map((p) =>
+          <div key={p.name} className="flex-1 flex flex-col items-center gap-0.5 py-2 bg-white rounded-xl shadow-card">
                 <span className="text-xs" style={{ color: '#62748E' }}>{p.name}</span>
                 <span className="text-sm font-bold" style={{ color: '#0F172B', letterSpacing: '-0.5px' }}>{p.time}</span>
               </div>
-            ))}
+          )}
           </div>
-        )}
+        }
       </div>
-    </motion.div>
-  );
+    </motion.div>);
+
 };
 
 export default HeroCard;
