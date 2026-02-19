@@ -1,8 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, BookOpen, ChevronRight, Loader2, Bookmark } from "lucide-react";
+import { motion } from "framer-motion";
+import { ChevronLeft, BookOpen, ChevronRight, Loader2, Bookmark, Copy, BookMarked } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import {
+  Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription,
+} from "@/components/ui/drawer";
 
 interface Surah {
   number: number;
@@ -20,7 +23,16 @@ interface Ayah {
   translation?: string;
 }
 
+interface BookmarkedAyah {
+  surah: number;
+  surahName: string;
+  ayahNumber: number;
+  arabicText: string;
+  translation: string;
+}
+
 const QURAN_PROGRESS_KEY = "kala_quran_progress";
+const QURAN_BOOKMARKS_KEY = "kala_quran_bookmarks";
 
 function getQuranProgress(): { lastSurah: number; lastAyah: number } {
   const saved = localStorage.getItem(QURAN_PROGRESS_KEY);
@@ -30,6 +42,16 @@ function getQuranProgress(): { lastSurah: number; lastAyah: number } {
 
 function saveQuranProgress(surah: number, ayah: number) {
   localStorage.setItem(QURAN_PROGRESS_KEY, JSON.stringify({ lastSurah: surah, lastAyah: ayah }));
+}
+
+function getBookmarks(): BookmarkedAyah[] {
+  const saved = localStorage.getItem(QURAN_BOOKMARKS_KEY);
+  if (saved) return JSON.parse(saved);
+  return [];
+}
+
+function saveBookmarks(bookmarks: BookmarkedAyah[]) {
+  localStorage.setItem(QURAN_BOOKMARKS_KEY, JSON.stringify(bookmarks));
 }
 
 const Quran = () => {
@@ -42,9 +64,11 @@ const Quran = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [bookmarkedSurah, setBookmarkedSurah] = useState<number>(getQuranProgress().lastSurah);
   const [bookmarkedAyah, setBookmarkedAyah] = useState<number>(getQuranProgress().lastAyah);
+  const [bookmarks, setBookmarks] = useState<BookmarkedAyah[]>(getBookmarks());
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedAyahForAction, setSelectedAyahForAction] = useState<Ayah | null>(null);
   const progress = { lastSurah: bookmarkedSurah, lastAyah: bookmarkedAyah };
 
-  // Fetch surah list
   useEffect(() => {
     const cached = localStorage.getItem("kala_quran_surahs");
     if (cached) {
@@ -63,7 +87,6 @@ const Quran = () => {
       .finally(() => setSurahLoading(false));
   }, []);
 
-  // Fetch ayahs for selected surah
   const loadSurah = useCallback(async (surahNum: number) => {
     setLoading(true);
     setSelectedSurah(surahNum);
@@ -88,7 +111,6 @@ const Quran = () => {
     }
   }, []);
 
-  // Auto-scroll to bookmarked ayah after loading
   useEffect(() => {
     if (!loading && ayahs.length > 0 && selectedSurah === bookmarkedSurah) {
       setTimeout(() => {
@@ -98,12 +120,62 @@ const Quran = () => {
     }
   }, [loading, ayahs, selectedSurah, bookmarkedSurah, bookmarkedAyah]);
 
-  const handleBookmark = (surahNum: number, ayahNum: number) => {
-    saveQuranProgress(surahNum, ayahNum);
-    setBookmarkedSurah(surahNum);
-    setBookmarkedAyah(ayahNum);
-    toast.success("Terakhir dibaca disimpan ✓");
+  const handleAyahTap = (ayah: Ayah) => {
+    setSelectedAyahForAction(ayah);
+    setDrawerOpen(true);
   };
+
+  const handleMarkLastRead = () => {
+    if (!selectedAyahForAction || selectedSurah === null) return;
+    saveQuranProgress(selectedSurah, selectedAyahForAction.numberInSurah);
+    setBookmarkedSurah(selectedSurah);
+    setBookmarkedAyah(selectedAyahForAction.numberInSurah);
+    toast.success("Terakhir dibaca disimpan ✓");
+    setDrawerOpen(false);
+  };
+
+  const handleCopyAyah = () => {
+    if (!selectedAyahForAction) return;
+    const surah = surahs.find((s) => s.number === selectedSurah);
+    const text = `${selectedAyahForAction.text}\n\n${selectedAyahForAction.translation || ""}\n\n— ${surah?.englishName || ""} : ${selectedAyahForAction.numberInSurah}`;
+    navigator.clipboard.writeText(text).then(() => {
+      toast.success("Ayat berhasil disalin");
+    }).catch(() => {
+      toast.error("Gagal menyalin ayat");
+    });
+    setDrawerOpen(false);
+  };
+
+  const handleToggleBookmark = () => {
+    if (!selectedAyahForAction || selectedSurah === null) return;
+    const surah = surahs.find((s) => s.number === selectedSurah);
+    const existing = bookmarks.findIndex(
+      (b) => b.surah === selectedSurah && b.ayahNumber === selectedAyahForAction.numberInSurah
+    );
+    let updated: BookmarkedAyah[];
+    if (existing !== -1) {
+      updated = bookmarks.filter((_, i) => i !== existing);
+      toast.success("Bookmark dihapus");
+    } else {
+      updated = [
+        ...bookmarks,
+        {
+          surah: selectedSurah,
+          surahName: surah?.englishName || "",
+          ayahNumber: selectedAyahForAction.numberInSurah,
+          arabicText: selectedAyahForAction.text,
+          translation: selectedAyahForAction.translation || "",
+        },
+      ];
+      toast.success("Ditambahkan ke bookmark ✓");
+    }
+    setBookmarks(updated);
+    saveBookmarks(updated);
+    setDrawerOpen(false);
+  };
+
+  const isAyahBookmarked = (surahNum: number, ayahNum: number) =>
+    bookmarks.some((b) => b.surah === surahNum && b.ayahNumber === ayahNum);
 
   const filteredSurahs = surahs.filter(
     (s) =>
@@ -111,6 +183,14 @@ const Quran = () => {
       s.englishNameTranslation.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.number.toString() === searchQuery
   );
+
+  const currentSurahForDrawer = surahs.find((s) => s.number === selectedSurah);
+  const isSelectedBookmarked = selectedAyahForAction && selectedSurah !== null
+    ? isAyahBookmarked(selectedSurah, selectedAyahForAction.numberInSurah)
+    : false;
+  const isSelectedLastRead = selectedAyahForAction && selectedSurah !== null
+    ? bookmarkedSurah === selectedSurah && bookmarkedAyah === selectedAyahForAction.numberInSurah
+    : false;
 
   // Surah reading view
   if (selectedSurah !== null) {
@@ -143,20 +223,21 @@ const Quran = () => {
           ) : (
             <div className="flex flex-col gap-4 pb-6">
               {ayahs.map((ayah) => {
-                const isBookmarked = bookmarkedSurah === selectedSurah && bookmarkedAyah === ayah.numberInSurah;
+                const isLastRead = bookmarkedSurah === selectedSurah && bookmarkedAyah === ayah.numberInSurah;
+                const isSaved = isAyahBookmarked(selectedSurah, ayah.numberInSurah);
                 return (
                   <motion.div
                     key={ayah.number}
                     id={`ayah-${ayah.numberInSurah}`}
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    onClick={() => handleBookmark(selectedSurah, ayah.numberInSurah)}
+                    onClick={() => handleAyahTap(ayah)}
                     className="rounded-2xl p-4 flex flex-col gap-3 cursor-pointer transition-all active:scale-[0.99]"
                     style={{
                       background: '#FFFFFF',
                       border: '1px solid #F3EDE6',
                       boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)',
-                      borderLeft: isBookmarked ? '3px solid #38CA5E' : '1px solid #F3EDE6',
+                      borderLeft: isLastRead ? '3px solid #38CA5E' : isSaved ? '3px solid #3B82F6' : '1px solid #F3EDE6',
                     }}
                   >
                     <div className="flex items-center justify-between">
@@ -164,13 +245,14 @@ const Quran = () => {
                         <div
                           className="flex items-center justify-center h-7 w-7 rounded-full text-xs font-bold"
                           style={{
-                            background: isBookmarked ? '#38CA5E' : '#F0FDF4',
-                            color: isBookmarked ? '#FFFFFF' : '#166534',
+                            background: isLastRead ? '#38CA5E' : '#F0FDF4',
+                            color: isLastRead ? '#FFFFFF' : '#166534',
                           }}
                         >
                           {ayah.numberInSurah}
                         </div>
-                        {isBookmarked && <Bookmark className="h-4 w-4" style={{ color: '#38CA5E' }} fill="#38CA5E" />}
+                        {isLastRead && <BookOpen className="h-4 w-4" style={{ color: '#38CA5E' }} />}
+                        {isSaved && <Bookmark className="h-4 w-4" style={{ color: '#3B82F6' }} fill="#3B82F6" />}
                       </div>
                     </div>
 
@@ -200,6 +282,74 @@ const Quran = () => {
             </div>
           )}
         </div>
+
+        {/* Action Drawer */}
+        <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+          <DrawerContent className="rounded-t-3xl">
+            <DrawerHeader className="pb-2">
+              <DrawerTitle className="text-base font-bold" style={{ color: '#1D293D' }}>
+                {currentSurahForDrawer?.englishName} : {selectedAyahForAction?.numberInSurah}
+              </DrawerTitle>
+              <DrawerDescription className="text-xs" style={{ color: '#838A96' }}>
+                Pilih aksi untuk ayat ini
+              </DrawerDescription>
+            </DrawerHeader>
+            <div className="flex flex-col gap-2 px-4 pb-6">
+              {/* Copy */}
+              <button
+                onClick={handleCopyAyah}
+                className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:bg-gray-50"
+                style={{ background: '#F8F8F7' }}
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: '#E0F2FE' }}>
+                  <Copy className="h-5 w-5" style={{ color: '#0284C7' }} />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>Salin Ayat</span>
+                  <span className="text-xs" style={{ color: '#838A96' }}>Salin teks Arab & terjemahan</span>
+                </div>
+              </button>
+
+              {/* Bookmark */}
+              <button
+                onClick={handleToggleBookmark}
+                className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:bg-gray-50"
+                style={{ background: '#F8F8F7' }}
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: isSelectedBookmarked ? '#DBEAFE' : '#FEF3C7' }}>
+                  <Bookmark className="h-5 w-5" style={{ color: isSelectedBookmarked ? '#3B82F6' : '#D97706' }} fill={isSelectedBookmarked ? '#3B82F6' : 'none'} />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>
+                    {isSelectedBookmarked ? 'Hapus Bookmark' : 'Tambah Bookmark'}
+                  </span>
+                  <span className="text-xs" style={{ color: '#838A96' }}>
+                    {isSelectedBookmarked ? 'Hapus ayat dari daftar bookmark' : 'Simpan ayat ke daftar bookmark'}
+                  </span>
+                </div>
+              </button>
+
+              {/* Mark Last Read */}
+              <button
+                onClick={handleMarkLastRead}
+                className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:bg-gray-50"
+                style={{ background: isSelectedLastRead ? '#F0FDF4' : '#F8F8F7' }}
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: isSelectedLastRead ? '#D1FAE5' : '#ECFDF5' }}>
+                  <BookMarked className="h-5 w-5" style={{ color: '#059669' }} />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>
+                    {isSelectedLastRead ? 'Sudah Ditandai' : 'Tandai Terakhir Dibaca'}
+                  </span>
+                  <span className="text-xs" style={{ color: '#838A96' }}>
+                    {isSelectedLastRead ? 'Ayat ini adalah terakhir dibaca' : 'Lanjut membaca dari ayat ini nanti'}
+                  </span>
+                </div>
+              </button>
+            </div>
+          </DrawerContent>
+        </Drawer>
       </div>
     );
   }
