@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Clock } from "lucide-react";
 import type { PrayerSchedule } from "@/lib/kala-utils";
+import heroBg from "@/assets/hero-bg.svg";
 
 interface HeroCardProps {
   selectedDate: Date;
@@ -28,22 +29,13 @@ const HeroCard = ({
     <motion.div
       initial={{ y: -10, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="relative overflow-hidden rounded-3xl p-4"
-      style={{
-        background: '#F6FFE7',
-        border: '1px solid #FFFFFF',
-        boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1), inset 0px -6px 14px rgba(0, 0, 0, 0.05), inset 0px -16px 34px 10px rgba(255, 255, 255, 0.65)',
-        isolation: 'isolate',
-      }}>
+      className="relative overflow-hidden rounded-3xl"
+      style={{ borderRadius: 24 }}>
 
-      {/* bg atas */}
-      <div className="absolute" style={{ width: 560, height: 341, left: -67, top: -217, background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0 }} />
+      {/* SVG background */}
+      <img src={heroBg} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ zIndex: 0 }} />
 
-      {/* bg bawah group */}
-      <div className="absolute" style={{ width: 546, height: 521, left: -65, top: 375, background: '#74F7B1', filter: 'blur(100px)', zIndex: 1 }} />
-      <div className="absolute" style={{ width: 546, height: 521, left: -110, top: 308, background: '#00B4D8', filter: 'blur(100px)', zIndex: 1, transform: 'rotate(-76.22deg)' }} />
-
-      <div className="relative flex flex-col items-center gap-[42px]" style={{ zIndex: 4 }}>
+      <div className="relative flex flex-col items-center gap-[42px] p-4" style={{ zIndex: 4 }}>
         {/* Greeting */}
         <div className="flex flex-col items-center gap-1">
           <h1 className="text-xl font-medium" style={{ color: '#0F172B', letterSpacing: '-0.02em' }}>
