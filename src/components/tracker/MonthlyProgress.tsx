@@ -20,7 +20,7 @@ const MonthlyProgress = ({ selectedDate, onMonthChange }: MonthlyProgressProps) 
   const calendarDays = useMemo(() => {
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const days: { date: Date | null; completed: number; total: number }[] = [];
+    const days: {date: Date | null;completed: number;total: number;}[] = [];
 
     // Empty cells before first day
     for (let i = 0; i < firstDay; i++) {
@@ -77,13 +77,13 @@ const MonthlyProgress = ({ selectedDate, onMonthChange }: MonthlyProgressProps) 
       style={{
         background: '#FFFFFF',
         border: '1px solid #F3EDE6',
-        boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)',
-      }}
-    >
+        boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)'
+      }}>
+
       {/* Month header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
-          Konsistensi Bulanan
+        <h2 className="text-lg font-semibold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>Progress
+
         </h2>
         <div className="flex items-center gap-2">
           <button onClick={() => onMonthChange(-1)} className="p-1 rounded-full" style={{ background: '#F8F8F7' }}>
@@ -116,11 +116,11 @@ const MonthlyProgress = ({ selectedDate, onMonthChange }: MonthlyProgressProps) 
 
       {/* Calendar grid */}
       <div className="grid grid-cols-7 gap-1">
-        {DAY_HEADERS.map(d => (
-          <div key={d} className="text-center text-[10px] font-medium uppercase pb-1" style={{ color: '#838A96', letterSpacing: '0.5px' }}>
+        {DAY_HEADERS.map((d) =>
+        <div key={d} className="text-center text-[10px] font-medium uppercase pb-1" style={{ color: '#838A96', letterSpacing: '0.5px' }}>
             {d}
           </div>
-        ))}
+        )}
         {calendarDays.map((day, i) => {
           if (!day.date) return <div key={`empty-${i}`} />;
           const isToday = getDayKey(day.date) === todayKey;
@@ -132,12 +132,12 @@ const MonthlyProgress = ({ selectedDate, onMonthChange }: MonthlyProgressProps) 
               style={{
                 background: isFuture ? 'transparent' : getColorForDay(day.completed, day.total),
                 color: isFuture ? '#D1D5DB' : '#314158',
-                border: isToday ? '2px solid #3AE886' : 'none',
-              }}
-            >
+                border: isToday ? '2px solid #3AE886' : 'none'
+              }}>
+
               {day.date.getDate()}
-            </div>
-          );
+            </div>);
+
         })}
       </div>
 
@@ -160,8 +160,8 @@ const MonthlyProgress = ({ selectedDate, onMonthChange }: MonthlyProgressProps) 
           <span className="text-[10px]" style={{ color: '#838A96' }}>90%+</span>
         </div>
       </div>
-    </motion.div>
-  );
+    </motion.div>);
+
 };
 
 export default MonthlyProgress;
