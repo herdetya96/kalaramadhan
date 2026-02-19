@@ -43,7 +43,7 @@ const HeroCard = ({
 
       <div className="relative z-10 flex flex-col items-center gap-[42px]">
         {/* Greeting */}
-        <div className="flex flex-col items-center gap-1 mt-8">
+        <div className="flex flex-col items-center gap-1">
           <h1 className="text-xl font-medium tracking-tight" style={{ color: '#0F172B' }}>
             Gimana puasamu hari ini?
           </h1>
