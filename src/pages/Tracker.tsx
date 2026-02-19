@@ -5,6 +5,8 @@ import {
   WAJIB_PRAYERS, DEFAULT_PRAYERS, fetchPrayerTimes, getWajibFromPrayers,
   loadDayData, saveDayData, getDayKey, type DayData, type PrayerSchedule
 } from "@/lib/kala-utils";
+import TrackerSunnahSection from "@/components/tracker/TrackerSunnahSection";
+import MonthlyProgress from "@/components/tracker/MonthlyProgress";
 
 const DAY_LABELS = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
@@ -57,8 +59,20 @@ const Tracker = () => {
     updateDayData({ ...dayData, prayerCompleted: newCompleted });
   };
 
+  const toggleSunnah = (id: string) => {
+    const newSunnah = { ...dayData.sunnahCompleted, [id]: !dayData.sunnahCompleted[id] };
+    updateDayData({ ...dayData, sunnahCompleted: newSunnah });
+  };
+
   const completeAll = () => {
     updateDayData({ ...dayData, prayerCompleted: [true, true, true, true, true] });
+  };
+
+  const [monthViewDate, setMonthViewDate] = useState(new Date());
+  const handleMonthChange = (dir: number) => {
+    const d = new Date(monthViewDate);
+    d.setMonth(d.getMonth() + dir);
+    setMonthViewDate(d);
   };
 
   const completedCount = dayData.prayerCompleted.filter(Boolean).length;
@@ -360,6 +374,12 @@ const Tracker = () => {
             })}
           </div>
         </motion.div>
+
+        {/* Sunnah section */}
+        <TrackerSunnahSection dayData={dayData} onToggleSunnah={toggleSunnah} />
+
+        {/* Monthly consistency */}
+        <MonthlyProgress selectedDate={monthViewDate} onMonthChange={handleMonthChange} />
       </div>
     </div>
   );
