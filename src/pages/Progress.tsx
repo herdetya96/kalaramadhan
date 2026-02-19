@@ -2,15 +2,18 @@ import { useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import MonthlyProgress from "@/components/tracker/MonthlyProgress";
+import DayDetail from "@/components/tracker/DayDetail";
 
 const Progress = () => {
   const navigate = useNavigate();
   const [monthViewDate, setMonthViewDate] = useState(new Date());
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
 
   const handleMonthChange = (dir: number) => {
     const d = new Date(monthViewDate);
     d.setMonth(d.getMonth() + dir);
     setMonthViewDate(d);
+    setSelectedDay(null);
   };
 
   return (
@@ -26,7 +29,9 @@ const Progress = () => {
           </h1>
         </div>
 
-        <MonthlyProgress selectedDate={monthViewDate} onMonthChange={handleMonthChange} />
+        <MonthlyProgress selectedDate={monthViewDate} onMonthChange={handleMonthChange} onDayClick={setSelectedDay} />
+
+        {selectedDay && <DayDetail date={selectedDay} onClose={() => setSelectedDay(null)} />}
       </div>
     </div>
   );
