@@ -38,8 +38,8 @@ const HeroCard = ({
       {/* Blurred decorative blobs */}
       <div className="absolute -top-[217px] -left-[67px] w-[560px] h-[341px] rounded-full" style={{ background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0 }} />
       <div className="absolute top-[200px] left-[8px] w-[560px] h-[341px] rounded-full" style={{ background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0 }} />
-      <div className="absolute top-[180px] -left-[65px] w-[546px] h-[521px] rounded-full" style={{ background: '#74F7B1', filter: 'blur(100px)', zIndex: 0 }} />
-      <div className="absolute top-[150px] -left-[110px] w-[546px] h-[521px] rounded-full" style={{ background: '#00B4D8', filter: 'blur(100px)', zIndex: 0, transform: 'rotate(-76deg)' }} />
+      <div className="absolute top-[375px] -left-[65px] w-[546px] h-[521px] rounded-full" style={{ background: '#74F7B1', filter: 'blur(100px)', zIndex: 1 }} />
+      <div className="absolute top-[308px] -left-[110px] w-[546px] h-[521px] rounded-full" style={{ background: '#00B4D8', filter: 'blur(100px)', zIndex: 1, transform: 'rotate(-76.22deg)' }} />
 
       <div className="relative z-10 flex flex-col items-center gap-[42px]">
         {/* Greeting */}
