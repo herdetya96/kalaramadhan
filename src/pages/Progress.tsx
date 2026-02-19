@@ -18,6 +18,17 @@ const Progress = () => {
 
   return (
     <div className="min-h-screen bg-white pb-24 relative overflow-hidden">
+      {/* Green blur bg */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          width: 560, height: 341,
+          left: '50%', top: -280,
+          transform: 'translateX(-50%)',
+          background: '#CCFF3F',
+          filter: 'blur(100px)',
+          zIndex: 0
+        }} />
       <div className="relative z-10 flex flex-col items-center pt-6 gap-6 px-4">
         {/* Header */}
         <div className="flex items-center w-full">
