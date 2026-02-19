@@ -348,7 +348,7 @@ const Puasa = () => {
                       )}
                     </div>
                     <span
-                      className="font-normal text-base"
+                      className="font-normal text-[18px]"
                       style={{
                         color: completed ? '#90A1B9' : '#1D293D',
                         textDecoration: completed ? 'line-through' : 'none',
