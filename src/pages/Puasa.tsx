@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Check, ChevronLeft, ChevronRight } from "lucide-react";
-import { getDayKey, loadDayData, saveDayData, isRamadan, DEFAULT_PRAYERS, type DayData } from "@/lib/kala-utils";
+import { getDayKey, loadDayData, saveDayData, isRamadan, DEFAULT_PRAYERS, fetchPrayerTimes, type DayData, type PrayerSchedule } from "@/lib/kala-utils";
 
 const PUASA_TASKS = [
   { id: "sahur", label: "Makan Sahur" },
@@ -16,6 +16,29 @@ const Puasa = () => {
   const realToday = new Date();
   const [selectedDate, setSelectedDate] = useState<Date>(realToday);
   const [dayData, setDayData] = useState<DayData>(() => loadDayData(realToday));
+  const [prayers, setPrayers] = useState<PrayerSchedule[]>(DEFAULT_PRAYERS);
+  const [userCoords, setUserCoords] = useState<{ lat: number; lon: number } | null>(null);
+
+  // Load coords
+  useEffect(() => {
+    const savedCoords = localStorage.getItem("kala-user-coords");
+    if (savedCoords) setUserCoords(JSON.parse(savedCoords));
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setUserCoords({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
+        () => {},
+        { enableHighAccuracy: true, timeout: 5000 }
+      );
+    }
+  }, []);
+
+  // Fetch prayer times based on location
+  useEffect(() => {
+    if (!userCoords) return;
+    fetchPrayerTimes(userCoords.lat, userCoords.lon, selectedDate)
+      .then((fetched) => setPrayers(fetched))
+      .catch(() => setPrayers(DEFAULT_PRAYERS));
+  }, [userCoords, selectedDate]);
 
   useEffect(() => {
     setDayData(loadDayData(selectedDate));
@@ -238,7 +261,7 @@ const Puasa = () => {
               style={{ background: '#FFFFFF', border: '1px solid #F3EDE6' }}
             >
               <span className="text-2xl font-bold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
-                {DEFAULT_PRAYERS.find(p => p.name === "Imsak")?.time || "04:55"}
+                {prayers.find(p => p.name === "Imsak")?.time || "04:55"}
               </span>
               <span className="text-xs" style={{ color: '#838A96', letterSpacing: '-0.15px' }}>Imsak</span>
             </div>
@@ -247,7 +270,7 @@ const Puasa = () => {
               style={{ background: '#FFFFFF', border: '1px solid #F3EDE6' }}
             >
               <span className="text-2xl font-bold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
-                {DEFAULT_PRAYERS.find(p => p.name === "Maghrib")?.time || "18:02"}
+                {prayers.find(p => p.name === "Maghrib")?.time || "18:02"}
               </span>
               <span className="text-xs" style={{ color: '#838A96', letterSpacing: '-0.15px' }}>Buka Puasa</span>
             </div>
@@ -412,9 +435,9 @@ const Puasa = () => {
             </div>
             <div className="max-h-64 overflow-y-auto">
               {Array.from({ length: 30 }, (_, i) => {
-                const imsakTime = DEFAULT_PRAYERS.find(p => p.name === "Imsak")?.time || "04:25";
-                const subuhTime = DEFAULT_PRAYERS.find(p => p.name === "Subuh")?.time || "04:35";
-                const maghribTime = DEFAULT_PRAYERS.find(p => p.name === "Maghrib")?.time || "17:50";
+                const imsakTime = prayers.find(p => p.name === "Imsak")?.time || "04:25";
+                const subuhTime = prayers.find(p => p.name === "Subuh")?.time || "04:35";
+                const maghribTime = prayers.find(p => p.name === "Maghrib")?.time || "17:50";
                 const isCurrent = ramadan.isRamadan && ramadan.dayOfRamadan === i + 1;
                 return (
                   <div
