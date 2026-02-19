@@ -1,10 +1,9 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { CalendarDays, Compass, LayoutGrid, Settings, Sun } from "lucide-react";
+import { CalendarDays, LayoutGrid, Settings, Sun } from "lucide-react";
 
 const tabs = [
   { path: "/today", label: "Hari Ini", icon: Sun },
   { path: "/tracker", label: "Tracker", icon: CalendarDays },
-  { path: "/qibla", label: "Kiblat", icon: Compass },
   { path: "/tools", label: "Alat", icon: LayoutGrid },
   { path: "/settings", label: "Setelan", icon: Settings },
 ];
@@ -14,8 +13,8 @@ const BottomNav = () => {
   const navigate = useNavigate();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-[#F1F5F9] safe-bottom" style={{ boxShadow: '0px -4px 20px -4px rgba(0, 0, 0, 0.1)', borderRadius: '16px 16px 0 0' }}>
-      <div className="mx-auto flex max-w-md items-center justify-around px-6 pt-2 pb-1">
+    <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 safe-bottom" style={{ width: 'calc(100% - 32px)', maxWidth: 'calc(448px - 32px)' }}>
+      <div className="flex items-center justify-around rounded-2xl bg-white px-4 pt-2 pb-1" style={{ boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.08)', border: '1px solid rgba(0,0,0,0.06)' }}>
         {tabs.map((tab) => {
           const isActive = location.pathname === tab.path;
           const Icon = tab.icon;
