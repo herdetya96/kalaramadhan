@@ -115,7 +115,7 @@ const Tracker = () => {
         className="absolute pointer-events-none"
         style={{
           width: 560, height: 341,
-          left: '50%', top: -250,
+          left: '50%', top: -280,
           transform: 'translateX(-50%)',
           background: '#CCFF3F',
           filter: 'blur(100px)',
