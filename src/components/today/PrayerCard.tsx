@@ -70,10 +70,8 @@ const PrayerCard = ({ wajibPrayers, dayData, completedCount, onTogglePrayer }: P
                     background: '#F8F8F7'
                   }}>
 
-                  {completed ?
-                  <Check className="h-5 w-5" style={{ color: '#334258' }} strokeWidth={2.5} /> :
-
-                  <Icon className="h-5 w-5" style={{ color: '#90A1B9' }} />
+                  {completed &&
+                  <Check className="h-5 w-5" style={{ color: '#334258' }} strokeWidth={2.5} />
                   }
                 </div>
                 <span
