@@ -54,8 +54,10 @@ const SunnahSection = ({ dayData, onToggleSunnah }: SunnahSectionProps) => {
                     background: '#F8F8F7'
                   }}>
 
-                  {completed &&
-                  <Check className="h-5 w-5" style={{ color: '#334258' }} strokeWidth={2.5} />
+                  {completed ?
+                  <Check className="h-5 w-5" style={{ color: '#334258' }} strokeWidth={2.5} /> :
+
+                  <span className="text-lg">{task.emoji}</span>
                   }
                 </div>
                 <span
