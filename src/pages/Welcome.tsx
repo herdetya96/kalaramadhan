@@ -49,7 +49,13 @@ const Welcome = () => {
           localStorage.setItem("kala_onboarded", "true");
           navigate("/today");
         }}
-        className="w-full max-w-sm rounded-2xl gradient-primary py-4 text-lg font-semibold text-primary-foreground shadow-lg"
+        className="w-full flex items-center justify-center gap-0.5 rounded-[40px] py-6 text-xl font-bold"
+        style={{
+          background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)',
+          border: '1px solid #FFFFFF',
+          boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1)',
+          color: '#314158',
+        }}
       >
         Mulai
       </motion.button>
