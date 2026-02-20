@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, BookOpen, ChevronRight, Loader2, Copy, BookMarked, Flag } from "lucide-react";
+import { ChevronLeft, BookOpen, ChevronRight, Loader2, Copy, BookMarked, Flag, Trophy, Plus, X, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
@@ -72,8 +72,20 @@ interface BookmarkedAyah {
   translation: string;
 }
 
+interface KhatamSession {
+  id: string;
+  startDate: string; // ISO string
+  durationDays: number;
+  targetDate: string; // ISO string
+  completed: boolean;
+  completedDate?: string;
+}
+
 const QURAN_PROGRESS_KEY = "kala_quran_progress";
 const QURAN_BOOKMARKS_KEY = "kala_quran_bookmarks";
+const QURAN_KHATAM_KEY = "kala_quran_khatam";
+
+const DURATION_TEMPLATES = [30, 45, 60, 90];
 
 function getQuranProgress(): { lastSurah: number; lastAyah: number } {
   const saved = localStorage.getItem(QURAN_PROGRESS_KEY);
@@ -95,6 +107,27 @@ function saveBookmarks(bookmarks: BookmarkedAyah[]) {
   localStorage.setItem(QURAN_BOOKMARKS_KEY, JSON.stringify(bookmarks));
 }
 
+function getKhatamSessions(): KhatamSession[] {
+  const saved = localStorage.getItem(QURAN_KHATAM_KEY);
+  if (saved) return JSON.parse(saved);
+  return [];
+}
+
+function saveKhatamSessions(sessions: KhatamSession[]) {
+  localStorage.setItem(QURAN_KHATAM_KEY, JSON.stringify(sessions));
+}
+
+function getDaysRemaining(targetDate: string): number {
+  const now = new Date();
+  const target = new Date(targetDate);
+  const diff = Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  return diff;
+}
+
+function formatDate(isoString: string): string {
+  return new Date(isoString).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+}
+
 const Quran = () => {
   const navigate = useNavigate();
   const [surahs, setSurahs] = useState<Surah[]>([]);
@@ -113,6 +146,12 @@ const Quran = () => {
   const [juzAyahs, setJuzAyahs] = useState<Ayah[]>([]);
   const [juzLoading, setJuzLoading] = useState(false);
   const [showCheckpoints, setShowCheckpoints] = useState(false);
+  const [showKhatam, setShowKhatam] = useState(false);
+  const [khatamSessions, setKhatamSessions] = useState<KhatamSession[]>(getKhatamSessions());
+  const [showNewKhatam, setShowNewKhatam] = useState(false);
+  const [selectedDuration, setSelectedDuration] = useState<number | null>(30);
+  const [customDuration, setCustomDuration] = useState<string>("");
+  const [useCustom, setUseCustom] = useState(false);
   const progress = { lastSurah: bookmarkedSurah, lastAyah: bookmarkedAyah };
 
   useEffect(() => {
@@ -224,11 +263,9 @@ const Quran = () => {
     );
     let updated: BookmarkedAyah[];
     if (exactMatch !== -1) {
-      // Remove if exact same ayah
       updated = bookmarks.filter((_, i) => i !== exactMatch);
       toast.success("Checkpoint dihapus");
     } else {
-      // Replace existing checkpoint in same surah, or add new
       updated = bookmarks.filter((b) => b.surah !== selectedSurah);
       updated.push({
         surah: selectedSurah,
@@ -242,6 +279,48 @@ const Quran = () => {
     setBookmarks(updated);
     saveBookmarks(updated);
     setDrawerOpen(false);
+  };
+
+  const handleCreateKhatam = () => {
+    const days = useCustom ? parseInt(customDuration) : selectedDuration;
+    if (!days || days < 1 || isNaN(days)) {
+      toast.error("Masukkan durasi yang valid");
+      return;
+    }
+    const now = new Date();
+    const target = new Date(now);
+    target.setDate(target.getDate() + days);
+    const session: KhatamSession = {
+      id: Date.now().toString(),
+      startDate: now.toISOString(),
+      durationDays: days,
+      targetDate: target.toISOString(),
+      completed: false,
+    };
+    const updated = [...khatamSessions, session];
+    setKhatamSessions(updated);
+    saveKhatamSessions(updated);
+    setShowNewKhatam(false);
+    setSelectedDuration(30);
+    setCustomDuration("");
+    setUseCustom(false);
+    toast.success(`Target khatam ${days} hari dibuat ✓`);
+  };
+
+  const handleDeleteKhatam = (id: string) => {
+    const updated = khatamSessions.filter((s) => s.id !== id);
+    setKhatamSessions(updated);
+    saveKhatamSessions(updated);
+    toast.success("Khatam dihapus");
+  };
+
+  const handleCompleteKhatam = (id: string) => {
+    const updated = khatamSessions.map((s) =>
+      s.id === id ? { ...s, completed: true, completedDate: new Date().toISOString() } : s
+    );
+    setKhatamSessions(updated);
+    saveKhatamSessions(updated);
+    toast.success("Selamat, khatam tercatat! 🎉");
   };
 
   const isAyahBookmarked = (surahNum: number, ayahNum: number) =>
@@ -261,6 +340,9 @@ const Quran = () => {
   const isSelectedLastRead = selectedAyahForAction && selectedSurah !== null
     ? bookmarkedSurah === selectedSurah && bookmarkedAyah === selectedAyahForAction.numberInSurah
     : false;
+
+  const activeKhatam = khatamSessions.filter((s) => !s.completed);
+  const completedKhatam = khatamSessions.filter((s) => s.completed);
 
   // Surah reading view
   if (selectedSurah !== null) {
@@ -386,7 +468,7 @@ const Quran = () => {
                 className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:bg-gray-50"
                 style={{ background: '#F8F8F7' }}
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: isSelectedBookmarked ? '#FEF3C7' : '#FEF3C7' }}>
+                <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: '#FEF3C7' }}>
                   <Flag className="h-5 w-5" style={{ color: isSelectedBookmarked ? '#F59E0B' : '#D97706' }} />
                 </div>
                 <div className="flex flex-col">
@@ -477,6 +559,223 @@ const Quran = () => {
                   <ChevronRight className="h-4 w-4 flex-shrink-0" style={{ color: '#90A1B9' }} />
                 </motion.button>
               ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Khatam screen
+  if (showKhatam) {
+    return (
+      <div className="min-h-screen bg-white pb-24 relative overflow-hidden">
+        <div className="absolute pointer-events-none" style={{ width: 560, height: 341, left: '50%', top: -209, transform: 'translateX(-50%)', background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0 }} />
+        <div className="absolute pointer-events-none" style={{ width: 546, height: 521, left: 19, top: -535, background: '#00B4D8', filter: 'blur(100px)', transform: 'rotate(-76.22deg)', zIndex: 1 }} />
+        <div className="relative z-10 flex flex-col pt-6 px-4 gap-4">
+          <div className="flex items-center w-full">
+            <button onClick={() => { setShowKhatam(false); setShowNewKhatam(false); }} className="p-2 rounded-full">
+              <ChevronLeft className="h-6 w-6" style={{ color: '#62748E' }} strokeWidth={2} />
+            </button>
+            <h1 className="text-xl font-bold flex-1 text-center pr-10" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>Khatam</h1>
+          </div>
+
+          {/* New Khatam form */}
+          {showNewKhatam ? (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-3xl p-5 flex flex-col gap-4"
+              style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.08)' }}
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-base" style={{ color: '#1D293D' }}>Target Khatam Baru</span>
+                <button onClick={() => setShowNewKhatam(false)}>
+                  <X className="h-5 w-5" style={{ color: '#90A1B9' }} />
+                </button>
+              </div>
+
+              <div>
+                <span className="text-xs font-semibold mb-2 block" style={{ color: '#62748E' }}>Pilih durasi</span>
+                <div className="grid grid-cols-4 gap-2">
+                  {DURATION_TEMPLATES.map((d) => (
+                    <button
+                      key={d}
+                      onClick={() => { setSelectedDuration(d); setUseCustom(false); }}
+                      className="rounded-2xl py-3 flex flex-col items-center gap-0.5 transition-all"
+                      style={{
+                        background: !useCustom && selectedDuration === d ? 'linear-gradient(180deg, #7DF8AD 0%, #D1FAE5 100%)' : '#F8F8F7',
+                        border: !useCustom && selectedDuration === d ? '1px solid #FFFFFF' : '1px solid #F3EDE6',
+                        boxShadow: !useCustom && selectedDuration === d ? '0px 4px 14px rgba(0,0,0,0.08)' : 'none',
+                      }}
+                    >
+                      <span className="font-bold text-sm" style={{ color: !useCustom && selectedDuration === d ? '#065F46' : '#314158' }}>{d}</span>
+                      <span className="text-[10px]" style={{ color: !useCustom && selectedDuration === d ? '#059669' : '#90A1B9' }}>hari</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <span className="text-xs font-semibold mb-2 block" style={{ color: '#62748E' }}>Atau masukkan manual</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setUseCustom(true)}
+                    className="flex items-center justify-center h-5 w-5 rounded-full border-2 flex-shrink-0 transition-all"
+                    style={{ borderColor: useCustom ? '#38CA5E' : '#D1D5DB', background: useCustom ? '#38CA5E' : 'transparent' }}
+                  >
+                    {useCustom && <Check className="h-3 w-3 text-white" />}
+                  </button>
+                  <input
+                    type="number"
+                    min="1"
+                    placeholder="Contoh: 120"
+                    value={customDuration}
+                    onFocus={() => setUseCustom(true)}
+                    onChange={(e) => { setCustomDuration(e.target.value); setUseCustom(true); }}
+                    className="flex-1 rounded-2xl px-4 py-2.5 text-sm outline-none"
+                    style={{ background: '#F8F8F7', border: useCustom ? '1.5px solid #38CA5E' : '1px solid #F3EDE6', color: '#1D293D' }}
+                  />
+                  <span className="text-sm font-medium" style={{ color: '#62748E' }}>hari</span>
+                </div>
+              </div>
+
+              {/* Preview */}
+              {((!useCustom && selectedDuration) || (useCustom && customDuration)) && (
+                <div className="rounded-2xl px-4 py-3 flex items-center gap-3" style={{ background: '#F0FDF4', border: '1px solid #D1FAE5' }}>
+                  <Trophy className="h-4 w-4 flex-shrink-0" style={{ color: '#059669' }} />
+                  <span className="text-xs" style={{ color: '#065F46' }}>
+                    Target selesai pada{' '}
+                    <span className="font-bold">
+                      {(() => {
+                        const d = useCustom ? parseInt(customDuration) : selectedDuration!;
+                        if (!d || isNaN(d)) return '...';
+                        const t = new Date();
+                        t.setDate(t.getDate() + d);
+                        return formatDate(t.toISOString());
+                      })()}
+                    </span>
+                  </span>
+                </div>
+              )}
+
+              <button
+                onClick={handleCreateKhatam}
+                className="w-full rounded-2xl py-3.5 font-semibold text-sm"
+                style={{ background: 'linear-gradient(180deg, #6EE7B7 0%, #D1FAE5 100%)', color: '#065F46' }}
+              >
+                Buat Target Khatam
+              </button>
+            </motion.div>
+          ) : (
+            <button
+              onClick={() => setShowNewKhatam(true)}
+              className="w-full rounded-2xl p-4 flex items-center gap-3"
+              style={{ background: '#F0FDF4', border: '1.5px dashed #6EE7B7' }}
+            >
+              <div className="flex h-9 w-9 items-center justify-center rounded-full" style={{ background: '#D1FAE5' }}>
+                <Plus className="h-4 w-4" style={{ color: '#059669' }} />
+              </div>
+              <span className="font-semibold text-sm" style={{ color: '#059669' }}>Buat Target Khatam Baru</span>
+            </button>
+          )}
+
+          {/* Active sessions */}
+          {activeKhatam.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-semibold px-1" style={{ color: '#62748E' }}>SEDANG BERJALAN</span>
+              {activeKhatam.map((session, i) => {
+                const daysLeft = getDaysRemaining(session.targetDate);
+                const elapsed = session.durationDays - daysLeft;
+                const pct = Math.min(Math.max((elapsed / session.durationDays) * 100, 0), 100);
+                return (
+                  <motion.div
+                    key={session.id}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.04 }}
+                    className="rounded-2xl p-4 flex flex-col gap-3"
+                    style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Trophy className="h-4 w-4" style={{ color: '#D97706' }} />
+                        <span className="font-bold text-sm" style={{ color: '#1D293D' }}>
+                          {session.durationDays} Hari
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleCompleteKhatam(session.id)}
+                          className="rounded-xl px-3 py-1 text-xs font-semibold"
+                          style={{ background: '#D1FAE5', color: '#059669' }}
+                        >
+                          Tandai Selesai
+                        </button>
+                        <button onClick={() => handleDeleteKhatam(session.id)}>
+                          <X className="h-4 w-4" style={{ color: '#90A1B9' }} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <div className="flex justify-between text-xs" style={{ color: '#838A96' }}>
+                        <span>Mulai {formatDate(session.startDate)}</span>
+                        <span>Target {formatDate(session.targetDate)}</span>
+                      </div>
+                      <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: '#F3F4F6' }}>
+                        <div
+                          className="h-full rounded-full transition-all"
+                          style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #6EE7B7, #38CA5E)' }}
+                        />
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span style={{ color: '#059669' }}>{Math.round(pct)}% berlalu</span>
+                        <span style={{ color: daysLeft < 0 ? '#EF4444' : '#838A96' }}>
+                          {daysLeft < 0 ? `${Math.abs(daysLeft)} hari terlewat` : `${daysLeft} hari lagi`}
+                        </span>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Completed sessions */}
+          {completedKhatam.length > 0 && (
+            <div className="flex flex-col gap-2 pb-6">
+              <span className="text-xs font-semibold px-1" style={{ color: '#62748E' }}>SELESAI</span>
+              {completedKhatam.map((session, i) => (
+                <motion.div
+                  key={session.id}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.04 }}
+                  className="rounded-2xl p-4 flex items-center gap-3"
+                  style={{ background: '#F9FAFB', border: '1px solid #F3EDE6' }}
+                >
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full flex-shrink-0" style={{ background: '#D1FAE5' }}>
+                    <Check className="h-4 w-4" style={{ color: '#059669' }} />
+                  </div>
+                  <div className="flex flex-col flex-1 min-w-0">
+                    <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>Khatam {session.durationDays} Hari</span>
+                    <span className="text-xs" style={{ color: '#838A96' }}>
+                      Selesai {formatDate(session.completedDate || session.targetDate)}
+                    </span>
+                  </div>
+                  <button onClick={() => handleDeleteKhatam(session.id)}>
+                    <X className="h-4 w-4" style={{ color: '#D1D5DB' }} />
+                  </button>
+                </motion.div>
+              ))}
+            </div>
+          )}
+
+          {khatamSessions.length === 0 && !showNewKhatam && (
+            <div className="text-center py-16">
+              <Trophy className="h-10 w-10 mx-auto mb-3" style={{ color: '#D1D5DB' }} />
+              <span className="text-sm" style={{ color: '#838A96' }}>Belum ada target khatam</span>
             </div>
           )}
         </div>
@@ -591,25 +890,47 @@ const Quran = () => {
           </motion.button>
         )}
 
-        {/* Checkpoint card */}
-        {bookmarks.length > 0 && (
+        {/* Checkpoint + Khatam 2-column cards */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Checkpoint card */}
           <motion.button
             initial={{ y: 10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             onClick={() => setShowCheckpoints(true)}
-            className="w-full rounded-2xl p-4 flex items-center gap-4 text-left"
+            className="rounded-2xl p-4 flex flex-col gap-2 text-left"
             style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full flex-shrink-0" style={{ background: '#FEF3C7' }}>
+            <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: '#FEF3C7' }}>
               <Flag className="h-4 w-4" style={{ color: '#D97706' }} />
             </div>
-            <div className="flex flex-col flex-1 min-w-0">
-              <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>Checkpoint</span>
-              <span className="text-xs" style={{ color: '#838A96' }}>{bookmarks.length} surah ditandai</span>
+            <div className="flex flex-col">
+              <span className="font-bold text-sm" style={{ color: '#1D293D' }}>Checkpoint</span>
+              <span className="text-xs" style={{ color: '#838A96' }}>
+                {bookmarks.length > 0 ? `${bookmarks.length} surah ditandai` : 'Belum ada'}
+              </span>
             </div>
-            <ChevronRight className="h-4 w-4 flex-shrink-0" style={{ color: '#90A1B9' }} />
           </motion.button>
-        )}
+
+          {/* Khatam card */}
+          <motion.button
+            initial={{ y: 10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.05 }}
+            onClick={() => setShowKhatam(true)}
+            className="rounded-2xl p-4 flex flex-col gap-2 text-left"
+            style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: '#D1FAE5' }}>
+              <Trophy className="h-4 w-4" style={{ color: '#059669' }} />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-bold text-sm" style={{ color: '#1D293D' }}>Khatam</span>
+              <span className="text-xs" style={{ color: '#838A96' }}>
+                {activeKhatam.length > 0 ? `${activeKhatam.length} target aktif` : 'Buat target'}
+              </span>
+            </div>
+          </motion.button>
+        </div>
 
         {/* Surah / Juz tabs */}
         <div className="flex gap-2">
