@@ -214,7 +214,10 @@ const Puasa = () => {
                 <span className="text-lg font-bold" style={{ color: '#314158', letterSpacing: '-0.44px' }}>
                   {d.getDate()}
                 </span>
-                {hasPuasa && (
+                {isTodayDate && !isSelected && (
+                  <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#38CA5E' }} />
+                )}
+                {hasPuasa && !isTodayDate && (
                   <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#3AE886' }} />
                 )}
               </button>
