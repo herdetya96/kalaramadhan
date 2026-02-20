@@ -181,6 +181,9 @@ const Tracker = () => {
 
                   {d.getDate()}
                 </span>
+                {isTodayDate && !isSelected && (
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#38CA5E' }} />
+                )}
               </button>);
 
           })}
