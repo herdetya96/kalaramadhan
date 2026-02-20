@@ -30,12 +30,14 @@ const HeroCard = ({
       initial={{ y: -10, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       className="relative overflow-hidden rounded-3xl"
-      style={{ borderRadius: 24 }}>
+      style={{
+        borderRadius: 24,
+        background: 'linear-gradient(180deg, #F9FFD2 0%, #7DF8AD 100%)',
+        border: '1px solid #FFFFFF',
+        boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1)',
+      }}>
 
-      {/* SVG background */}
-      <img src={heroBg} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ zIndex: 0 }} />
-
-      <div className="relative items-center gap-[42px] p-4 flex flex-col shadow-md" style={{ zIndex: 4 }}>
+      <div className="relative items-center gap-[42px] p-4 flex flex-col" style={{ zIndex: 4 }}>
         {/* Greeting */}
         <div className="flex flex-col items-center gap-1">
           <h1 className="font-medium text-lg" style={{ color: '#0F172B', letterSpacing: '-0.02em' }}>
