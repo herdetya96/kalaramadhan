@@ -786,8 +786,8 @@ const Quran = () => {
                         />
                       </div>
                       <div className="flex justify-between text-xs" style={{ color: '#838A96' }}>
-                        <span>Surah 1</span>
-                        <span>Surah 114</span>
+                        <span>Al-Fatihah</span>
+                        <span>{session.checkpointSurahName || `Surah ${session.checkpointSurah}`} · Ayat {session.checkpointAyah}</span>
                       </div>
                     </>
                   );
