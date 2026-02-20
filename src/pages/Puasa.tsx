@@ -217,9 +217,6 @@ const Puasa = () => {
                 {isTodayDate && !isSelected && (
                   <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#38CA5E' }} />
                 )}
-                {hasPuasa && !isTodayDate && (
-                  <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#3AE886' }} />
-                )}
               </button>
             );
           })}
