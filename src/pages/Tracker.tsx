@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Check, BarChart3 } from "lucide-react";
+import { ChevronRight, Check, BarChart3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   WAJIB_PRAYERS, DEFAULT_PRAYERS, fetchPrayerTimes, getWajibFromPrayers,
@@ -75,7 +75,7 @@ const Tracker = () => {
 
   // Week days around selected date
   const weekDays = useMemo(() => {
-    const startOfWeek = new Date(selectedDate);
+    const startOfWeek = new Date(realToday);
     const dayOfWeek = startOfWeek.getDay();
     startOfWeek.setDate(startOfWeek.getDate() - dayOfWeek);
     return Array.from({ length: 7 }, (_, i) => {
@@ -83,13 +83,8 @@ const Tracker = () => {
       d.setDate(d.getDate() + i);
       return d;
     });
-  }, [selectedDate]);
+  }, []);
 
-  const navigateWeek = (dir: number) => {
-    const d = new Date(selectedDate);
-    d.setDate(d.getDate() + dir * 7);
-    setSelectedDate(d);
-  };
 
   // Streak calculation
   const streak = useMemo(() => {
@@ -134,19 +129,11 @@ const Tracker = () => {
 
       <div className="relative z-10 flex flex-col items-center pt-6 px-4 gap-[16px]">
         {/* Header with month nav */}
-        <div className="flex items-center justify-between w-full">
-          <button onClick={() => navigateWeek(-1)} className="p-2 rounded-full">
-            <ChevronLeft className="h-6 w-6" style={{ color: '#62748E' }} strokeWidth={2} />
-          </button>
-          <div className="flex flex-col items-center">
-            <h1 className="text-xl font-bold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
-              {isToday ? "Today" : selectedDate.toLocaleDateString("id-ID", { weekday: "long" })}
-            </h1>
-            <span className="text-sm" style={{ color: '#62748E', letterSpacing: '-0.15px' }}>{dateTitle}</span>
-          </div>
-          <button onClick={() => navigateWeek(1)} className="p-2 rounded-full">
-            <ChevronRight className="h-6 w-6" style={{ color: '#62748E' }} strokeWidth={2} />
-          </button>
+        <div className="flex flex-col items-center w-full">
+          <h1 className="text-xl font-bold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
+            {isToday ? "Today" : selectedDate.toLocaleDateString("id-ID", { weekday: "long" })}
+          </h1>
+          <span className="text-sm" style={{ color: '#62748E', letterSpacing: '-0.15px' }}>{dateTitle}</span>
         </div>
 
         {/* Week day selector */}
