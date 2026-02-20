@@ -1,11 +1,52 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, BookOpen, ChevronRight, Loader2, Bookmark, Copy, BookMarked } from "lucide-react";
+import { ChevronLeft, BookOpen, ChevronRight, Loader2, Bookmark, Copy, BookMarked, HandHeart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
   Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription,
 } from "@/components/ui/drawer";
+
+interface JuzInfo {
+  number: number;
+  startSurah: string;
+  startAyah: number;
+  endSurah: string;
+  endAyah: number;
+}
+
+const JUZ_DATA: JuzInfo[] = [
+  { number: 1, startSurah: "Al-Fatihah", startAyah: 1, endSurah: "Al-Baqarah", endAyah: 141 },
+  { number: 2, startSurah: "Al-Baqarah", startAyah: 142, endSurah: "Al-Baqarah", endAyah: 252 },
+  { number: 3, startSurah: "Al-Baqarah", startAyah: 253, endSurah: "Ali 'Imran", endAyah: 92 },
+  { number: 4, startSurah: "Ali 'Imran", startAyah: 93, endSurah: "An-Nisa", endAyah: 23 },
+  { number: 5, startSurah: "An-Nisa", startAyah: 24, endSurah: "An-Nisa", endAyah: 147 },
+  { number: 6, startSurah: "An-Nisa", startAyah: 148, endSurah: "Al-Ma'idah", endAyah: 81 },
+  { number: 7, startSurah: "Al-Ma'idah", startAyah: 82, endSurah: "Al-An'am", endAyah: 110 },
+  { number: 8, startSurah: "Al-An'am", startAyah: 111, endSurah: "Al-A'raf", endAyah: 87 },
+  { number: 9, startSurah: "Al-A'raf", startAyah: 88, endSurah: "Al-Anfal", endAyah: 40 },
+  { number: 10, startSurah: "Al-Anfal", startAyah: 41, endSurah: "At-Taubah", endAyah: 92 },
+  { number: 11, startSurah: "At-Taubah", startAyah: 93, endSurah: "Hud", endAyah: 5 },
+  { number: 12, startSurah: "Hud", startAyah: 6, endSurah: "Yusuf", endAyah: 52 },
+  { number: 13, startSurah: "Yusuf", startAyah: 53, endSurah: "Ibrahim", endAyah: 52 },
+  { number: 14, startSurah: "Al-Hijr", startAyah: 1, endSurah: "An-Nahl", endAyah: 128 },
+  { number: 15, startSurah: "Al-Isra", startAyah: 1, endSurah: "Al-Kahf", endAyah: 74 },
+  { number: 16, startSurah: "Al-Kahf", startAyah: 75, endSurah: "Ta-Ha", endAyah: 135 },
+  { number: 17, startSurah: "Al-Anbiya", startAyah: 1, endSurah: "Al-Hajj", endAyah: 78 },
+  { number: 18, startSurah: "Al-Mu'minun", startAyah: 1, endSurah: "Al-Furqan", endAyah: 20 },
+  { number: 19, startSurah: "Al-Furqan", startAyah: 21, endSurah: "An-Naml", endAyah: 55 },
+  { number: 20, startSurah: "An-Naml", startAyah: 56, endSurah: "Al-Ankabut", endAyah: 45 },
+  { number: 21, startSurah: "Al-Ankabut", startAyah: 46, endSurah: "Al-Ahzab", endAyah: 30 },
+  { number: 22, startSurah: "Al-Ahzab", startAyah: 31, endSurah: "Ya-Sin", endAyah: 27 },
+  { number: 23, startSurah: "Ya-Sin", startAyah: 28, endSurah: "Az-Zumar", endAyah: 31 },
+  { number: 24, startSurah: "Az-Zumar", startAyah: 32, endSurah: "Fussilat", endAyah: 46 },
+  { number: 25, startSurah: "Fussilat", startAyah: 47, endSurah: "Al-Jathiyah", endAyah: 37 },
+  { number: 26, startSurah: "Al-Ahqaf", startAyah: 1, endSurah: "Adh-Dhariyat", endAyah: 30 },
+  { number: 27, startSurah: "Adh-Dhariyat", startAyah: 31, endSurah: "Al-Hadid", endAyah: 29 },
+  { number: 28, startSurah: "Al-Mujadilah", startAyah: 1, endSurah: "At-Tahrim", endAyah: 12 },
+  { number: 29, startSurah: "Al-Mulk", startAyah: 1, endSurah: "Al-Mursalat", endAyah: 50 },
+  { number: 30, startSurah: "An-Naba", startAyah: 1, endSurah: "An-Nas", endAyah: 6 },
+];
 
 interface Surah {
   number: number;
@@ -67,6 +108,7 @@ const Quran = () => {
   const [bookmarks, setBookmarks] = useState<BookmarkedAyah[]>(getBookmarks());
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedAyahForAction, setSelectedAyahForAction] = useState<Ayah | null>(null);
+  const [viewMode, setViewMode] = useState<"surah" | "juz">("surah");
   const progress = { lastSurah: bookmarkedSurah, lastAyah: bookmarkedAyah };
 
   useEffect(() => {
@@ -367,6 +409,24 @@ const Quran = () => {
           <h1 className="text-xl font-bold flex-1 text-center pr-10" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>Al-Quran</h1>
         </div>
 
+        {/* Doa Harian link */}
+        <motion.button
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          onClick={() => navigate('/doa')}
+          className="w-full rounded-3xl p-4 flex items-center gap-4"
+          style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)' }}
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-full" style={{ background: 'linear-gradient(180deg, #F9FFD2 0%, #7DF8AD 100%)', border: '1px solid #FFFFFF', boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1)' }}>
+            <HandHeart className="h-5 w-5" style={{ color: '#334258' }} strokeWidth={2} />
+          </div>
+          <div className="flex flex-col items-start">
+            <span className="font-semibold text-base" style={{ color: '#1D293D' }}>Doa Harian</span>
+            <span className="text-xs" style={{ color: '#838A96' }}>Kumpulan doa sehari-hari</span>
+          </div>
+          <ChevronRight className="h-5 w-5 ml-auto" style={{ color: '#90A1B9' }} />
+        </motion.button>
+
         {progress.lastSurah > 0 && (
           <motion.button
             initial={{ y: 10, opacity: 0 }}
@@ -430,40 +490,88 @@ const Quran = () => {
           </div>
         )}
 
-        <input
-          type="text"
-          placeholder="Cari surah..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full rounded-2xl px-4 py-3 text-sm outline-none"
-          style={{ background: '#F8F8F7', border: '1px solid #F3EDE6', color: '#1D293D' }}
-        />
+        {/* Surah / Juz tabs */}
+        <div className="flex gap-2">
+          {(["surah", "juz"] as const).map((mode) => (
+            <button
+              key={mode}
+              onClick={() => setViewMode(mode)}
+              className="flex-1 py-2.5 rounded-2xl text-sm font-semibold transition-all"
+              style={{
+                background: viewMode === mode ? 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)' : '#F8F8F7',
+                border: viewMode === mode ? '1px solid #FFFFFF' : '1px solid #F3EDE6',
+                color: viewMode === mode ? '#065F46' : '#62748E',
+                boxShadow: viewMode === mode ? '0px 4px 14px rgba(0, 0, 0, 0.1)' : 'none',
+              }}
+            >
+              {mode === "surah" ? "Surah" : "Juz"}
+            </button>
+          ))}
+        </div>
 
-        {surahLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#34D399' }} />
-          </div>
-        ) : (
+        {viewMode === "surah" && (
+          <>
+            <input
+              type="text"
+              placeholder="Cari surah..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-2xl px-4 py-3 text-sm outline-none"
+              style={{ background: '#F8F8F7', border: '1px solid #F3EDE6', color: '#1D293D' }}
+            />
+
+            {surahLoading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#34D399' }} />
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2 pb-6">
+                {filteredSurahs.map((surah, i) => (
+                  <motion.button
+                    key={surah.number}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: Math.min(i * 0.01, 0.3) }}
+                    onClick={() => loadSurah(surah.number)}
+                    className="w-full rounded-2xl p-4 flex items-center gap-4 text-left"
+                    style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0 text-sm font-bold" style={{ background: '#F8F8F7', color: '#314158' }}>
+                      {surah.number}
+                    </div>
+                    <div className="flex flex-col flex-1 min-w-0">
+                      <span className="font-semibold text-sm truncate" style={{ color: '#1D293D' }}>{surah.englishName}</span>
+                      <span className="text-xs truncate" style={{ color: '#838A96' }}>{surah.englishNameTranslation} · {surah.numberOfAyahs} ayat</span>
+                    </div>
+                    <span className="text-base font-arabic flex-shrink-0" style={{ color: '#1D293D', fontFamily: "'Scheherazade New', serif" }}>{surah.name}</span>
+                  </motion.button>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {viewMode === "juz" && (
           <div className="flex flex-col gap-2 pb-6">
-            {filteredSurahs.map((surah, i) => (
-              <motion.button
-                key={surah.number}
+            {JUZ_DATA.map((juz, i) => (
+              <motion.div
+                key={juz.number}
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: Math.min(i * 0.01, 0.3) }}
-                onClick={() => loadSurah(surah.number)}
-                className="w-full rounded-2xl p-4 flex items-center gap-4 text-left"
+                transition={{ delay: Math.min(i * 0.02, 0.3) }}
+                className="rounded-2xl p-4 flex items-center gap-4"
                 style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0 text-sm font-bold" style={{ background: '#F8F8F7', color: '#314158' }}>
-                  {surah.number}
+                  {juz.number}
                 </div>
                 <div className="flex flex-col flex-1 min-w-0">
-                  <span className="font-semibold text-sm truncate" style={{ color: '#1D293D' }}>{surah.englishName}</span>
-                  <span className="text-xs truncate" style={{ color: '#838A96' }}>{surah.englishNameTranslation} · {surah.numberOfAyahs} ayat</span>
+                  <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>Juz {juz.number}</span>
+                  <span className="text-xs" style={{ color: '#838A96' }}>
+                    {juz.startSurah} : {juz.startAyah} — {juz.endSurah} : {juz.endAyah}
+                  </span>
                 </div>
-                <span className="text-base font-arabic flex-shrink-0" style={{ color: '#1D293D', fontFamily: "'Scheherazade New', serif" }}>{surah.name}</span>
-              </motion.button>
+              </motion.div>
             ))}
           </div>
         )}
