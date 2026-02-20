@@ -1,37 +1,27 @@
 
-# Bookmark Ayat / Last Read Marker
+# Kalibrasi Ulang Lokasi di Halaman Setelan
 
-## Overview
-Add the ability for users to tap on any ayah card to mark it as their "last read" bookmark. This saves the exact surah and ayah number so they can continue reading from that specific verse later.
+## Ringkasan
+Card "Lokasi" tetap tampil sebagai card biasa (bukan button), tapi ketika di-tap akan menjalankan kalibrasi ulang GPS. Deskripsi card menampilkan lokasi terkini dan status loading saat proses kalibrasi.
 
-## How It Works
-1. **Tap an ayah card** -- a small bookmark icon appears on the marked ayah, and a toast notification confirms "Terakhir dibaca disimpan"
-2. **Only one bookmark at a time** -- tapping a new ayah replaces the previous bookmark
-3. **"Lanjut Membaca" card updated** -- the card on the surah list screen now shows both the surah name AND the specific ayah number (e.g., "Surah Al-Baqarah, Ayat 142")
-4. **Auto-scroll on resume** -- when the user taps "Lanjut Membaca", the page loads the surah and automatically scrolls to the bookmarked ayah
+## Cara Kerja
+1. User tap card "Lokasi" -- proses kalibrasi GPS dimulai
+2. Deskripsi card berubah menjadi "Mengkalibrasi lokasi..." dengan ikon loading berputar
+3. Setelah selesai, deskripsi menampilkan lokasi baru (misal "Jakarta, DKI Jakarta")
+4. Toast konfirmasi muncul: "Lokasi diperbarui: Jakarta, DKI Jakarta"
+5. Jika gagal, toast error tampil
 
-## Visual Design
-- The bookmarked ayah card gets a subtle green left border to distinguish it
-- A small Bookmark icon appears next to the ayah number badge
-- The ayah number badge background changes to green (#38CA5E) with white text for the marked ayah
-- A sonner toast confirms the action
+## Detail Teknis
 
-## Technical Details
-
-### Storage
-- Reuse existing `kala_quran_progress` localStorage key
-- Update `saveQuranProgress` to always save the specific ayah number (currently it hardcodes `1`)
-- The progress object stays `{ lastSurah: number, lastAyah: number }`
-
-### Changes to `src/pages/Quran.tsx`
-1. Add `Bookmark` icon import from lucide-react
-2. Add state `bookmarkedAyah` initialized from `getQuranProgress()` to track the currently marked ayah
-3. Add `handleBookmark(surahNum, ayahNum)` function that calls `saveQuranProgress` and updates state
-4. Make each ayah card clickable -- on tap, call `handleBookmark`
-5. Conditionally style the bookmarked ayah (green border + bookmark icon + green badge)
-6. Update the "Lanjut Membaca" card subtitle to show "Surah X, Ayat Y"
-7. After loading a surah, use `setTimeout` + `scrollIntoView` to scroll to the bookmarked ayah (using a ref or element ID)
-8. Add `id={`ayah-${ayah.numberInSurah}`}` to each ayah card for scroll targeting
-
-### Toast
-- Import `toast` from `sonner` to show a brief confirmation message when bookmarking
+### Perubahan di `src/pages/SettingsPage.tsx`
+1. Ubah dari static arrow function menjadi komponen dengan state (`useState`, `useEffect`)
+2. Tambah state `currentLocation` (dari `localStorage`) dan `isCalibrating`
+3. Card "Lokasi" tetap menggunakan `<div>` (bukan `<button>`), tapi ditambah `onClick` handler dan `cursor-pointer`
+4. Fungsi `handleRecalibrate`:
+   - Panggil `navigator.geolocation.getCurrentPosition`
+   - Reverse geocode via Nominatim API
+   - Update `localStorage` (`kala-user-location` dan `kala-user-coords`)
+   - Toast sukses/error via `sonner`
+5. Deskripsi card Lokasi dinamis: tampilkan lokasi saat ini atau "Atur lokasi untuk waktu sholat akurat" jika belum ada
+6. Saat loading, tampilkan spinner kecil (`Loader2` dari lucide-react) di samping ikon MapPin
+7. Import tambahan: `useState`, `useEffect`, `Loader2`, `toast` dari sonner
