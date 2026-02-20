@@ -36,7 +36,7 @@ const WeekSelector = ({ selectedDate, realToday, onSelectDate }: WeekSelectorPro
       <button onClick={() => goWeek(-1)} className="p-1 rounded-full bg-white/50 shadow-sm" style={{ color: '#62748E' }}>
         <ChevronLeft className="h-4 w-4" />
       </button>
-      <div className="flex flex-1 gap-1.5 px-1">
+      <div className="flex flex-1 gap-0.5 px-1">
         {weekDays.map((d, i) => (
           <button
             key={i}
