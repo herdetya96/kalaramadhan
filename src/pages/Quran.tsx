@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, BookOpen, ChevronRight, Loader2, Copy, BookMarked, Flag, Trophy, Plus, X, Check } from "lucide-react";
+import { ChevronLeft, BookOpen, ChevronRight, Loader2, Copy, BookMarked, Flag, Trophy, Plus, X, Check, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
@@ -74,11 +74,15 @@ interface BookmarkedAyah {
 
 interface KhatamSession {
   id: string;
-  startDate: string; // ISO string
+  startDate: string;
   durationDays: number;
-  targetDate: string; // ISO string
+  targetDate: string;
   completed: boolean;
   completedDate?: string;
+  // Khatam checkpoint
+  checkpointSurah?: number;
+  checkpointSurahName?: string;
+  checkpointAyah?: number;
 }
 
 const QURAN_PROGRESS_KEY = "kala_quran_progress";
@@ -128,6 +132,14 @@ function formatDate(isoString: string): string {
   return new Date(isoString).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
 }
 
+// Shared background blobs
+const BgBlobs = () => (
+  <>
+    <div className="absolute pointer-events-none" style={{ width: 560, height: 341, left: '50%', top: -209, transform: 'translateX(-50%)', background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0 }} />
+    <div className="absolute pointer-events-none" style={{ width: 546, height: 521, left: 19, top: -535, background: '#00B4D8', filter: 'blur(100px)', transform: 'rotate(-76.22deg)', zIndex: 1 }} />
+  </>
+);
+
 const Quran = () => {
   const navigate = useNavigate();
   const [surahs, setSurahs] = useState<Surah[]>([]);
@@ -152,7 +164,17 @@ const Quran = () => {
   const [selectedDuration, setSelectedDuration] = useState<number | null>(30);
   const [customDuration, setCustomDuration] = useState<string>("");
   const [useCustom, setUseCustom] = useState(false);
+  // Khatam detail
+  const [khatamDetailId, setKhatamDetailId] = useState<string | null>(null);
+  const [khatamDetailViewMode, setKhatamDetailViewMode] = useState<"surah" | "juz">("surah");
+  const [khatamDetailSearch, setKhatamDetailSearch] = useState("");
+  // Track whether user is reading from khatam detail context
+  const [khatamReadingId, setKhatamReadingId] = useState<string | null>(null);
+
   const progress = { lastSurah: bookmarkedSurah, lastAyah: bookmarkedAyah };
+
+  const activeKhatam = khatamSessions.filter((s) => !s.completed);
+  const completedKhatam = khatamSessions.filter((s) => s.completed);
 
   useEffect(() => {
     const cached = localStorage.getItem("kala_quran_surahs");
@@ -195,6 +217,11 @@ const Quran = () => {
       setLoading(false);
     }
   }, []);
+
+  const loadSurahFromKhatam = useCallback(async (surahNum: number, khatamId: string) => {
+    setKhatamReadingId(khatamId);
+    await loadSurah(surahNum);
+  }, [loadSurah]);
 
   const loadJuz = useCallback(async (juzNum: number) => {
     setJuzLoading(true);
@@ -281,6 +308,25 @@ const Quran = () => {
     setDrawerOpen(false);
   };
 
+  const handleKhatamCheckpoint = () => {
+    if (!selectedAyahForAction || selectedSurah === null || !khatamReadingId) return;
+    const surah = surahs.find((s) => s.number === selectedSurah);
+    const updated = khatamSessions.map((s) =>
+      s.id === khatamReadingId
+        ? {
+            ...s,
+            checkpointSurah: selectedSurah,
+            checkpointSurahName: surah?.englishName || "",
+            checkpointAyah: selectedAyahForAction.numberInSurah,
+          }
+        : s
+    );
+    setKhatamSessions(updated);
+    saveKhatamSessions(updated);
+    toast.success("Checkpoint khatam disimpan ✓");
+    setDrawerOpen(false);
+  };
+
   const handleCreateKhatam = () => {
     const days = useCustom ? parseInt(customDuration) : selectedDuration;
     if (!days || days < 1 || isNaN(days)) {
@@ -333,6 +379,13 @@ const Quran = () => {
       s.number.toString() === searchQuery
   );
 
+  const filteredKhatamSurahs = surahs.filter(
+    (s) =>
+      s.englishName.toLowerCase().includes(khatamDetailSearch.toLowerCase()) ||
+      s.englishNameTranslation.toLowerCase().includes(khatamDetailSearch.toLowerCase()) ||
+      s.number.toString() === khatamDetailSearch
+  );
+
   const currentSurahForDrawer = surahs.find((s) => s.number === selectedSurah);
   const isSelectedBookmarked = selectedAyahForAction && selectedSurah !== null
     ? isAyahBookmarked(selectedSurah, selectedAyahForAction.numberInSurah)
@@ -341,19 +394,35 @@ const Quran = () => {
     ? bookmarkedSurah === selectedSurah && bookmarkedAyah === selectedAyahForAction.numberInSurah
     : false;
 
-  const activeKhatam = khatamSessions.filter((s) => !s.completed);
-  const completedKhatam = khatamSessions.filter((s) => s.completed);
+  const activeKhatamSession = khatamReadingId ? khatamSessions.find((s) => s.id === khatamReadingId) : null;
+  const isKhatamCheckpointed = activeKhatamSession
+    && selectedSurah !== null
+    && selectedAyahForAction !== null
+    && activeKhatamSession.checkpointSurah === selectedSurah
+    && activeKhatamSession.checkpointAyah === selectedAyahForAction?.numberInSurah;
 
-  // Surah reading view
+  // ──────────────────────────────────────────────
+  // SURAH READING VIEW
+  // ──────────────────────────────────────────────
   if (selectedSurah !== null) {
     const surah = surahs.find((s) => s.number === selectedSurah);
     return (
       <div className="min-h-screen bg-white pb-24 relative overflow-hidden">
-        <div className="absolute pointer-events-none" style={{ width: 560, height: 341, left: '50%', top: -209, transform: 'translateX(-50%)', background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0 }} />
-        <div className="absolute pointer-events-none" style={{ width: 546, height: 521, left: 19, top: -535, background: '#00B4D8', filter: 'blur(100px)', transform: 'rotate(-76.22deg)', zIndex: 1 }} />
+        <BgBlobs />
         <div className="relative z-10 flex flex-col pt-6 px-4 gap-4">
           <div className="flex items-center w-full">
-            <button onClick={() => { setSelectedSurah(null); setAyahs([]); }} className="p-2 rounded-full">
+            <button
+              onClick={() => {
+                setSelectedSurah(null);
+                setAyahs([]);
+                // If came from khatam, go back to khatam detail
+                if (khatamReadingId) {
+                  setKhatamDetailId(khatamReadingId);
+                  setKhatamReadingId(null);
+                }
+              }}
+              className="p-2 rounded-full"
+            >
               <ChevronLeft className="h-6 w-6" style={{ color: '#62748E' }} strokeWidth={2} />
             </button>
             <div className="flex-1 text-center pr-10">
@@ -361,6 +430,16 @@ const Quran = () => {
               <span className="text-xs" style={{ color: '#838A96' }}>{surah?.englishNameTranslation} · {surah?.numberOfAyahs} ayat</span>
             </div>
           </div>
+
+          {/* Khatam context banner */}
+          {khatamReadingId && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-2xl" style={{ background: '#F0FDF4', border: '1px solid #D1FAE5' }}>
+              <Trophy className="h-4 w-4 flex-shrink-0" style={{ color: '#059669' }} />
+              <span className="text-xs font-medium" style={{ color: '#065F46' }}>
+                Membaca untuk Khatam · ketuk ayat untuk checkpoint
+              </span>
+            </div>
+          )}
 
           {selectedSurah !== 1 && selectedSurah !== 9 && (
             <div className="text-center py-4">
@@ -377,6 +456,9 @@ const Quran = () => {
               {ayahs.map((ayah) => {
                 const isLastRead = bookmarkedSurah === selectedSurah && bookmarkedAyah === ayah.numberInSurah;
                 const isSaved = isAyahBookmarked(selectedSurah, ayah.numberInSurah);
+                const isKhatamCp = activeKhatamSession
+                  && activeKhatamSession.checkpointSurah === selectedSurah
+                  && activeKhatamSession.checkpointAyah === ayah.numberInSurah;
                 return (
                   <motion.div
                     key={ayah.number}
@@ -389,7 +471,13 @@ const Quran = () => {
                       background: '#FFFFFF',
                       border: '1px solid #F3EDE6',
                       boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)',
-                      borderLeft: isLastRead ? '3px solid #38CA5E' : isSaved ? '3px solid #F59E0B' : '1px solid #F3EDE6',
+                      borderLeft: isKhatamCp
+                        ? '3px solid #059669'
+                        : isLastRead
+                        ? '3px solid #38CA5E'
+                        : isSaved
+                        ? '3px solid #F59E0B'
+                        : '1px solid #F3EDE6',
                     }}
                   >
                     <div className="flex items-center justify-between">
@@ -405,6 +493,7 @@ const Quran = () => {
                         </div>
                         {isLastRead && <BookOpen className="h-4 w-4" style={{ color: '#38CA5E' }} />}
                         {isSaved && <Flag className="h-4 w-4" style={{ color: '#F59E0B' }} />}
+                        {isKhatamCp && <MapPin className="h-4 w-4" style={{ color: '#059669' }} />}
                       </div>
                     </div>
 
@@ -447,6 +536,27 @@ const Quran = () => {
               </DrawerDescription>
             </DrawerHeader>
             <div className="flex flex-col gap-2 px-4 pb-6">
+              {/* Khatam Checkpoint — only shown when reading from khatam */}
+              {khatamReadingId && (
+                <button
+                  onClick={handleKhatamCheckpoint}
+                  className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:bg-gray-50"
+                  style={{ background: isKhatamCheckpointed ? '#F0FDF4' : '#F8F8F7' }}
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: '#D1FAE5' }}>
+                    <MapPin className="h-5 w-5" style={{ color: '#059669' }} />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>
+                      {isKhatamCheckpointed ? 'Checkpoint Khatam (aktif)' : 'Set Checkpoint Khatam'}
+                    </span>
+                    <span className="text-xs" style={{ color: '#838A96' }}>
+                      Tandai posisi baca khatam di ayat ini
+                    </span>
+                  </div>
+                </button>
+              )}
+
               {/* Copy */}
               <button
                 onClick={handleCopyAyah}
@@ -506,12 +616,13 @@ const Quran = () => {
     );
   }
 
-  // Checkpoint list screen
+  // ──────────────────────────────────────────────
+  // CHECKPOINT LIST SCREEN
+  // ──────────────────────────────────────────────
   if (showCheckpoints) {
     return (
       <div className="min-h-screen bg-white pb-24 relative overflow-hidden">
-        <div className="absolute pointer-events-none" style={{ width: 560, height: 341, left: '50%', top: -209, transform: 'translateX(-50%)', background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0 }} />
-        <div className="absolute pointer-events-none" style={{ width: 546, height: 521, left: 19, top: -535, background: '#00B4D8', filter: 'blur(100px)', transform: 'rotate(-76.22deg)', zIndex: 1 }} />
+        <BgBlobs />
         <div className="relative z-10 flex flex-col pt-6 px-4 gap-4">
           <div className="flex items-center w-full">
             <button onClick={() => setShowCheckpoints(false)} className="p-2 rounded-full">
@@ -566,12 +677,199 @@ const Quran = () => {
     );
   }
 
-  // Khatam screen
+  // ──────────────────────────────────────────────
+  // KHATAM DETAIL SCREEN
+  // ──────────────────────────────────────────────
+  if (khatamDetailId !== null) {
+    const session = khatamSessions.find((s) => s.id === khatamDetailId);
+    if (!session) {
+      setKhatamDetailId(null);
+      return null;
+    }
+    const daysLeft = getDaysRemaining(session.targetDate);
+    const elapsed = session.durationDays - daysLeft;
+    const pct = Math.min(Math.max((elapsed / session.durationDays) * 100, 0), 100);
+
+    return (
+      <div className="min-h-screen bg-white pb-24 relative overflow-hidden">
+        <BgBlobs />
+        <div className="relative z-10 flex flex-col pt-6 px-4 gap-4">
+          {/* Header */}
+          <div className="flex items-center w-full">
+            <button onClick={() => { setKhatamDetailId(null); setShowKhatam(true); }} className="p-2 rounded-full">
+              <ChevronLeft className="h-6 w-6" style={{ color: '#62748E' }} strokeWidth={2} />
+            </button>
+            <div className="flex-1 text-center pr-10">
+              <h1 className="text-xl font-bold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
+                Khatam {session.durationDays} Hari
+              </h1>
+              <span className="text-xs" style={{ color: '#838A96' }}>
+                Selesai {formatDate(session.targetDate)}
+              </span>
+            </div>
+          </div>
+
+          {/* Progress bar */}
+          <div className="rounded-2xl p-4 flex flex-col gap-2" style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}>
+            <div className="flex justify-between text-xs mb-1" style={{ color: '#838A96' }}>
+              <span>{Math.round(pct)}% waktu berlalu</span>
+              <span style={{ color: daysLeft < 0 ? '#EF4444' : '#059669' }}>
+                {daysLeft < 0 ? `${Math.abs(daysLeft)} hari terlewat` : `${daysLeft} hari lagi`}
+              </span>
+            </div>
+            <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: '#F3F4F6' }}>
+              <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #6EE7B7, #38CA5E)' }} />
+            </div>
+            {session.checkpointSurah && (
+              <div className="flex items-center gap-2 pt-1">
+                <MapPin className="h-3.5 w-3.5 flex-shrink-0" style={{ color: '#059669' }} />
+                <span className="text-xs" style={{ color: '#059669' }}>
+                  Checkpoint: {session.checkpointSurahName} Ayat {session.checkpointAyah}
+                </span>
+                <button
+                  onClick={() => {
+                    if (session.checkpointSurah) {
+                      setKhatamDetailId(null);
+                      loadSurahFromKhatam(session.checkpointSurah, session.id).then(() => {
+                        setTimeout(() => {
+                          const el = document.getElementById(`ayah-${session.checkpointAyah}`);
+                          if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }, 500);
+                      });
+                    }
+                  }}
+                  className="ml-auto text-xs font-semibold px-2 py-0.5 rounded-lg"
+                  style={{ background: '#D1FAE5', color: '#059669' }}
+                >
+                  Lanjut
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Surah / Juz tabs */}
+          <div className="flex gap-2">
+            {(["surah", "juz"] as const).map((mode) => (
+              <button
+                key={mode}
+                onClick={() => setKhatamDetailViewMode(mode)}
+                className="flex-1 py-2.5 rounded-2xl text-sm font-semibold transition-all"
+                style={{
+                  background: khatamDetailViewMode === mode ? 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)' : '#F8F8F7',
+                  border: khatamDetailViewMode === mode ? '1px solid #FFFFFF' : '1px solid #F3EDE6',
+                  color: khatamDetailViewMode === mode ? '#065F46' : '#62748E',
+                  boxShadow: khatamDetailViewMode === mode ? '0px 4px 14px rgba(0, 0, 0, 0.1)' : 'none',
+                }}
+              >
+                {mode === "surah" ? "Surah" : "Juz"}
+              </button>
+            ))}
+          </div>
+
+          {/* Surah list */}
+          {khatamDetailViewMode === "surah" && (
+            <>
+              <input
+                type="text"
+                placeholder="Cari surah..."
+                value={khatamDetailSearch}
+                onChange={(e) => setKhatamDetailSearch(e.target.value)}
+                className="w-full rounded-2xl px-4 py-3 text-sm outline-none"
+                style={{ background: '#F8F8F7', border: '1px solid #F3EDE6', color: '#1D293D' }}
+              />
+              {surahLoading ? (
+                <div className="flex items-center justify-center py-20">
+                  <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#34D399' }} />
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2 pb-6">
+                  {filteredKhatamSurahs.map((surah, i) => {
+                    const isCp = session.checkpointSurah === surah.number;
+                    return (
+                      <motion.button
+                        key={surah.number}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: Math.min(i * 0.01, 0.3) }}
+                        onClick={() => {
+                          setKhatamDetailId(null);
+                          loadSurahFromKhatam(surah.number, session.id);
+                        }}
+                        className="w-full rounded-2xl p-4 flex items-center gap-4 text-left"
+                        style={{
+                          background: '#FFFFFF',
+                          border: isCp ? '1.5px solid #6EE7B7' : '1px solid #F3EDE6',
+                          boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)',
+                        }}
+                      >
+                        <div
+                          className="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0 text-sm font-bold"
+                          style={{ background: isCp ? '#D1FAE5' : '#F8F8F7', color: isCp ? '#059669' : '#314158' }}
+                        >
+                          {surah.number}
+                        </div>
+                        <div className="flex flex-col flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-semibold text-sm truncate" style={{ color: '#1D293D' }}>{surah.englishName}</span>
+                            {isCp && <MapPin className="h-3.5 w-3.5 flex-shrink-0" style={{ color: '#059669' }} />}
+                          </div>
+                          <span className="text-xs truncate" style={{ color: '#838A96' }}>
+                            {surah.englishNameTranslation} · {surah.numberOfAyahs} ayat
+                            {isCp ? ` · Ayat ${session.checkpointAyah}` : ''}
+                          </span>
+                        </div>
+                        <span className="text-base font-arabic flex-shrink-0" style={{ color: '#1D293D', fontFamily: "'Scheherazade New', serif" }}>{surah.name}</span>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Juz list */}
+          {khatamDetailViewMode === "juz" && (
+            <div className="flex flex-col gap-2 pb-6">
+              {JUZ_DATA.map((juz, i) => (
+                <motion.button
+                  key={juz.number}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: Math.min(i * 0.02, 0.3) }}
+                  onClick={() => {
+                    setKhatamDetailId(null);
+                    setKhatamReadingId(session.id);
+                    loadJuz(juz.number);
+                  }}
+                  className="w-full rounded-2xl p-4 flex items-center gap-4 text-left"
+                  style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0 text-sm font-bold" style={{ background: '#F8F8F7', color: '#314158' }}>
+                    {juz.number}
+                  </div>
+                  <div className="flex flex-col flex-1 min-w-0">
+                    <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>Juz {juz.number}</span>
+                    <span className="text-xs" style={{ color: '#838A96' }}>
+                      {juz.startSurah} : {juz.startAyah} — {juz.endSurah} : {juz.endAyah}
+                    </span>
+                  </div>
+                  <ChevronRight className="h-4 w-4 flex-shrink-0" style={{ color: '#90A1B9' }} />
+                </motion.button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // ──────────────────────────────────────────────
+  // KHATAM LIST SCREEN
+  // ──────────────────────────────────────────────
   if (showKhatam) {
     return (
       <div className="min-h-screen bg-white pb-24 relative overflow-hidden">
-        <div className="absolute pointer-events-none" style={{ width: 560, height: 341, left: '50%', top: -209, transform: 'translateX(-50%)', background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0 }} />
-        <div className="absolute pointer-events-none" style={{ width: 546, height: 521, left: 19, top: -535, background: '#00B4D8', filter: 'blur(100px)', transform: 'rotate(-76.22deg)', zIndex: 1 }} />
+        <BgBlobs />
         <div className="relative z-10 flex flex-col pt-6 px-4 gap-4">
           <div className="flex items-center w-full">
             <button onClick={() => { setShowKhatam(false); setShowNewKhatam(false); }} className="p-2 rounded-full">
@@ -640,7 +938,6 @@ const Quran = () => {
                 </div>
               </div>
 
-              {/* Preview */}
               {((!useCustom && selectedDuration) || (useCustom && customDuration)) && (
                 <div className="rounded-2xl px-4 py-3 flex items-center gap-3" style={{ background: '#F0FDF4', border: '1px solid #D1FAE5' }}>
                   <Trophy className="h-4 w-4 flex-shrink-0" style={{ color: '#059669' }} />
@@ -700,17 +997,22 @@ const Quran = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Trophy className="h-4 w-4" style={{ color: '#D97706' }} />
-                        <span className="font-bold text-sm" style={{ color: '#1D293D' }}>
-                          {session.durationDays} Hari
-                        </span>
+                        <span className="font-bold text-sm" style={{ color: '#1D293D' }}>{session.durationDays} Hari</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => handleCompleteKhatam(session.id)}
+                          onClick={() => { setShowKhatam(false); setKhatamDetailId(session.id); }}
                           className="rounded-xl px-3 py-1 text-xs font-semibold"
                           style={{ background: '#D1FAE5', color: '#059669' }}
                         >
-                          Tandai Selesai
+                          Buka
+                        </button>
+                        <button
+                          onClick={() => handleCompleteKhatam(session.id)}
+                          className="rounded-xl px-3 py-1 text-xs font-semibold"
+                          style={{ background: '#FEF3C7', color: '#D97706' }}
+                        >
+                          Selesai
                         </button>
                         <button onClick={() => handleDeleteKhatam(session.id)}>
                           <X className="h-4 w-4" style={{ color: '#90A1B9' }} />
@@ -724,10 +1026,7 @@ const Quran = () => {
                         <span>Target {formatDate(session.targetDate)}</span>
                       </div>
                       <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: '#F3F4F6' }}>
-                        <div
-                          className="h-full rounded-full transition-all"
-                          style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #6EE7B7, #38CA5E)' }}
-                        />
+                        <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #6EE7B7, #38CA5E)' }} />
                       </div>
                       <div className="flex justify-between text-xs">
                         <span style={{ color: '#059669' }}>{Math.round(pct)}% berlalu</span>
@@ -735,6 +1034,14 @@ const Quran = () => {
                           {daysLeft < 0 ? `${Math.abs(daysLeft)} hari terlewat` : `${daysLeft} hari lagi`}
                         </span>
                       </div>
+                      {session.checkpointSurah && (
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <MapPin className="h-3 w-3" style={{ color: '#059669' }} />
+                          <span className="text-xs" style={{ color: '#059669' }}>
+                            Checkpoint: {session.checkpointSurahName} Ayat {session.checkpointAyah}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 );
@@ -783,13 +1090,14 @@ const Quran = () => {
     );
   }
 
-  // Juz reading view
+  // ──────────────────────────────────────────────
+  // JUZ READING VIEW
+  // ──────────────────────────────────────────────
   if (selectedJuz !== null) {
     const juz = JUZ_DATA.find((j) => j.number === selectedJuz);
     return (
       <div className="min-h-screen bg-white pb-24 relative overflow-hidden">
-        <div className="absolute pointer-events-none" style={{ width: 560, height: 341, left: '50%', top: -209, transform: 'translateX(-50%)', background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0 }} />
-        <div className="absolute pointer-events-none" style={{ width: 546, height: 521, left: 19, top: -535, background: '#00B4D8', filter: 'blur(100px)', transform: 'rotate(-76.22deg)', zIndex: 1 }} />
+        <BgBlobs />
         <div className="relative z-10 flex flex-col pt-6 px-4 gap-4">
           <div className="flex items-center w-full">
             <button onClick={() => { setSelectedJuz(null); setJuzAyahs([]); }} className="p-2 rounded-full">
@@ -813,17 +1121,10 @@ const Quran = () => {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="rounded-2xl p-4 flex flex-col gap-3"
-                  style={{
-                    background: '#FFFFFF',
-                    border: '1px solid #F3EDE6',
-                    boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)',
-                  }}
+                  style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}
                 >
                   <div className="flex items-center">
-                    <div
-                      className="flex items-center justify-center h-7 w-7 rounded-full text-xs font-bold"
-                      style={{ background: '#F0FDF4', color: '#166534' }}
-                    >
+                    <div className="flex items-center justify-center h-7 w-7 rounded-full text-xs font-bold" style={{ background: '#F0FDF4', color: '#166534' }}>
                       {ayah.numberInSurah}
                     </div>
                   </div>
@@ -855,11 +1156,12 @@ const Quran = () => {
     );
   }
 
-  // Surah list view
+  // ──────────────────────────────────────────────
+  // SURAH LIST / HOME VIEW
+  // ──────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-white pb-24 relative overflow-hidden">
-      <div className="absolute pointer-events-none" style={{ width: 560, height: 341, left: '50%', top: -209, transform: 'translateX(-50%)', background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0 }} />
-      <div className="absolute pointer-events-none" style={{ width: 546, height: 521, left: 19, top: -535, background: '#00B4D8', filter: 'blur(100px)', transform: 'rotate(-76.22deg)', zIndex: 1 }} />
+      <BgBlobs />
       <div className="relative z-10 flex flex-col pt-6 px-4 gap-4">
         <div className="flex items-center w-full">
           <button onClick={() => navigate(-1)} className="p-2 rounded-full">
@@ -892,7 +1194,6 @@ const Quran = () => {
 
         {/* Checkpoint + Khatam 2-column cards */}
         <div className="grid grid-cols-2 gap-3">
-          {/* Checkpoint card */}
           <motion.button
             initial={{ y: 10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -911,7 +1212,6 @@ const Quran = () => {
             </div>
           </motion.button>
 
-          {/* Khatam card */}
           <motion.button
             initial={{ y: 10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -961,7 +1261,6 @@ const Quran = () => {
               className="w-full rounded-2xl px-4 py-3 text-sm outline-none"
               style={{ background: '#F8F8F7', border: '1px solid #F3EDE6', color: '#1D293D' }}
             />
-
             {surahLoading ? (
               <div className="flex items-center justify-center py-20">
                 <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#34D399' }} />
