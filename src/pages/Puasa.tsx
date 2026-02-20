@@ -187,7 +187,7 @@ const Puasa = () => {
         </div>
 
         {/* Week day selector */}
-        <div className="flex items-start gap-3 overflow-x-auto w-full pl-2" style={{ scrollbarWidth: 'none' }}>
+        <div className="flex items-start gap-0 w-full justify-between px-1" style={{ scrollbarWidth: 'none' }}>
           {weekDays.map((d, i) => {
             const isSelected = getDayKey(d) === getDayKey(selectedDate);
             const isTodayDate = getDayKey(d) === getDayKey(realToday);
