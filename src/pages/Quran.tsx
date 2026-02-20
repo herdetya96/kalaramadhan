@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, BookOpen, ChevronRight, Loader2, Copy, BookMarked, Flag, Trophy, Plus, X, Check, MapPin } from "lucide-react";
+import { ChevronLeft, BookOpen, ChevronRight, Loader2, Copy, BookMarked, Flag, Trophy, Plus, X, Check, MapPin, MoreVertical } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
@@ -170,6 +170,7 @@ const Quran = () => {
   const [khatamDetailSearch, setKhatamDetailSearch] = useState("");
   // Track whether user is reading from khatam detail context
   const [khatamReadingId, setKhatamReadingId] = useState<string | null>(null);
+  const [showKhatamMenu, setShowKhatamMenu] = useState(false);
 
   const progress = { lastSurah: bookmarkedSurah, lastAyah: bookmarkedAyah };
 
@@ -707,23 +708,45 @@ const Quran = () => {
                 Selesai {formatDate(session.targetDate)}
               </span>
             </div>
-            <div className="flex items-center gap-1">
-              {!session.completed && (
-                <button
-                  onClick={() => handleCompleteKhatam(session.id)}
-                  className="p-2 rounded-full"
-                  title="Tandai Selesai"
-                >
-                  <Check className="h-5 w-5" style={{ color: '#059669' }} />
-                </button>
-              )}
+            <div className="relative">
               <button
-                onClick={() => { handleDeleteKhatam(session.id); setKhatamDetailId(null); setShowKhatam(true); }}
+                onClick={() => setShowKhatamMenu((v) => !v)}
                 className="p-2 rounded-full"
-                title="Hapus Khatam"
               >
-                <X className="h-5 w-5" style={{ color: '#90A1B9' }} />
+                <MoreVertical className="h-5 w-5" style={{ color: '#62748E' }} />
               </button>
+              {showKhatamMenu && (
+                <>
+                  {/* Backdrop to close */}
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowKhatamMenu(false)}
+                  />
+                  <div
+                    className="absolute right-0 top-10 z-50 flex flex-col rounded-2xl overflow-hidden"
+                    style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 8px 24px rgba(0,0,0,0.10)', minWidth: 160 }}
+                  >
+                    {!session.completed && (
+                      <button
+                        onClick={() => { handleCompleteKhatam(session.id); setShowKhatamMenu(false); }}
+                        className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
+                        style={{ color: '#059669' }}
+                      >
+                        <Check className="h-4 w-4" />
+                        Tandai Selesai
+                      </button>
+                    )}
+                    <button
+                      onClick={() => { handleDeleteKhatam(session.id); setKhatamDetailId(null); setShowKhatam(true); setShowKhatamMenu(false); }}
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
+                      style={{ color: '#EF4444' }}
+                    >
+                      <X className="h-4 w-4" />
+                      Hapus Khatam
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
