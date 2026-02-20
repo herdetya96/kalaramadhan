@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, BookOpen, ChevronRight, Loader2, Bookmark, Copy, BookMarked, ChevronDown } from "lucide-react";
+import { ChevronLeft, BookOpen, ChevronRight, Loader2, Copy, BookMarked, Flag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
@@ -112,7 +112,7 @@ const Quran = () => {
   const [selectedJuz, setSelectedJuz] = useState<number | null>(null);
   const [juzAyahs, setJuzAyahs] = useState<Ayah[]>([]);
   const [juzLoading, setJuzLoading] = useState(false);
-  const [bookmarkExpanded, setBookmarkExpanded] = useState(false);
+  const [showCheckpoints, setShowCheckpoints] = useState(false);
   const progress = { lastSurah: bookmarkedSurah, lastAyah: bookmarkedAyah };
 
   useEffect(() => {
@@ -216,28 +216,28 @@ const Quran = () => {
     setDrawerOpen(false);
   };
 
-  const handleToggleBookmark = () => {
+  const handleToggleCheckpoint = () => {
     if (!selectedAyahForAction || selectedSurah === null) return;
     const surah = surahs.find((s) => s.number === selectedSurah);
-    const existing = bookmarks.findIndex(
+    const exactMatch = bookmarks.findIndex(
       (b) => b.surah === selectedSurah && b.ayahNumber === selectedAyahForAction.numberInSurah
     );
     let updated: BookmarkedAyah[];
-    if (existing !== -1) {
-      updated = bookmarks.filter((_, i) => i !== existing);
-      toast.success("Bookmark dihapus");
+    if (exactMatch !== -1) {
+      // Remove if exact same ayah
+      updated = bookmarks.filter((_, i) => i !== exactMatch);
+      toast.success("Checkpoint dihapus");
     } else {
-      updated = [
-        ...bookmarks,
-        {
-          surah: selectedSurah,
-          surahName: surah?.englishName || "",
-          ayahNumber: selectedAyahForAction.numberInSurah,
-          arabicText: selectedAyahForAction.text,
-          translation: selectedAyahForAction.translation || "",
-        },
-      ];
-      toast.success("Ditambahkan ke bookmark ✓");
+      // Replace existing checkpoint in same surah, or add new
+      updated = bookmarks.filter((b) => b.surah !== selectedSurah);
+      updated.push({
+        surah: selectedSurah,
+        surahName: surah?.englishName || "",
+        ayahNumber: selectedAyahForAction.numberInSurah,
+        arabicText: selectedAyahForAction.text,
+        translation: selectedAyahForAction.translation || "",
+      });
+      toast.success("Checkpoint disimpan ✓");
     }
     setBookmarks(updated);
     saveBookmarks(updated);
@@ -307,7 +307,7 @@ const Quran = () => {
                       background: '#FFFFFF',
                       border: '1px solid #F3EDE6',
                       boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)',
-                      borderLeft: isLastRead ? '3px solid #38CA5E' : isSaved ? '3px solid #3B82F6' : '1px solid #F3EDE6',
+                      borderLeft: isLastRead ? '3px solid #38CA5E' : isSaved ? '3px solid #F59E0B' : '1px solid #F3EDE6',
                     }}
                   >
                     <div className="flex items-center justify-between">
@@ -322,7 +322,7 @@ const Quran = () => {
                           {ayah.numberInSurah}
                         </div>
                         {isLastRead && <BookOpen className="h-4 w-4" style={{ color: '#38CA5E' }} />}
-                        {isSaved && <Bookmark className="h-4 w-4" style={{ color: '#3B82F6' }} fill="#3B82F6" />}
+                        {isSaved && <Flag className="h-4 w-4" style={{ color: '#F59E0B' }} />}
                       </div>
                     </div>
 
@@ -380,21 +380,21 @@ const Quran = () => {
                 </div>
               </button>
 
-              {/* Bookmark */}
+              {/* Checkpoint */}
               <button
-                onClick={handleToggleBookmark}
+                onClick={handleToggleCheckpoint}
                 className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:bg-gray-50"
                 style={{ background: '#F8F8F7' }}
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: isSelectedBookmarked ? '#DBEAFE' : '#FEF3C7' }}>
-                  <Bookmark className="h-5 w-5" style={{ color: isSelectedBookmarked ? '#3B82F6' : '#D97706' }} fill={isSelectedBookmarked ? '#3B82F6' : 'none'} />
+                <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: isSelectedBookmarked ? '#FEF3C7' : '#FEF3C7' }}>
+                  <Flag className="h-5 w-5" style={{ color: isSelectedBookmarked ? '#F59E0B' : '#D97706' }} />
                 </div>
                 <div className="flex flex-col">
                   <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>
-                    {isSelectedBookmarked ? 'Hapus Bookmark' : 'Tambah Bookmark'}
+                    {isSelectedBookmarked ? 'Hapus Checkpoint' : 'Simpan Checkpoint'}
                   </span>
                   <span className="text-xs" style={{ color: '#838A96' }}>
-                    {isSelectedBookmarked ? 'Hapus ayat dari daftar bookmark' : 'Simpan ayat ke daftar bookmark'}
+                    {isSelectedBookmarked ? 'Hapus checkpoint di surah ini' : 'Tandai ayat ini sebagai checkpoint'}
                   </span>
                 </div>
               </button>
@@ -420,6 +420,66 @@ const Quran = () => {
             </div>
           </DrawerContent>
         </Drawer>
+      </div>
+    );
+  }
+
+  // Checkpoint list screen
+  if (showCheckpoints) {
+    return (
+      <div className="min-h-screen bg-white pb-24 relative overflow-hidden">
+        <div className="absolute pointer-events-none" style={{ width: 560, height: 341, left: '50%', top: -209, transform: 'translateX(-50%)', background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0 }} />
+        <div className="absolute pointer-events-none" style={{ width: 546, height: 521, left: 19, top: -535, background: '#00B4D8', filter: 'blur(100px)', transform: 'rotate(-76.22deg)', zIndex: 1 }} />
+        <div className="relative z-10 flex flex-col pt-6 px-4 gap-4">
+          <div className="flex items-center w-full">
+            <button onClick={() => setShowCheckpoints(false)} className="p-2 rounded-full">
+              <ChevronLeft className="h-6 w-6" style={{ color: '#62748E' }} strokeWidth={2} />
+            </button>
+            <h1 className="text-xl font-bold flex-1 text-center pr-10" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>Checkpoint</h1>
+          </div>
+
+          {bookmarks.length === 0 ? (
+            <div className="text-center py-20">
+              <Flag className="h-10 w-10 mx-auto mb-3" style={{ color: '#D1D5DB' }} />
+              <span className="text-sm" style={{ color: '#838A96' }}>Belum ada checkpoint</span>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2 pb-6">
+              {bookmarks.map((bm, i) => (
+                <motion.button
+                  key={`${bm.surah}-${bm.ayahNumber}`}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: Math.min(i * 0.03, 0.2) }}
+                  onClick={() => {
+                    setShowCheckpoints(false);
+                    loadSurah(bm.surah).then(() => {
+                      setTimeout(() => {
+                        const el = document.getElementById(`ayah-${bm.ayahNumber}`);
+                        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                      }, 500);
+                    });
+                  }}
+                  className="w-full rounded-2xl p-4 flex items-center gap-4 text-left"
+                  style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full flex-shrink-0" style={{ background: '#FEF3C7' }}>
+                    <Flag className="h-4 w-4" style={{ color: '#D97706' }} />
+                  </div>
+                  <div className="flex flex-col flex-1 min-w-0">
+                    <span className="font-semibold text-sm truncate" style={{ color: '#1D293D' }}>
+                      {bm.surahName} : Ayat {bm.ayahNumber}
+                    </span>
+                    <span className="text-xs truncate" style={{ color: '#838A96' }}>
+                      {bm.translation.slice(0, 80)}{bm.translation.length > 80 ? '...' : ''}
+                    </span>
+                  </div>
+                  <ChevronRight className="h-4 w-4 flex-shrink-0" style={{ color: '#90A1B9' }} />
+                </motion.button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     );
   }
@@ -531,59 +591,24 @@ const Quran = () => {
           </motion.button>
         )}
 
-        {/* Bookmark card - collapsible */}
+        {/* Checkpoint card */}
         {bookmarks.length > 0 && (
-          <div className="flex flex-col gap-2">
-            <button
-              onClick={() => setBookmarkExpanded(!bookmarkExpanded)}
-              className="w-full rounded-2xl p-4 flex items-center gap-4 text-left"
-              style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full flex-shrink-0" style={{ background: '#FEF3C7' }}>
-                <Bookmark className="h-4 w-4" style={{ color: '#D97706' }} />
-              </div>
-              <div className="flex flex-col flex-1 min-w-0">
-                <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>Bookmark</span>
-                <span className="text-xs" style={{ color: '#838A96' }}>{bookmarks.length} ayat tersimpan</span>
-              </div>
-              <ChevronDown
-                className="h-4 w-4 flex-shrink-0 transition-transform"
-                style={{ color: '#90A1B9', transform: bookmarkExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
-              />
-            </button>
-
-            {bookmarkExpanded && bookmarks.map((bm, i) => (
-              <motion.button
-                key={`${bm.surah}-${bm.ayahNumber}`}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: Math.min(i * 0.03, 0.2) }}
-                onClick={() => {
-                  loadSurah(bm.surah).then(() => {
-                    setTimeout(() => {
-                      const el = document.getElementById(`ayah-${bm.ayahNumber}`);
-                      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-                    }, 500);
-                  });
-                }}
-                className="w-full rounded-2xl p-4 flex items-center gap-4 text-left"
-                style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0" style={{ background: '#F8F8F7' }}>
-                  <Bookmark className="h-4 w-4" style={{ color: '#166534' }} />
-                </div>
-                <div className="flex flex-col flex-1 min-w-0">
-                  <span className="font-semibold text-sm truncate" style={{ color: '#1D293D' }}>
-                    {bm.surahName} : {bm.ayahNumber}
-                  </span>
-                  <span className="text-xs truncate" style={{ color: '#838A96' }}>
-                    {bm.translation.slice(0, 60)}{bm.translation.length > 60 ? '...' : ''}
-                  </span>
-                </div>
-                <ChevronRight className="h-4 w-4 flex-shrink-0" style={{ color: '#90A1B9' }} />
-              </motion.button>
-            ))}
-          </div>
+          <motion.button
+            initial={{ y: 10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            onClick={() => setShowCheckpoints(true)}
+            className="w-full rounded-2xl p-4 flex items-center gap-4 text-left"
+            style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-full flex-shrink-0" style={{ background: '#FEF3C7' }}>
+              <Flag className="h-4 w-4" style={{ color: '#D97706' }} />
+            </div>
+            <div className="flex flex-col flex-1 min-w-0">
+              <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>Checkpoint</span>
+              <span className="text-xs" style={{ color: '#838A96' }}>{bookmarks.length} surah ditandai</span>
+            </div>
+            <ChevronRight className="h-4 w-4 flex-shrink-0" style={{ color: '#90A1B9' }} />
+          </motion.button>
         )}
 
         {/* Surah / Juz tabs */}
