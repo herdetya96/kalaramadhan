@@ -785,10 +785,6 @@ const Quran = () => {
                           style={{ width: `${readingPct}%`, background: 'linear-gradient(90deg, #6EE7B7, #38CA5E)' }}
                         />
                       </div>
-                      <div className="flex justify-between text-xs" style={{ color: '#838A96' }}>
-                        <span>Al-Fatihah</span>
-                        <span>{session.checkpointSurahName || `Surah ${session.checkpointSurah}`} · Ayat {session.checkpointAyah}</span>
-                      </div>
                     </>
                   );
                 })()}
