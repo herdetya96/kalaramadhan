@@ -699,13 +699,31 @@ const Quran = () => {
             <button onClick={() => { setKhatamDetailId(null); setShowKhatam(true); }} className="p-2 rounded-full">
               <ChevronLeft className="h-6 w-6" style={{ color: '#62748E' }} strokeWidth={2} />
             </button>
-            <div className="flex-1 text-center pr-10">
+            <div className="flex-1 text-center">
               <h1 className="text-xl font-bold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
                 Khatam {session.durationDays} Hari
               </h1>
               <span className="text-xs" style={{ color: '#838A96' }}>
                 Selesai {formatDate(session.targetDate)}
               </span>
+            </div>
+            <div className="flex items-center gap-1">
+              {!session.completed && (
+                <button
+                  onClick={() => handleCompleteKhatam(session.id)}
+                  className="p-2 rounded-full"
+                  title="Tandai Selesai"
+                >
+                  <Check className="h-5 w-5" style={{ color: '#059669' }} />
+                </button>
+              )}
+              <button
+                onClick={() => { handleDeleteKhatam(session.id); setKhatamDetailId(null); setShowKhatam(true); }}
+                className="p-2 rounded-full"
+                title="Hapus Khatam"
+              >
+                <X className="h-5 w-5" style={{ color: '#90A1B9' }} />
+              </button>
             </div>
           </div>
 
@@ -986,12 +1004,13 @@ const Quran = () => {
                 const elapsed = session.durationDays - daysLeft;
                 const pct = Math.min(Math.max((elapsed / session.durationDays) * 100, 0), 100);
                 return (
-                  <motion.div
+                  <motion.button
                     key={session.id}
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.04 }}
-                    className="rounded-2xl p-4 flex flex-col gap-3"
+                    onClick={() => { setShowKhatam(false); setKhatamDetailId(session.id); }}
+                    className="w-full rounded-2xl p-4 flex flex-col gap-3 text-left active:scale-[0.99] transition-transform"
                     style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}
                   >
                     <div className="flex items-center justify-between">
@@ -999,25 +1018,7 @@ const Quran = () => {
                         <Trophy className="h-4 w-4" style={{ color: '#D97706' }} />
                         <span className="font-bold text-sm" style={{ color: '#1D293D' }}>{session.durationDays} Hari</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => { setShowKhatam(false); setKhatamDetailId(session.id); }}
-                          className="rounded-xl px-3 py-1 text-xs font-semibold"
-                          style={{ background: '#D1FAE5', color: '#059669' }}
-                        >
-                          Buka
-                        </button>
-                        <button
-                          onClick={() => handleCompleteKhatam(session.id)}
-                          className="rounded-xl px-3 py-1 text-xs font-semibold"
-                          style={{ background: '#FEF3C7', color: '#D97706' }}
-                        >
-                          Selesai
-                        </button>
-                        <button onClick={() => handleDeleteKhatam(session.id)}>
-                          <X className="h-4 w-4" style={{ color: '#90A1B9' }} />
-                        </button>
-                      </div>
+                      <ChevronRight className="h-4 w-4" style={{ color: '#90A1B9' }} />
                     </div>
 
                     <div className="flex flex-col gap-1">
@@ -1043,7 +1044,7 @@ const Quran = () => {
                         </div>
                       )}
                     </div>
-                  </motion.div>
+                  </motion.button>
                 );
               })}
             </div>
