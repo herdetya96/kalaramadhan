@@ -173,6 +173,7 @@ const Quran = () => {
   // Track whether user is reading from khatam detail context
   const [khatamReadingId, setKhatamReadingId] = useState<string | null>(null);
   const [showKhatamMenu, setShowKhatamMenu] = useState(false);
+  const [showContinueModal, setShowContinueModal] = useState(false);
 
   const progress = { lastSurah: bookmarkedSurah, lastAyah: bookmarkedAyah };
 
@@ -1322,9 +1323,15 @@ const Quran = () => {
 
         {progress.lastSurah > 0 && (
           <motion.button
-            initial={{ y: 10, opacity: 0 }}
+          initial={{ y: 10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            onClick={() => loadSurah(progress.lastSurah)}
+            onClick={() => {
+              if (activeKhatam.length > 0) {
+                setShowContinueModal(true);
+              } else {
+                loadSurah(progress.lastSurah);
+              }
+            }}
             className="w-full rounded-3xl p-5 flex items-center gap-4"
             style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)' }}
           >
@@ -1469,6 +1476,92 @@ const Quran = () => {
           </div>
         )}
       </div>
+
+      {/* Continue Reading Modal */}
+      {showContinueModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center"
+          style={{ background: 'rgba(0,0,0,0.4)' }}
+          onClick={() => setShowContinueModal(false)}
+        >
+          <motion.div
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 80, opacity: 0 }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full rounded-t-3xl p-6 flex flex-col gap-3"
+            style={{ background: '#FFFFFF', maxWidth: 480 }}
+          >
+            <div className="mx-auto mb-1 h-1.5 w-12 rounded-full" style={{ background: '#E5E7EB' }} />
+            <h2 className="text-base font-bold" style={{ color: '#1D293D' }}>Lanjut Membaca</h2>
+            <p className="text-xs" style={{ color: '#838A96' }}>Pilih mode membaca yang ingin dilanjutkan</p>
+
+            {/* Biasa */}
+            <button
+              onClick={() => {
+                setShowContinueModal(false);
+                loadSurah(progress.lastSurah);
+              }}
+              className="w-full rounded-2xl p-4 flex items-center gap-4 text-left active:scale-[0.99] transition-all"
+              style={{ background: '#F8F8F7', border: '1px solid #F3EDE6' }}
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-full flex-shrink-0" style={{ background: '#E0F2FE' }}>
+                <BookOpen className="h-5 w-5" style={{ color: '#0284C7' }} />
+              </div>
+              <div className="flex flex-col">
+                <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>Baca Al-Quran Biasa</span>
+                <span className="text-xs" style={{ color: '#838A96' }}>
+                  Lanjut dari {surahs.find((s) => s.number === progress.lastSurah)?.englishName || `Surah ${progress.lastSurah}`}
+                  {progress.lastAyah > 1 && `, Ayat ${progress.lastAyah}`}
+                </span>
+              </div>
+            </button>
+
+            {/* Khatam */}
+            {activeKhatam.map((session) => (
+              <button
+                key={session.id}
+                onClick={() => {
+                  setShowContinueModal(false);
+                  const surahToLoad = session.checkpointSurah ?? 1;
+                  setKhatamDetailId(null);
+                  loadSurahFromKhatam(surahToLoad, session.id).then(() => {
+                    if (session.checkpointAyah) {
+                      setTimeout(() => {
+                        const el = document.getElementById(`ayah-${session.checkpointAyah}`);
+                        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                      }, 500);
+                    }
+                  });
+                }}
+                className="w-full rounded-2xl p-4 flex items-center gap-4 text-left active:scale-[0.99] transition-all"
+                style={{ background: '#F0FDF4', border: '1px solid #D1FAE5' }}
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-full flex-shrink-0" style={{ background: '#D1FAE5' }}>
+                  <Trophy className="h-5 w-5" style={{ color: '#059669' }} />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-semibold text-sm" style={{ color: '#065F46' }}>Lanjut Khatam</span>
+                  <span className="text-xs" style={{ color: '#059669' }}>
+                    {session.checkpointSurah
+                      ? `${session.checkpointSurahName || `Surah ${session.checkpointSurah}`}, Ayat ${session.checkpointAyah}`
+                      : `Mulai dari Al-Fatihah`}
+                    {' · '}Target {session.durationDays} hari
+                  </span>
+                </div>
+              </button>
+            ))}
+
+            <button
+              onClick={() => setShowContinueModal(false)}
+              className="w-full py-3 rounded-2xl text-sm font-semibold mt-1"
+              style={{ background: '#F8F8F7', color: '#838A96' }}
+            >
+              Batal
+            </button>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };
