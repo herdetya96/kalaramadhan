@@ -586,43 +586,46 @@ const Quran = () => {
                 </div>
               </button>
 
-              {/* Checkpoint */}
-              <button
-                onClick={handleToggleCheckpoint}
-                className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:bg-gray-50"
-                style={{ background: '#F8F8F7' }}
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: '#FEF3C7' }}>
-                  <Flag className="h-5 w-5" style={{ color: isSelectedBookmarked ? '#F59E0B' : '#D97706' }} />
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>
-                    {isSelectedBookmarked ? 'Hapus Checkpoint' : 'Simpan Checkpoint'}
-                  </span>
-                  <span className="text-xs" style={{ color: '#838A96' }}>
-                    {isSelectedBookmarked ? 'Hapus checkpoint di surah ini' : 'Tandai ayat ini sebagai checkpoint'}
-                  </span>
-                </div>
-              </button>
+              {/* Checkpoint & Tandai Terakhir Dibaca — hidden when in khatam reading mode */}
+              {!khatamReadingId && (
+                <>
+                  <button
+                    onClick={handleToggleCheckpoint}
+                    className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:bg-gray-50"
+                    style={{ background: '#F8F8F7' }}
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: '#FEF3C7' }}>
+                      <Flag className="h-5 w-5" style={{ color: isSelectedBookmarked ? '#F59E0B' : '#D97706' }} />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>
+                        {isSelectedBookmarked ? 'Hapus Checkpoint' : 'Simpan Checkpoint'}
+                      </span>
+                      <span className="text-xs" style={{ color: '#838A96' }}>
+                        {isSelectedBookmarked ? 'Hapus checkpoint di surah ini' : 'Tandai ayat ini sebagai checkpoint'}
+                      </span>
+                    </div>
+                  </button>
 
-              {/* Mark Last Read */}
-              <button
-                onClick={handleMarkLastRead}
-                className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:bg-gray-50"
-                style={{ background: isSelectedLastRead ? '#F0FDF4' : '#F8F8F7' }}
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: isSelectedLastRead ? '#D1FAE5' : '#ECFDF5' }}>
-                  <BookMarked className="h-5 w-5" style={{ color: '#059669' }} />
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>
-                    {isSelectedLastRead ? 'Sudah Ditandai' : 'Tandai Terakhir Dibaca'}
-                  </span>
-                  <span className="text-xs" style={{ color: '#838A96' }}>
-                    {isSelectedLastRead ? 'Ayat ini adalah terakhir dibaca' : 'Lanjut membaca dari ayat ini nanti'}
-                  </span>
-                </div>
-              </button>
+                  <button
+                    onClick={handleMarkLastRead}
+                    className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:bg-gray-50"
+                    style={{ background: isSelectedLastRead ? '#F0FDF4' : '#F8F8F7' }}
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: isSelectedLastRead ? '#D1FAE5' : '#ECFDF5' }}>
+                      <BookMarked className="h-5 w-5" style={{ color: '#059669' }} />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>
+                        {isSelectedLastRead ? 'Sudah Ditandai' : 'Tandai Terakhir Dibaca'}
+                      </span>
+                      <span className="text-xs" style={{ color: '#838A96' }}>
+                        {isSelectedLastRead ? 'Ayat ini adalah terakhir dibaca' : 'Lanjut membaca dari ayat ini nanti'}
+                      </span>
+                    </div>
+                  </button>
+                </>
+              )}
             </div>
           </DrawerContent>
         </Drawer>
