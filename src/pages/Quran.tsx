@@ -750,40 +750,72 @@ const Quran = () => {
             </div>
           </div>
 
-          {/* Progress bar */}
-          <div className="rounded-2xl p-4 flex flex-col gap-2" style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}>
-            <div className="flex justify-between text-xs mb-1" style={{ color: '#838A96' }}>
-              <span>{Math.round(pct)}% waktu berlalu</span>
-              <span style={{ color: daysLeft < 0 ? '#EF4444' : '#059669' }}>
-                {daysLeft < 0 ? `${Math.abs(daysLeft)} hari terlewat` : `${daysLeft} hari lagi`}
-              </span>
-            </div>
-            <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: '#F3F4F6' }}>
-              <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #6EE7B7, #38CA5E)' }} />
-            </div>
-            {session.checkpointSurah && (
-              <div className="flex items-center gap-2 pt-1">
-                <MapPin className="h-3.5 w-3.5 flex-shrink-0" style={{ color: '#059669' }} />
-                <span className="text-xs" style={{ color: '#059669' }}>
-                  Checkpoint: {session.checkpointSurahName} Ayat {session.checkpointAyah}
+          {/* Reading progress card */}
+          <div className="rounded-2xl p-4 flex flex-col gap-3" style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}>
+            {session.checkpointSurah ? (
+              <>
+                {/* Reading progress based on checkpoint */}
+                {(() => {
+                  const readingPct = Math.round((session.checkpointSurah / 114) * 100);
+                  return (
+                    <>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-semibold" style={{ color: '#62748E' }}>Progress Khatam</span>
+                        <span className="text-xs font-bold" style={{ color: '#059669' }}>{readingPct}%</span>
+                      </div>
+                      <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ background: '#F3F4F6' }}>
+                        <div
+                          className="h-full rounded-full transition-all"
+                          style={{ width: `${readingPct}%`, background: 'linear-gradient(90deg, #6EE7B7, #38CA5E)' }}
+                        />
+                      </div>
+                      <div className="flex justify-between text-xs" style={{ color: '#838A96' }}>
+                        <span>Surah 1</span>
+                        <span>Surah 114</span>
+                      </div>
+                    </>
+                  );
+                })()}
+
+                {/* Checkpoint detail + lanjut button */}
+                <div className="flex items-center gap-2 pt-1 rounded-xl px-3 py-2" style={{ background: '#F0FDF4' }}>
+                  <MapPin className="h-3.5 w-3.5 flex-shrink-0" style={{ color: '#059669' }} />
+                  <div className="flex flex-col flex-1 min-w-0">
+                    <span className="text-xs font-semibold" style={{ color: '#065F46' }}>
+                      {session.checkpointSurahName} · Ayat {session.checkpointAyah}
+                    </span>
+                    <span className="text-[10px]" style={{ color: '#6EE7B7' }}>
+                      Surah ke-{session.checkpointSurah} dari 114
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (session.checkpointSurah) {
+                        setKhatamDetailId(null);
+                        loadSurahFromKhatam(session.checkpointSurah, session.id).then(() => {
+                          setTimeout(() => {
+                            const el = document.getElementById(`ayah-${session.checkpointAyah}`);
+                            if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                          }, 500);
+                        });
+                      }
+                    }}
+                    className="flex-shrink-0 text-xs font-bold px-3 py-1.5 rounded-xl"
+                    style={{ background: '#D1FAE5', color: '#059669' }}
+                  >
+                    Lanjut Baca
+                  </button>
+                </div>
+              </>
+            ) : (
+              /* No checkpoint yet */
+              <div className="flex flex-col items-center gap-2 py-2">
+                <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ background: '#F3F4F6' }}>
+                  <div className="h-full rounded-full" style={{ width: '0%', background: 'linear-gradient(90deg, #6EE7B7, #38CA5E)' }} />
+                </div>
+                <span className="text-xs text-center" style={{ color: '#90A1B9' }}>
+                  Belum ada checkpoint · buka surah dan tandai ayat terakhir dibaca
                 </span>
-                <button
-                  onClick={() => {
-                    if (session.checkpointSurah) {
-                      setKhatamDetailId(null);
-                      loadSurahFromKhatam(session.checkpointSurah, session.id).then(() => {
-                        setTimeout(() => {
-                          const el = document.getElementById(`ayah-${session.checkpointAyah}`);
-                          if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-                        }, 500);
-                      });
-                    }
-                  }}
-                  className="ml-auto text-xs font-semibold px-2 py-0.5 rounded-lg"
-                  style={{ background: '#D1FAE5', color: '#059669' }}
-                >
-                  Lanjut
-                </button>
               </div>
             )}
           </div>
