@@ -62,6 +62,8 @@ interface Ayah {
   text: string;
   numberInSurah: number;
   translation?: string;
+  surahNumber?: number;
+  surahName?: string;
 }
 
 interface BookmarkedAyah {
@@ -233,11 +235,17 @@ const Quran = () => {
         fetch(`https://api.alquran.cloud/v1/juz/${juzNum}/id.indonesian`).then((r) => r.json()),
       ]);
       if (arRes.code === 200) {
-        const arabic: Ayah[] = arRes.data.ayahs;
-        const indo = idRes.code === 200 ? idRes.data.ayahs : [];
-        const merged = arabic.map((a: Ayah, i: number) => ({
-          ...a,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const arabic = arRes.data.ayahs as any[];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const indo = idRes.code === 200 ? (idRes.data.ayahs as any[]) : [];
+        const merged: Ayah[] = arabic.map((a, i) => ({
+          number: a.number,
+          text: a.text,
+          numberInSurah: a.numberInSurah,
           translation: indo[i]?.text || "",
+          surahNumber: a.surah?.number,
+          surahName: a.surah?.englishName,
         }));
         setJuzAyahs(merged);
       }
@@ -310,14 +318,19 @@ const Quran = () => {
   };
 
   const handleKhatamCheckpoint = () => {
-    if (!selectedAyahForAction || selectedSurah === null || !khatamReadingId) return;
-    const surah = surahs.find((s) => s.number === selectedSurah);
+    if (!selectedAyahForAction || !khatamReadingId) return;
+    // In juz mode, use surahNumber from the ayah; in surah mode, use selectedSurah
+    const surahNum = selectedAyahForAction.surahNumber ?? selectedSurah;
+    const surahLabel = selectedAyahForAction.surahName
+      ?? surahs.find((s) => s.number === selectedSurah)?.englishName
+      ?? "";
+    if (surahNum === null || surahNum === undefined) return;
     const updated = khatamSessions.map((s) =>
       s.id === khatamReadingId
         ? {
             ...s,
-            checkpointSurah: selectedSurah,
-            checkpointSurahName: surah?.englishName || "",
+            checkpointSurah: surahNum,
+            checkpointSurahName: surahLabel,
             checkpointAyah: selectedAyahForAction.numberInSurah,
           }
         : s
@@ -1151,12 +1164,25 @@ const Quran = () => {
   // ──────────────────────────────────────────────
   if (selectedJuz !== null) {
     const juz = JUZ_DATA.find((j) => j.number === selectedJuz);
+    const isKhatamJuz = !!khatamReadingId;
+    const khatamSession = khatamReadingId ? khatamSessions.find((s) => s.id === khatamReadingId) : null;
+
     return (
       <div className="min-h-screen bg-white pb-24 relative overflow-hidden">
         <BgBlobs />
         <div className="relative z-10 flex flex-col pt-6 px-4 gap-4">
           <div className="flex items-center w-full">
-            <button onClick={() => { setSelectedJuz(null); setJuzAyahs([]); }} className="p-2 rounded-full">
+            <button
+              onClick={() => {
+                setSelectedJuz(null);
+                setJuzAyahs([]);
+                if (khatamReadingId) {
+                  setKhatamDetailId(khatamReadingId);
+                  setKhatamReadingId(null);
+                }
+              }}
+              className="p-2 rounded-full"
+            >
               <ChevronLeft className="h-6 w-6" style={{ color: '#62748E' }} strokeWidth={2} />
             </button>
             <div className="flex-1 text-center pr-10">
@@ -1165,33 +1191,58 @@ const Quran = () => {
             </div>
           </div>
 
+          {/* Khatam context banner */}
+          {isKhatamJuz && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-2xl" style={{ background: '#F0FDF4', border: '1px solid #D1FAE5' }}>
+              <Trophy className="h-4 w-4 flex-shrink-0" style={{ color: '#059669' }} />
+              <span className="text-xs font-medium" style={{ color: '#065F46' }}>
+                Membaca untuk Khatam · ketuk ayat untuk checkpoint
+              </span>
+            </div>
+          )}
+
           {juzLoading ? (
             <div className="flex items-center justify-center py-20">
               <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#34D399' }} />
             </div>
           ) : (
             <div className="flex flex-col gap-4 pb-6">
-              {juzAyahs.map((ayah) => (
-                <motion.div
-                  key={ayah.number}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="rounded-2xl p-4 flex flex-col gap-3"
-                  style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}
-                >
-                  <div className="flex items-center">
-                    <div className="flex items-center justify-center h-7 w-7 rounded-full text-xs font-bold" style={{ background: '#F0FDF4', color: '#166534' }}>
-                      {ayah.numberInSurah}
+              {juzAyahs.map((ayah) => {
+                const isKhatamCp = khatamSession
+                  && khatamSession.checkpointSurah === ayah.surahNumber
+                  && khatamSession.checkpointAyah === ayah.numberInSurah;
+                return (
+                  <motion.div
+                    key={ayah.number}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    onClick={isKhatamJuz ? () => handleAyahTap(ayah) : undefined}
+                    className={isKhatamJuz ? "rounded-2xl p-4 flex flex-col gap-3 cursor-pointer active:scale-[0.99] transition-all" : "rounded-2xl p-4 flex flex-col gap-3"}
+                    style={{
+                      background: '#FFFFFF',
+                      border: '1px solid #F3EDE6',
+                      boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)',
+                      borderLeft: isKhatamCp ? '3px solid #059669' : '1px solid #F3EDE6',
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-center h-7 w-7 rounded-full text-xs font-bold" style={{ background: '#F0FDF4', color: '#166534' }}>
+                        {ayah.numberInSurah}
+                      </div>
+                      {ayah.surahName && (
+                        <span className="text-xs font-medium" style={{ color: '#90A1B9' }}>{ayah.surahName}</span>
+                      )}
+                      {isKhatamCp && <MapPin className="h-4 w-4 ml-auto" style={{ color: '#059669' }} />}
                     </div>
-                  </div>
-                  <p className="text-right text-xl leading-loose" dir="rtl" style={{ color: '#1D293D', fontFamily: "'Scheherazade New', 'Amiri', serif", lineHeight: 2.2 }}>
-                    {ayah.text}
-                  </p>
-                  {ayah.translation && (
-                    <p className="text-sm leading-relaxed" style={{ color: '#62748E' }}>{ayah.translation}</p>
-                  )}
-                </motion.div>
-              ))}
+                    <p className="text-right text-xl leading-loose" dir="rtl" style={{ color: '#1D293D', fontFamily: "'Scheherazade New', 'Amiri', serif", lineHeight: 2.2 }}>
+                      {ayah.text}
+                    </p>
+                    {ayah.translation && (
+                      <p className="text-sm leading-relaxed" style={{ color: '#62748E' }}>{ayah.translation}</p>
+                    )}
+                  </motion.div>
+                );
+              })}
 
               <div className="flex gap-3 pt-2">
                 {selectedJuz > 1 && (
@@ -1208,6 +1259,50 @@ const Quran = () => {
             </div>
           )}
         </div>
+
+        {/* Drawer — khatam juz context */}
+        {isKhatamJuz && (
+          <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+            <DrawerContent className="rounded-t-3xl">
+              <DrawerHeader className="pb-2">
+                <DrawerTitle className="text-base font-bold" style={{ color: '#1D293D' }}>
+                  {selectedAyahForAction?.surahName} : Ayat {selectedAyahForAction?.numberInSurah}
+                </DrawerTitle>
+                <DrawerDescription className="text-xs" style={{ color: '#838A96' }}>
+                  Pilih aksi untuk ayat ini
+                </DrawerDescription>
+              </DrawerHeader>
+              <div className="flex flex-col gap-2 px-4 pb-6">
+                <button
+                  onClick={handleKhatamCheckpoint}
+                  className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:bg-gray-50"
+                  style={{ background: '#F8F8F7' }}
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: '#D1FAE5' }}>
+                    <MapPin className="h-5 w-5" style={{ color: '#059669' }} />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>Set Checkpoint Khatam</span>
+                    <span className="text-xs" style={{ color: '#838A96' }}>Tandai posisi baca khatam di ayat ini</span>
+                  </div>
+                </button>
+                <button
+                  onClick={handleCopyAyah}
+                  className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:bg-gray-50"
+                  style={{ background: '#F8F8F7' }}
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: '#E0F2FE' }}>
+                    <Copy className="h-5 w-5" style={{ color: '#0284C7' }} />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>Salin Ayat</span>
+                    <span className="text-xs" style={{ color: '#838A96' }}>Salin teks Arab & terjemahan</span>
+                  </div>
+                </button>
+              </div>
+            </DrawerContent>
+          </Drawer>
+        )}
       </div>
     );
   }
