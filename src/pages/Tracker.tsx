@@ -86,16 +86,22 @@ const Tracker = () => {
   }, []);
 
 
-  // Streak calculation — count consecutive days with all 5 prayers
-  // If today is incomplete, start from yesterday; if complete, include today
+  // Streak calculation — find the most recent completed day, then count consecutive days backwards
   const streak = useMemo(() => {
-    let count = 0;
     const d = new Date(realToday);
-    const todayData = loadDayData(d);
-    const todayComplete = todayData.prayerCompleted.filter(Boolean).length === 5;
-    if (!todayComplete) {
-      d.setDate(d.getDate() - 1); // start from yesterday
+    // Find the most recent day with all 5 prayers completed (scan up to 90 days back)
+    let found = false;
+    for (let i = 0; i < 90; i++) {
+      const data = loadDayData(d);
+      if (data.prayerCompleted.filter(Boolean).length === 5) {
+        found = true;
+        break;
+      }
+      d.setDate(d.getDate() - 1);
     }
+    if (!found) return 0;
+    // Count consecutive days from that point backwards
+    let count = 0;
     while (true) {
       const data = loadDayData(d);
       if (data.prayerCompleted.filter(Boolean).length === 5) {
