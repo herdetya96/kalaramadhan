@@ -209,10 +209,19 @@ const Quran = () => {
       if (arRes.code === 200) {
         const arabic: Ayah[] = arRes.data.ayahs;
         const indo = idRes.code === 200 ? idRes.data.ayahs : [];
-        const merged = arabic.map((a: Ayah, i: number) => ({
-          ...a,
-          translation: indo[i]?.text || "",
-        }));
+        const bismillahPrefix = /^بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ\s*/;
+        const merged = arabic.map((a: Ayah, i: number) => {
+          let text = a.text;
+          // Strip bismillah from ayah 1 for all surahs except Al-Fatihah (1) and At-Tawbah (9)
+          if (a.numberInSurah === 1 && surahNum !== 1 && surahNum !== 9) {
+            text = text.replace(bismillahPrefix, '').trim();
+          }
+          return {
+            ...a,
+            text,
+            translation: indo[i]?.text || "",
+          };
+        });
         setAyahs(merged);
       }
     } catch {
@@ -240,14 +249,22 @@ const Quran = () => {
         const arabic = arRes.data.ayahs as any[];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const indo = idRes.code === 200 ? (idRes.data.ayahs as any[]) : [];
-        const merged: Ayah[] = arabic.map((a, i) => ({
-          number: a.number,
-          text: a.text,
-          numberInSurah: a.numberInSurah,
-          translation: indo[i]?.text || "",
-          surahNumber: a.surah?.number,
-          surahName: a.surah?.englishName,
-        }));
+        const bismillahPrefix = /^بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ\s*/;
+        const merged: Ayah[] = arabic.map((a, i) => {
+          let text = a.text;
+          const surahNum = a.surah?.number;
+          if (a.numberInSurah === 1 && surahNum !== 1 && surahNum !== 9) {
+            text = text.replace(bismillahPrefix, '').trim();
+          }
+          return {
+            number: a.number,
+            text,
+            numberInSurah: a.numberInSurah,
+            translation: indo[i]?.text || "",
+            surahNumber: surahNum,
+            surahName: a.surah?.englishName,
+          };
+        });
         setJuzAyahs(merged);
       }
     } catch {
