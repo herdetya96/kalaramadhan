@@ -62,6 +62,7 @@ interface Ayah {
   text: string;
   numberInSurah: number;
   translation?: string;
+  transliteration?: string;
   surahNumber?: number;
   surahName?: string;
 }
@@ -229,13 +230,15 @@ const Quran = () => {
     setLoading(true);
     setSelectedSurah(surahNum);
     try {
-      const [arRes, idRes] = await Promise.all([
+      const [arRes, idRes, tlRes] = await Promise.all([
         fetch(`https://api.alquran.cloud/v1/surah/${surahNum}`).then((r) => r.json()),
         fetch(`https://api.alquran.cloud/v1/surah/${surahNum}/id.indonesian`).then((r) => r.json()),
+        fetch(`https://api.alquran.cloud/v1/surah/${surahNum}/en.transliteration`).then((r) => r.json()),
       ]);
       if (arRes.code === 200) {
         const arabic: Ayah[] = arRes.data.ayahs;
         const indo = idRes.code === 200 ? idRes.data.ayahs : [];
+        const translit = tlRes.code === 200 ? tlRes.data.ayahs : [];
         
         const merged = arabic.map((a: Ayah, i: number) => {
           let text = a.text;
@@ -247,6 +250,7 @@ const Quran = () => {
             ...a,
             text,
             translation: indo[i]?.text || "",
+            transliteration: translit[i]?.text || "",
           };
         });
         setAyahs(merged);
@@ -267,15 +271,17 @@ const Quran = () => {
     setJuzLoading(true);
     setSelectedJuz(juzNum);
     try {
-      const [arRes, idRes] = await Promise.all([
+      const [arRes, idRes, tlRes] = await Promise.all([
         fetch(`https://api.alquran.cloud/v1/juz/${juzNum}/quran-uthmani`).then((r) => r.json()),
         fetch(`https://api.alquran.cloud/v1/juz/${juzNum}/id.indonesian`).then((r) => r.json()),
+        fetch(`https://api.alquran.cloud/v1/juz/${juzNum}/en.transliteration`).then((r) => r.json()),
       ]);
       if (arRes.code === 200) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const arabic = arRes.data.ayahs as any[];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const indo = idRes.code === 200 ? (idRes.data.ayahs as any[]) : [];
+        const translit = tlRes.code === 200 ? (tlRes.data.ayahs as any[]) : [];
         const merged: Ayah[] = arabic.map((a, i) => {
           let text = a.text;
           const sNum = a.surah?.number;
@@ -287,6 +293,7 @@ const Quran = () => {
             text,
             numberInSurah: a.numberInSurah,
             translation: indo[i]?.text || "",
+            transliteration: translit[i]?.text || "",
             surahNumber: sNum,
             surahName: a.surah?.englishName,
           };
@@ -556,6 +563,10 @@ const Quran = () => {
                     <p className="text-right text-xl leading-loose" dir="rtl" style={{ color: '#1D293D', fontFamily: "'LPMQ IsepMisbah', 'Scheherazade New', serif", lineHeight: 2.2 }}>
                       {ayah.text}
                     </p>
+
+                    {ayah.transliteration && (
+                      <p className="text-sm italic leading-relaxed" style={{ color: '#2E7D32' }}>{ayah.transliteration}</p>
+                    )}
 
                     {ayah.translation && (
                       <p className="text-sm leading-relaxed" style={{ color: '#62748E' }}>{ayah.translation}</p>
@@ -1276,6 +1287,9 @@ const Quran = () => {
                     <p className="text-right text-xl leading-loose" dir="rtl" style={{ color: '#1D293D', fontFamily: "'LPMQ IsepMisbah', 'Scheherazade New', serif", lineHeight: 2.2 }}>
                       {ayah.text}
                     </p>
+                    {ayah.transliteration && (
+                      <p className="text-sm italic leading-relaxed" style={{ color: '#2E7D32' }}>{ayah.transliteration}</p>
+                    )}
                     {ayah.translation && (
                       <p className="text-sm leading-relaxed" style={{ color: '#62748E' }}>{ayah.translation}</p>
                     )}
