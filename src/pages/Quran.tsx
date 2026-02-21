@@ -230,19 +230,18 @@ const Quran = () => {
     setLoading(true);
     setSelectedSurah(surahNum);
     try {
-      const [arRes, idRes, tlRes] = await Promise.all([
+      const [arRes, idRes, eqRes] = await Promise.all([
         fetch(`https://api.alquran.cloud/v1/surah/${surahNum}`).then((r) => r.json()),
         fetch(`https://api.alquran.cloud/v1/surah/${surahNum}/id.indonesian`).then((r) => r.json()),
-        fetch(`https://api.alquran.cloud/v1/surah/${surahNum}/en.transliteration`).then((r) => r.json()),
+        fetch(`https://equran.id/api/v2/surat/${surahNum}`).then((r) => r.json()).catch(() => null),
       ]);
       if (arRes.code === 200) {
         const arabic: Ayah[] = arRes.data.ayahs;
         const indo = idRes.code === 200 ? idRes.data.ayahs : [];
-        const translit = tlRes.code === 200 ? tlRes.data.ayahs : [];
+        const eqAyat = eqRes?.data?.ayat || [];
         
         const merged = arabic.map((a: Ayah, i: number) => {
           let text = a.text;
-          // Strip bismillah from ayah 1 for all surahs except Al-Fatihah (1) and At-Tawbah (9)
           if (a.numberInSurah === 1 && surahNum !== 1 && surahNum !== 9) {
             text = stripBismillahFromAyah(text);
           }
@@ -250,7 +249,7 @@ const Quran = () => {
             ...a,
             text,
             translation: indo[i]?.text || "",
-            transliteration: translit[i]?.text || "",
+            transliteration: eqAyat[i]?.teksLatin || "",
           };
         });
         setAyahs(merged);
@@ -271,17 +270,29 @@ const Quran = () => {
     setJuzLoading(true);
     setSelectedJuz(juzNum);
     try {
-      const [arRes, idRes, tlRes] = await Promise.all([
+      const [arRes, idRes] = await Promise.all([
         fetch(`https://api.alquran.cloud/v1/juz/${juzNum}/quran-uthmani`).then((r) => r.json()),
         fetch(`https://api.alquran.cloud/v1/juz/${juzNum}/id.indonesian`).then((r) => r.json()),
-        fetch(`https://api.alquran.cloud/v1/juz/${juzNum}/en.transliteration`).then((r) => r.json()),
       ]);
       if (arRes.code === 200) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const arabic = arRes.data.ayahs as any[];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const indo = idRes.code === 200 ? (idRes.data.ayahs as any[]) : [];
-        const translit = tlRes.code === 200 ? (tlRes.data.ayahs as any[]) : [];
+        
+        // Fetch Indonesian transliterations from equran.id for surahs in this juz
+        const surahNums = [...new Set(arabic.map((a: any) => a.surah?.number as number))];
+        const eqResults = await Promise.all(
+          surahNums.map((sn) => fetch(`https://equran.id/api/v2/surat/${sn}`).then((r) => r.json()).catch(() => null))
+        );
+        // Build a map: surahNum -> { ayahNum -> teksLatin }
+        const translitMap: Record<number, Record<number, string>> = {};
+        surahNums.forEach((sn, idx) => {
+          const ayat = eqResults[idx]?.data?.ayat || [];
+          translitMap[sn] = {};
+          ayat.forEach((a: any) => { translitMap[sn][a.nomorAyat] = a.teksLatin || ""; });
+        });
+        
         const merged: Ayah[] = arabic.map((a, i) => {
           let text = a.text;
           const sNum = a.surah?.number;
@@ -293,7 +304,7 @@ const Quran = () => {
             text,
             numberInSurah: a.numberInSurah,
             translation: indo[i]?.text || "",
-            transliteration: translit[i]?.text || "",
+            transliteration: translitMap[sNum]?.[a.numberInSurah] || "",
             surahNumber: sNum,
             surahName: a.surah?.englishName,
           };
