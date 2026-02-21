@@ -136,18 +136,22 @@ function formatDate(isoString: string): string {
 
 // Strip bismillah prefix from ayah text, handling various Unicode diacritics
 function stripBismillahFromAyah(t: string): string {
-  const diacritics = /[\u064B-\u0670\u06D6-\u06ED\u08F0-\u08FF\u0640\u06E1\u06E4\u06DF\u06DB\u0671]/g;
-  const stripped = t.replace(diacritics, '');
+  // Remove diacritics AND replace alef wasla (ٱ) with regular alef (ا)
+  const diacritics = /[\u064B-\u0670\u06D6-\u06ED\u08F0-\u08FF\u0640\u06E1\u06E4\u06DF\u06DB]/g;
+  const normalized = t.replace(/\u0671/g, '\u0627').replace(diacritics, '');
   const bismillahPlain = '\u0628\u0633\u0645 \u0627\u0644\u0644\u0647 \u0627\u0644\u0631\u062D\u0645\u0646 \u0627\u0644\u0631\u062D\u064A\u0645';
-  if (stripped.trimStart().startsWith(bismillahPlain)) {
+  if (normalized.trimStart().startsWith(bismillahPlain)) {
+    // Count base characters (non-diacritical, non-space) in the bismillah to find cut point
+    const targetBaseChars = bismillahPlain.replace(/\s/g, '').length;
     let baseCount = 0;
-    const targetLen = bismillahPlain.replace(/\s/g, '').length;
     let cutIdx = 0;
     for (let ci = 0; ci < t.length; ci++) {
       const ch = t[ci];
-      if (/[\u064B-\u0670\u06D6-\u06ED\u08F0-\u08FF\u0640\u06E1\u06E4\u06DF\u06DB\u0671\s]/.test(ch)) continue;
+      // Skip diacritics and whitespace
+      if (/[\u064B-\u0670\u06D6-\u06ED\u08F0-\u08FF\u0640\u06E1\u06E4\u06DF\u06DB\s]/.test(ch)) continue;
+      // Count alef wasla as a base char (it maps to alef)
       baseCount++;
-      if (baseCount === targetLen) {
+      if (baseCount === targetBaseChars) {
         cutIdx = ci + 1;
         break;
       }
