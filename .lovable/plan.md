@@ -1,27 +1,65 @@
 
-# Kalibrasi Ulang Lokasi di Halaman Setelan
 
-## Ringkasan
-Card "Lokasi" tetap tampil sebagai card biasa (bukan button), tapi ketika di-tap akan menjalankan kalibrasi ulang GPS. Deskripsi card menampilkan lokasi terkini dan status loading saat proses kalibrasi.
+# Setup Kala Ramadhan sebagai PWA (Progressive Web App)
 
-## Cara Kerja
-1. User tap card "Lokasi" -- proses kalibrasi GPS dimulai
-2. Deskripsi card berubah menjadi "Mengkalibrasi lokasi..." dengan ikon loading berputar
-3. Setelah selesai, deskripsi menampilkan lokasi baru (misal "Jakarta, DKI Jakarta")
-4. Toast konfirmasi muncul: "Lokasi diperbarui: Jakarta, DKI Jakarta"
-5. Jika gagal, toast error tampil
+## Apa itu PWA?
+PWA membuat aplikasi web bisa di-install langsung dari browser ke home screen HP, tanpa perlu App Store atau Play Store. Aplikasi akan terasa seperti app native — bisa dibuka offline, loading cepat, dan punya ikon sendiri di home screen.
+
+## Langkah-langkah Implementasi
+
+### 1. Install Plugin PWA
+Tambah dependency `vite-plugin-pwa` untuk mengaktifkan fitur PWA di project Vite.
+
+### 2. Konfigurasi vite.config.ts
+Tambahkan plugin `VitePWA` dengan pengaturan:
+- **manifest.json** otomatis (nama app, warna tema, ikon)
+- **Service Worker** untuk caching dan offline support
+- **navigateFallbackDenylist** untuk `/~oauth` agar tidak di-cache
+
+### 3. Buat Ikon PWA
+Tambahkan ikon app dalam ukuran 192x192 dan 512x512 pixel ke folder `public/`. Bisa menggunakan ikon sederhana dulu, nanti diganti dengan desain final.
+
+### 4. Update index.html
+Tambahkan meta tags untuk mobile optimization:
+- `theme-color` (warna hijau sesuai tema app)
+- `apple-mobile-web-app-capable` (untuk iOS)
+- `apple-mobile-web-app-status-bar-style`
+
+### 5. Buat Halaman /install (Opsional)
+Halaman panduan install yang menjelaskan cara menambahkan app ke home screen untuk pengguna yang belum familiar.
+
+## Cara Install oleh User
+Setelah setup selesai:
+- **Android**: Buka di Chrome, ketuk menu browser, pilih "Add to Home Screen"
+- **iPhone**: Buka di Safari, ketuk tombol Share, pilih "Add to Home Screen"
 
 ## Detail Teknis
 
-### Perubahan di `src/pages/SettingsPage.tsx`
-1. Ubah dari static arrow function menjadi komponen dengan state (`useState`, `useEffect`)
-2. Tambah state `currentLocation` (dari `localStorage`) dan `isCalibrating`
-3. Card "Lokasi" tetap menggunakan `<div>` (bukan `<button>`), tapi ditambah `onClick` handler dan `cursor-pointer`
-4. Fungsi `handleRecalibrate`:
-   - Panggil `navigator.geolocation.getCurrentPosition`
-   - Reverse geocode via Nominatim API
-   - Update `localStorage` (`kala-user-location` dan `kala-user-coords`)
-   - Toast sukses/error via `sonner`
-5. Deskripsi card Lokasi dinamis: tampilkan lokasi saat ini atau "Atur lokasi untuk waktu sholat akurat" jika belum ada
-6. Saat loading, tampilkan spinner kecil (`Loader2` dari lucide-react) di samping ikon MapPin
-7. Import tambahan: `useState`, `useEffect`, `Loader2`, `toast` dari sonner
+### File yang dibuat/diubah:
+| File | Aksi |
+|------|------|
+| `vite.config.ts` | Tambah plugin VitePWA dengan manifest dan service worker |
+| `index.html` | Tambah meta tags PWA |
+| `public/pwa-192x192.png` | Ikon PWA 192px |
+| `public/pwa-512x512.png` | Ikon PWA 512px |
+| `src/pages/Install.tsx` | Halaman panduan install (opsional) |
+| `src/App.tsx` | Tambah route `/install` |
+
+### Contoh konfigurasi VitePWA:
+```text
+VitePWA({
+  registerType: 'autoUpdate',
+  manifest: {
+    name: 'Kala Ramadhan',
+    short_name: 'Kala',
+    theme_color: '#38CA5E',
+    background_color: '#ffffff',
+    display: 'standalone',
+    icons: [...]
+  },
+  workbox: {
+    navigateFallbackDenylist: [/^\/~oauth/],
+  }
+})
+```
+
