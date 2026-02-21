@@ -1,65 +1,55 @@
 
+# Fitur Import & Export Data di Setelan
 
-# Setup Kala Ramadhan sebagai PWA (Progressive Web App)
+## Ringkasan
+Menambahkan dua menu baru di halaman Setelan: **Export Data** dan **Import Data**, untuk backup dan restore seluruh data ibadah (sholat, sunnah, lokasi, progress Quran, dll) dalam format file JSON.
 
-## Apa itu PWA?
-PWA membuat aplikasi web bisa di-install langsung dari browser ke home screen HP, tanpa perlu App Store atau Play Store. Aplikasi akan terasa seperti app native — bisa dibuka offline, loading cepat, dan punya ikon sendiri di home screen.
+## Yang Akan Dibuat
 
-## Langkah-langkah Implementasi
+### Export Data
+- Kumpulkan semua data dari localStorage yang berprefix `kala_data_`, `kala_quran_*`, `kala-user-location`, `kala-user-coords`
+- Bungkus dalam satu objek JSON dengan metadata (tanggal export, versi app)
+- Download otomatis sebagai file `kala-backup-YYYY-MM-DD.json`
+- Tampilkan toast sukses
 
-### 1. Install Plugin PWA
-Tambah dependency `vite-plugin-pwa` untuk mengaktifkan fitur PWA di project Vite.
+### Import Data
+- Klik menu Import membuka file picker (accept `.json`)
+- Validasi format file: cek apakah ada key yang dikenali (`version`, `exportDate`, `data`)
+- Tampilkan dialog konfirmasi: "Data saat ini akan ditimpa. Lanjutkan?"
+- Tulis semua data ke localStorage, lalu reload halaman
+- Tampilkan toast sukses/error
 
-### 2. Konfigurasi vite.config.ts
-Tambahkan plugin `VitePWA` dengan pengaturan:
-- **manifest.json** otomatis (nama app, warna tema, ikon)
-- **Service Worker** untuk caching dan offline support
-- **navigateFallbackDenylist** untuk `/~oauth` agar tidak di-cache
-
-### 3. Buat Ikon PWA
-Tambahkan ikon app dalam ukuran 192x192 dan 512x512 pixel ke folder `public/`. Bisa menggunakan ikon sederhana dulu, nanti diganti dengan desain final.
-
-### 4. Update index.html
-Tambahkan meta tags untuk mobile optimization:
-- `theme-color` (warna hijau sesuai tema app)
-- `apple-mobile-web-app-capable` (untuk iOS)
-- `apple-mobile-web-app-status-bar-style`
-
-### 5. Buat Halaman /install (Opsional)
-Halaman panduan install yang menjelaskan cara menambahkan app ke home screen untuk pengguna yang belum familiar.
-
-## Cara Install oleh User
-Setelah setup selesai:
-- **Android**: Buka di Chrome, ketuk menu browser, pilih "Add to Home Screen"
-- **iPhone**: Buka di Safari, ketuk tombol Share, pilih "Add to Home Screen"
+### UI
+Dua item menu baru di halaman Setelan dengan style yang sama seperti menu yang sudah ada:
+- Icon `Download` untuk Export Data
+- Icon `Upload` untuk Import Data
+- Ditempatkan sebelum "Tentang Kala"
 
 ## Detail Teknis
 
-### File yang dibuat/diubah:
-| File | Aksi |
-|------|------|
-| `vite.config.ts` | Tambah plugin VitePWA dengan manifest dan service worker |
-| `index.html` | Tambah meta tags PWA |
-| `public/pwa-192x192.png` | Ikon PWA 192px |
-| `public/pwa-512x512.png` | Ikon PWA 512px |
-| `src/pages/Install.tsx` | Halaman panduan install (opsional) |
-| `src/App.tsx` | Tambah route `/install` |
+### File yang diubah
+| File | Perubahan |
+|------|-----------|
+| `src/pages/SettingsPage.tsx` | Tambah menu Export & Import, handler logic, hidden file input, dialog konfirmasi |
 
-### Contoh konfigurasi VitePWA:
+### Struktur File Backup (JSON)
 ```text
-VitePWA({
-  registerType: 'autoUpdate',
-  manifest: {
-    name: 'Kala Ramadhan',
-    short_name: 'Kala',
-    theme_color: '#38CA5E',
-    background_color: '#ffffff',
-    display: 'standalone',
-    icons: [...]
-  },
-  workbox: {
-    navigateFallbackDenylist: [/^\/~oauth/],
+{
+  "version": "1.0",
+  "exportDate": "2026-02-21T...",
+  "appName": "Kala",
+  "data": {
+    "dailyData": { "2026-02-18": {...}, "2026-02-19": {...} },
+    "quranProgress": {...},
+    "quranBookmarks": [...],
+    "quranKhatam": {...},
+    "location": "Jakarta, DKI Jakarta",
+    "coords": { "lat": -6.2, "lon": 106.8 }
   }
-})
+}
 ```
 
+### Validasi Import
+- Cek `version` dan `appName` ada di file
+- Jika format tidak valid, tampilkan toast error "Format file tidak valid"
+- Konfirmasi user sebelum overwrite via Alert Dialog
