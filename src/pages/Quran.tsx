@@ -475,11 +475,9 @@ const Quran = () => {
                   && activeKhatamSession.checkpointSurah === selectedSurah
                   && activeKhatamSession.checkpointAyah === ayah.numberInSurah;
                 return (
-                  <motion.div
+                  <div
                     key={ayah.number}
                     id={`ayah-${ayah.numberInSurah}`}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
                     onClick={() => handleAyahTap(ayah)}
                     className="rounded-2xl p-4 flex flex-col gap-3 cursor-pointer transition-all active:scale-[0.99]"
                     style={{
@@ -519,7 +517,7 @@ const Quran = () => {
                     {ayah.translation && (
                       <p className="text-sm leading-relaxed" style={{ color: '#62748E' }}>{ayah.translation}</p>
                     )}
-                  </motion.div>
+                  </div>
                 );
               })}
 
@@ -1212,10 +1210,8 @@ const Quran = () => {
                   && khatamSession.checkpointSurah === ayah.surahNumber
                   && khatamSession.checkpointAyah === ayah.numberInSurah;
                 return (
-                  <motion.div
+                  <div
                     key={ayah.number}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
                     onClick={isKhatamJuz ? () => handleAyahTap(ayah) : undefined}
                     className={isKhatamJuz ? "rounded-2xl p-4 flex flex-col gap-3 cursor-pointer active:scale-[0.99] transition-all" : "rounded-2xl p-4 flex flex-col gap-3"}
                     style={{
@@ -1240,7 +1236,7 @@ const Quran = () => {
                     {ayah.translation && (
                       <p className="text-sm leading-relaxed" style={{ color: '#62748E' }}>{ayah.translation}</p>
                     )}
-                  </motion.div>
+                  </div>
                 );
               })}
 
