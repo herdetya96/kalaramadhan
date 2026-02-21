@@ -134,6 +134,29 @@ function formatDate(isoString: string): string {
   return new Date(isoString).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
 }
 
+// Strip bismillah prefix from ayah text, handling various Unicode diacritics
+function stripBismillahFromAyah(t: string): string {
+  const diacritics = /[\u064B-\u0670\u06D6-\u06ED\u08F0-\u08FF\u0640\u06E1\u06E4\u06DF\u06DB\u0671]/g;
+  const stripped = t.replace(diacritics, '');
+  const bismillahPlain = '\u0628\u0633\u0645 \u0627\u0644\u0644\u0647 \u0627\u0644\u0631\u062D\u0645\u0646 \u0627\u0644\u0631\u062D\u064A\u0645';
+  if (stripped.trimStart().startsWith(bismillahPlain)) {
+    let baseCount = 0;
+    const targetLen = bismillahPlain.replace(/\s/g, '').length;
+    let cutIdx = 0;
+    for (let ci = 0; ci < t.length; ci++) {
+      const ch = t[ci];
+      if (/[\u064B-\u0670\u06D6-\u06ED\u08F0-\u08FF\u0640\u06E1\u06E4\u06DF\u06DB\u0671\s]/.test(ch)) continue;
+      baseCount++;
+      if (baseCount === targetLen) {
+        cutIdx = ci + 1;
+        break;
+      }
+    }
+    return t.slice(cutIdx).trim();
+  }
+  return t;
+}
+
 // Shared background blobs
 const BgBlobs = () => (
   <>
@@ -209,12 +232,12 @@ const Quran = () => {
       if (arRes.code === 200) {
         const arabic: Ayah[] = arRes.data.ayahs;
         const indo = idRes.code === 200 ? idRes.data.ayahs : [];
-        const bismillahPrefix = /^بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ\s*/;
+        
         const merged = arabic.map((a: Ayah, i: number) => {
           let text = a.text;
           // Strip bismillah from ayah 1 for all surahs except Al-Fatihah (1) and At-Tawbah (9)
           if (a.numberInSurah === 1 && surahNum !== 1 && surahNum !== 9) {
-            text = text.replace(bismillahPrefix, '').trim();
+            text = stripBismillahFromAyah(text);
           }
           return {
             ...a,
@@ -249,19 +272,18 @@ const Quran = () => {
         const arabic = arRes.data.ayahs as any[];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const indo = idRes.code === 200 ? (idRes.data.ayahs as any[]) : [];
-        const bismillahPrefix = /^بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ\s*/;
         const merged: Ayah[] = arabic.map((a, i) => {
           let text = a.text;
-          const surahNum = a.surah?.number;
-          if (a.numberInSurah === 1 && surahNum !== 1 && surahNum !== 9) {
-            text = text.replace(bismillahPrefix, '').trim();
+          const sNum = a.surah?.number;
+          if (a.numberInSurah === 1 && sNum !== 1 && sNum !== 9) {
+            text = stripBismillahFromAyah(text);
           }
           return {
             number: a.number,
             text,
             numberInSurah: a.numberInSurah,
             translation: indo[i]?.text || "",
-            surahNumber: surahNum,
+            surahNumber: sNum,
             surahName: a.surah?.englishName,
           };
         });
