@@ -501,7 +501,7 @@ const Quran = () => {
 
           {selectedSurah !== 1 && selectedSurah !== 9 && (
             <div className="text-center py-4">
-              <span className="text-2xl font-arabic" style={{ color: '#1D293D', fontFamily: "'Scheherazade New', serif" }}>بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ</span>
+              <span className="text-2xl font-arabic" style={{ color: '#1D293D', fontFamily: "'LPMQ IsepMisbah', 'Scheherazade New', serif" }}>بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ</span>
             </div>
           )}
 
@@ -553,7 +553,7 @@ const Quran = () => {
                       </div>
                     </div>
 
-                    <p className="text-right text-xl leading-loose" dir="rtl" style={{ color: '#1D293D', fontFamily: "'Scheherazade New', 'Amiri', serif", lineHeight: 2.2 }}>
+                    <p className="text-right text-xl leading-loose" dir="rtl" style={{ color: '#1D293D', fontFamily: "'LPMQ IsepMisbah', 'Scheherazade New', serif", lineHeight: 2.2 }}>
                       {ayah.text}
                     </p>
 
@@ -945,7 +945,7 @@ const Quran = () => {
                             {isCp ? ` · Ayat ${session.checkpointAyah}` : ''}
                           </span>
                         </div>
-                        <span className="text-base font-arabic flex-shrink-0" style={{ color: '#1D293D', fontFamily: "'Scheherazade New', serif" }}>{surah.name}</span>
+                        <span className="text-base font-arabic flex-shrink-0" style={{ color: '#1D293D', fontFamily: "'LPMQ IsepMisbah', 'Scheherazade New', serif" }}>{surah.name}</span>
                       </motion.button>
                     );
                   })}
@@ -1273,7 +1273,7 @@ const Quran = () => {
                       )}
                       {isKhatamCp && <MapPin className="h-4 w-4 ml-auto" style={{ color: '#059669' }} />}
                     </div>
-                    <p className="text-right text-xl leading-loose" dir="rtl" style={{ color: '#1D293D', fontFamily: "'Scheherazade New', 'Amiri', serif", lineHeight: 2.2 }}>
+                    <p className="text-right text-xl leading-loose" dir="rtl" style={{ color: '#1D293D', fontFamily: "'LPMQ IsepMisbah', 'Scheherazade New', serif", lineHeight: 2.2 }}>
                       {ayah.text}
                     </p>
                     {ayah.translation && (
@@ -1480,7 +1480,7 @@ const Quran = () => {
                       <span className="font-semibold text-sm truncate" style={{ color: '#1D293D' }}>{surah.englishName}</span>
                       <span className="text-xs truncate" style={{ color: '#838A96' }}>{surah.englishNameTranslation} · {surah.numberOfAyahs} ayat</span>
                     </div>
-                    <span className="text-base font-arabic flex-shrink-0" style={{ color: '#1D293D', fontFamily: "'Scheherazade New', serif" }}>{surah.name}</span>
+                    <span className="text-base font-arabic flex-shrink-0" style={{ color: '#1D293D', fontFamily: "'LPMQ IsepMisbah', 'Scheherazade New', serif" }}>{surah.name}</span>
                   </motion.button>
                 ))}
               </div>
