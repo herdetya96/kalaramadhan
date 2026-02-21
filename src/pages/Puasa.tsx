@@ -116,11 +116,11 @@ const Puasa = () => {
     setSelectedDate(d);
   };
 
-  // Streak
+  // Streak — count consecutive days with puasa ending at today
   const streak = useMemo(() => {
     let count = 0;
     const d = new Date(realToday);
-    d.setDate(d.getDate() - 1);
+    // Check from today backwards
     while (true) {
       const data = loadDayData(d);
       if (data.sunnahCompleted["puasa"]) {
@@ -128,7 +128,6 @@ const Puasa = () => {
         d.setDate(d.getDate() - 1);
       } else break;
     }
-    if (dayData.sunnahCompleted["puasa"]) count++;
     return count;
   }, [realToday, dayData]);
 
