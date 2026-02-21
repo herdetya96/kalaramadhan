@@ -1,12 +1,25 @@
-import { useState, useEffect } from "react";
-import { MapPin, Bell, Info, Loader2 } from "lucide-react";
+import { useState, useRef } from "react";
+import { MapPin, Bell, Info, Loader2, Download, Upload } from "lucide-react";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const SettingsPage = () => {
   const [currentLocation, setCurrentLocation] = useState<string>(() =>
     localStorage.getItem("kala-user-location") || ""
   );
   const [isCalibrating, setIsCalibrating] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [pendingImportData, setPendingImportData] = useState<Record<string, any> | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleRecalibrate = () => {
     if (isCalibrating) return;
@@ -45,6 +58,95 @@ const SettingsPage = () => {
     );
   };
 
+  const handleExport = () => {
+    const data: Record<string, any> = { dailyData: {} };
+
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+      try {
+        if (key.startsWith("kala_data_")) {
+          data.dailyData[key.replace("kala_data_", "")] = JSON.parse(localStorage.getItem(key)!);
+        } else if (key === "kala_quran_progress") {
+          data.quranProgress = JSON.parse(localStorage.getItem(key)!);
+        } else if (key === "kala_quran_bookmarks") {
+          data.quranBookmarks = JSON.parse(localStorage.getItem(key)!);
+        } else if (key === "kala_quran_khatam") {
+          data.quranKhatam = JSON.parse(localStorage.getItem(key)!);
+        }
+      } catch { /* skip malformed */ }
+    }
+
+    const loc = localStorage.getItem("kala-user-location");
+    const coords = localStorage.getItem("kala-user-coords");
+    if (loc) data.location = loc;
+    if (coords) try { data.coords = JSON.parse(coords); } catch {}
+
+    const backup = {
+      version: "1.0",
+      appName: "Kala",
+      exportDate: new Date().toISOString(),
+      data,
+    };
+
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `kala-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Data berhasil diekspor");
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const parsed = JSON.parse(ev.target?.result as string);
+        if (!parsed.version || !parsed.appName || parsed.appName !== "Kala" || !parsed.data) {
+          toast.error("Format file tidak valid");
+          return;
+        }
+        setPendingImportData(parsed.data);
+        setImportDialogOpen(true);
+      } catch {
+        toast.error("Format file tidak valid");
+      }
+    };
+    reader.readAsText(file);
+    // Reset so the same file can be re-selected
+    e.target.value = "";
+  };
+
+  const confirmImport = () => {
+    if (!pendingImportData) return;
+    const d = pendingImportData;
+
+    if (d.dailyData && typeof d.dailyData === "object") {
+      Object.entries(d.dailyData).forEach(([date, val]) => {
+        localStorage.setItem(`kala_data_${date}`, JSON.stringify(val));
+      });
+    }
+    if (d.quranProgress !== undefined) localStorage.setItem("kala_quran_progress", JSON.stringify(d.quranProgress));
+    if (d.quranBookmarks !== undefined) localStorage.setItem("kala_quran_bookmarks", JSON.stringify(d.quranBookmarks));
+    if (d.quranKhatam !== undefined) localStorage.setItem("kala_quran_khatam", JSON.stringify(d.quranKhatam));
+    if (d.location) localStorage.setItem("kala-user-location", d.location);
+    if (d.coords) localStorage.setItem("kala-user-coords", JSON.stringify(d.coords));
+
+    toast.success("Data berhasil diimpor, memuat ulang...");
+    setPendingImportData(null);
+    setImportDialogOpen(false);
+    setTimeout(() => window.location.reload(), 800);
+  };
+
   const settings = [
     {
       icon: MapPin,
@@ -55,6 +157,8 @@ const SettingsPage = () => {
       onClick: handleRecalibrate,
     },
     { icon: Bell, label: "Notifikasi Adzan", desc: "Pengingat waktu sholat" },
+    { icon: Download, label: "Export Data", desc: "Unduh backup data ibadahmu", onClick: handleExport },
+    { icon: Upload, label: "Import Data", desc: "Pulihkan data dari file backup", onClick: handleImportClick },
     { icon: Info, label: "Tentang Kala", desc: "Versi 1.0 — Pendamping ibadah harianmu" },
   ];
 
@@ -83,11 +187,11 @@ const SettingsPage = () => {
         <div className="flex flex-col gap-2">
           {settings.map((item) => {
             const Icon = item.icon;
-            const isLocation = item.label === "Lokasi";
+            const isClickable = !!item.onClick;
             return (
               <div
                 key={item.label}
-                className={`flex w-full items-center gap-4 rounded-2xl p-4${isLocation ? ' cursor-pointer active:scale-[0.98] transition-transform' : ''}`}
+                className={`flex w-full items-center gap-4 rounded-2xl p-4${isClickable ? ' cursor-pointer active:scale-[0.98] transition-transform' : ''}`}
                 style={{
                   background: '#FFFFFF',
                   border: '1px solid #F3EDE6',
@@ -99,7 +203,7 @@ const SettingsPage = () => {
                   className="flex h-11 w-11 items-center justify-center rounded-full flex-shrink-0"
                   style={{ background: '#F8F8F7' }}
                 >
-                  {isLocation && isCalibrating ? (
+                  {item.label === "Lokasi" && isCalibrating ? (
                     <Loader2 className="h-5 w-5 animate-spin" style={{ color: '#334258' }} />
                   ) : (
                     <Icon className="h-5 w-5" style={{ color: '#334258' }} />
@@ -114,6 +218,29 @@ const SettingsPage = () => {
           })}
         </div>
       </div>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+
+      <AlertDialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+        <AlertDialogContent className="rounded-2xl mx-4 max-w-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Impor Data</AlertDialogTitle>
+            <AlertDialogDescription>
+              Data saat ini akan ditimpa dengan data dari file backup. Lanjutkan?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPendingImportData(null)}>Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmImport}>Ya, Impor</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
