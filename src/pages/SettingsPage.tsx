@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { MapPin, Bell, Info, Loader2, Download, Upload } from "lucide-react";
+import { MapPin, Bell, Info, Loader2, Download, Upload, User, ChevronRight, LogIn } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -21,13 +21,15 @@ const SettingsPage = () => {
   const [pendingImportData, setPendingImportData] = useState<Record<string, any> | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Placeholder: will be replaced with real auth state
+  const isLoggedIn = false;
+
   const handleRecalibrate = () => {
     if (isCalibrating) return;
     if (!navigator.geolocation) {
       toast.error("Geolocation tidak didukung browser ini");
       return;
     }
-
     setIsCalibrating(true);
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
@@ -60,7 +62,6 @@ const SettingsPage = () => {
 
   const handleExport = () => {
     const data: Record<string, any> = { dailyData: {} };
-
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (!key) continue;
@@ -74,9 +75,8 @@ const SettingsPage = () => {
         } else if (key === "kala_quran_khatam") {
           data.quranKhatam = JSON.parse(localStorage.getItem(key)!);
         }
-      } catch { /* skip malformed */ }
+      } catch { /* skip */ }
     }
-
     const loc = localStorage.getItem("kala-user-location");
     const coords = localStorage.getItem("kala-user-coords");
     if (loc) data.location = loc;
@@ -88,7 +88,6 @@ const SettingsPage = () => {
       exportDate: new Date().toISOString(),
       data,
     };
-
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -106,7 +105,6 @@ const SettingsPage = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = (ev) => {
       try {
@@ -122,14 +120,12 @@ const SettingsPage = () => {
       }
     };
     reader.readAsText(file);
-    // Reset so the same file can be re-selected
     e.target.value = "";
   };
 
   const confirmImport = () => {
     if (!pendingImportData) return;
     const d = pendingImportData;
-
     if (d.dailyData && typeof d.dailyData === "object") {
       Object.entries(d.dailyData).forEach(([date, val]) => {
         localStorage.setItem(`kala_data_${date}`, JSON.stringify(val));
@@ -140,30 +136,52 @@ const SettingsPage = () => {
     if (d.quranKhatam !== undefined) localStorage.setItem("kala_quran_khatam", JSON.stringify(d.quranKhatam));
     if (d.location) localStorage.setItem("kala-user-location", d.location);
     if (d.coords) localStorage.setItem("kala-user-coords", JSON.stringify(d.coords));
-
     toast.success("Data berhasil diimpor, memuat ulang...");
     setPendingImportData(null);
     setImportDialogOpen(false);
     setTimeout(() => window.location.reload(), 800);
   };
 
-  const settings = [
+  type SettingItem = {
+    icon: typeof MapPin;
+    label: string;
+    desc: string;
+    onClick?: () => void;
+  };
+
+  const settingGroups: { title: string; items: SettingItem[] }[] = [
     {
-      icon: MapPin,
-      label: "Lokasi",
-      desc: isCalibrating
-        ? "Mengkalibrasi lokasi..."
-        : currentLocation || "Atur lokasi untuk waktu sholat akurat",
-      onClick: handleRecalibrate,
+      title: "Umum",
+      items: [
+        {
+          icon: MapPin,
+          label: "Lokasi",
+          desc: isCalibrating
+            ? "Mengkalibrasi lokasi..."
+            : currentLocation || "Atur lokasi untuk waktu sholat akurat",
+          onClick: handleRecalibrate,
+        },
+        { icon: Bell, label: "Notifikasi Adzan", desc: "Pengingat waktu sholat" },
+      ],
     },
-    { icon: Bell, label: "Notifikasi Adzan", desc: "Pengingat waktu sholat" },
-    { icon: Download, label: "Export Data", desc: "Unduh backup data ibadahmu", onClick: handleExport },
-    { icon: Upload, label: "Import Data", desc: "Pulihkan data dari file backup", onClick: handleImportClick },
-    { icon: Info, label: "Tentang Kala", desc: "Versi 1.0 — Pendamping ibadah harianmu" },
+    {
+      title: "Data",
+      items: [
+        { icon: Download, label: "Export Data", desc: "Unduh backup data ibadahmu", onClick: handleExport },
+        { icon: Upload, label: "Import Data", desc: "Pulihkan data dari file backup", onClick: handleImportClick },
+      ],
+    },
+    {
+      title: "Lainnya",
+      items: [
+        { icon: Info, label: "Tentang Kala", desc: "Versi 1.0 — Pendamping ibadah harianmu" },
+      ],
+    },
   ];
 
   return (
-    <div className="min-h-screen bg-white pb-24 relative overflow-hidden">
+    <div className="min-h-screen bg-background pb-24 relative overflow-hidden">
+      {/* Decorative blurs */}
       <div
         className="absolute pointer-events-none"
         style={{
@@ -179,44 +197,97 @@ const SettingsPage = () => {
         }}
       />
 
-      <div className="relative z-10 flex flex-col pt-6 px-4 gap-4">
-        <div className="flex flex-col items-center py-3">
-          <h1 className="text-xl font-bold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>Setelan</h1>
+      <div className="relative z-10 flex flex-col pt-6 px-4 gap-5">
+        {/* Header */}
+        <div className="flex flex-col items-center py-2">
+          <h1 className="text-xl font-bold text-foreground" style={{ letterSpacing: '-0.44px' }}>Setelan</h1>
         </div>
 
-        <div className="flex flex-col gap-2">
-          {settings.map((item) => {
-            const Icon = item.icon;
-            const isClickable = !!item.onClick;
-            return (
-              <div
-                key={item.label}
-                className={`flex w-full items-center gap-4 rounded-2xl p-4${isClickable ? ' cursor-pointer active:scale-[0.98] transition-transform' : ''}`}
-                style={{
-                  background: '#FFFFFF',
-                  border: '1px solid #F3EDE6',
-                  boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)',
-                }}
-                onClick={item.onClick}
-              >
-                <div
-                  className="flex h-11 w-11 items-center justify-center rounded-full flex-shrink-0"
-                  style={{ background: '#F8F8F7' }}
-                >
-                  {item.label === "Lokasi" && isCalibrating ? (
-                    <Loader2 className="h-5 w-5 animate-spin" style={{ color: '#334258' }} />
-                  ) : (
-                    <Icon className="h-5 w-5" style={{ color: '#334258' }} />
-                  )}
-                </div>
-                <div className="flex-1">
-                  <p className="font-semibold text-base" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>{item.label}</p>
-                  <p className="text-xs" style={{ color: '#838A96', letterSpacing: '-0.15px' }}>{item.desc}</p>
-                </div>
-              </div>
-            );
-          })}
+        {/* Profile Card */}
+        <div
+          className="flex items-center gap-4 rounded-2xl p-4 cursor-pointer active:scale-[0.98] transition-transform"
+          style={{
+            background: 'linear-gradient(135deg, hsl(150 70% 96%) 0%, hsl(80 100% 96%) 100%)',
+            border: '1px solid hsl(var(--border))',
+            boxShadow: 'var(--shadow-warm)',
+          }}
+        >
+          <div
+            className="flex h-12 w-12 items-center justify-center rounded-full flex-shrink-0"
+            style={{ background: 'hsl(var(--primary) / 0.12)' }}
+          >
+            {isLoggedIn ? (
+              <img src="" alt="avatar" className="h-12 w-12 rounded-full object-cover" />
+            ) : (
+              <User className="h-5 w-5 text-primary" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            {isLoggedIn ? (
+              <>
+                <p className="font-semibold text-base text-foreground truncate">Nama User</p>
+                <p className="text-xs text-muted-foreground truncate">email@example.com</p>
+              </>
+            ) : (
+              <>
+                <p className="font-semibold text-base text-foreground">Masuk ke Akun</p>
+                <p className="text-xs text-muted-foreground">Sinkronkan data ibadahmu ke cloud</p>
+              </>
+            )}
+          </div>
+          {!isLoggedIn && (
+            <LogIn className="h-5 w-5 text-primary flex-shrink-0" />
+          )}
+          {isLoggedIn && (
+            <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+          )}
         </div>
+
+        {/* Setting Groups */}
+        {settingGroups.map((group) => (
+          <div key={group.title} className="flex flex-col gap-1.5">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1 mb-1">
+              {group.title}
+            </p>
+            <div
+              className="flex flex-col rounded-2xl overflow-hidden"
+              style={{
+                border: '1px solid hsl(var(--border))',
+                boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)',
+              }}
+            >
+              {group.items.map((item, idx) => {
+                const Icon = item.icon;
+                const isClickable = !!item.onClick;
+                const isLocation = item.label === "Lokasi";
+                return (
+                  <div
+                    key={item.label}
+                    className={`flex w-full items-center gap-4 p-4 bg-card${isClickable ? ' cursor-pointer active:bg-muted transition-colors' : ''}${idx < group.items.length - 1 ? ' border-b border-border' : ''}`}
+                    onClick={item.onClick}
+                  >
+                    <div
+                      className="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0 bg-muted"
+                    >
+                      {isLocation && isCalibrating ? (
+                        <Loader2 className="h-[18px] w-[18px] animate-spin text-foreground/70" />
+                      ) : (
+                        <Icon className="h-[18px] w-[18px] text-foreground/70" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-[15px] text-foreground" style={{ letterSpacing: '-0.3px' }}>{item.label}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5" style={{ letterSpacing: '-0.1px' }}>{item.desc}</p>
+                    </div>
+                    {isClickable && (
+                      <ChevronRight className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
 
       <input
