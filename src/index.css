@@ -2,7 +2,8 @@
 
 @font-face {
   font-family: 'LPMQ IsepMisbah';
-  src: url('/fonts/LPMQ_IsepMisbah.ttf') format('truetype');
+  src: url('/fonts/LPMQ_IsepMisbah.woff2') format('woff2'),
+       url('/fonts/LPMQ_IsepMisbah.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
