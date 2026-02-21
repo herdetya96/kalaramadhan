@@ -187,7 +187,7 @@ const Today = () => {
               className="text-xs px-3 py-1.5 rounded-full"
               style={{ border: '1px solid #F3EDE6', letterSpacing: '-0.15px' }}
             >
-              <span style={{ color: '#62748E' }}>Streak </span><span style={{ color: '#38CA5E', fontWeight: 700 }}>{(() => { let c = 0; const d = new Date(); d.setDate(d.getDate() - 1); while (true) { const data = loadDayData(d); if (data.sunnahCompleted["puasa"]) { c++; d.setDate(d.getDate() - 1); } else break; } if (loadDayData(new Date()).sunnahCompleted["puasa"]) c++; return c; })()} hari</span>
+              <span style={{ color: '#62748E' }}>Streak </span><span style={{ color: '#38CA5E', fontWeight: 700 }}>{(() => { let c = 0; const d = new Date(); while (true) { const data = loadDayData(d); if (data.sunnahCompleted["puasa"]) { c++; d.setDate(d.getDate() - 1); } else break; } return c; })()} hari</span>
             </span>
           </div>
         </button>
