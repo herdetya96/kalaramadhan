@@ -207,7 +207,7 @@ const DoaHarian = () => {
                   className="flex flex-col gap-3 pt-2"
                   style={{ borderTop: '1px solid #F3EDE6' }}
                 >
-                  <p className="text-right text-xl leading-loose" dir="rtl" style={{ color: '#1D293D', fontFamily: "'Scheherazade New', 'Amiri', serif", lineHeight: 2.2 }}>
+                  <p className="text-right text-xl leading-loose" dir="rtl" style={{ color: '#1D293D', fontFamily: "'LPMQ IsepMisbah', 'Scheherazade New', serif", lineHeight: 2.2 }}>
                     {doa.arabic}
                   </p>
                   <p className="text-sm italic" style={{ color: '#62748E' }}>{doa.latin}</p>
