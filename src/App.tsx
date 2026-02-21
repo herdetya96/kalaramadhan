@@ -16,6 +16,7 @@ import HijriCalendar from "./pages/HijriCalendar";
 import RamadanInfo from "./pages/RamadanInfo";
 import SettingsPage from "./pages/SettingsPage";
 import Progress from "./pages/Progress";
+import Install from "./pages/Install";
 import BottomNav from "./components/BottomNav";
 import NotFound from "./pages/NotFound";
 
@@ -51,6 +52,7 @@ const App = () => {
             <Route path="/tools/zakat" element={<AppLayout><ZakatCalculator /></AppLayout>} />
             <Route path="/tools/ramadan" element={<AppLayout><RamadanInfo /></AppLayout>} />
             <Route path="/settings" element={<AppLayout><SettingsPage /></AppLayout>} />
+            <Route path="/install" element={<div className="mx-auto max-w-md"><Install /></div>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
