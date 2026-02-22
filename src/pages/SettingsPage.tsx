@@ -9,12 +9,12 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  AlertDialogTitle } from
+"@/components/ui/alert-dialog";
 
 const SettingsPage = () => {
   const [currentLocation, setCurrentLocation] = useState<string>(() =>
-    localStorage.getItem("kala-user-location") || ""
+  localStorage.getItem("kala-user-location") || ""
   );
   const [isCalibrating, setIsCalibrating] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
@@ -75,18 +75,18 @@ const SettingsPage = () => {
         } else if (key === "kala_quran_khatam") {
           data.quranKhatam = JSON.parse(localStorage.getItem(key)!);
         }
-      } catch { /* skip */ }
+      } catch {/* skip */}
     }
     const loc = localStorage.getItem("kala-user-location");
     const coords = localStorage.getItem("kala-user-coords");
     if (loc) data.location = loc;
-    if (coords) try { data.coords = JSON.parse(coords); } catch {}
+    if (coords) try {data.coords = JSON.parse(coords);} catch {}
 
     const backup = {
       version: "1.0",
       appName: "Kala",
       exportDate: new Date().toISOString(),
-      data,
+      data
     };
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -149,35 +149,35 @@ const SettingsPage = () => {
     onClick?: () => void;
   };
 
-  const settingGroups: { title: string; items: SettingItem[] }[] = [
+  const settingGroups: {title: string;items: SettingItem[];}[] = [
+  {
+    title: "Umum",
+    items: [
     {
-      title: "Umum",
-      items: [
-        {
-          icon: MapPin,
-          label: "Lokasi",
-          desc: isCalibrating
-            ? "Mengkalibrasi lokasi..."
-            : currentLocation || "Atur lokasi untuk waktu sholat akurat",
-          onClick: handleRecalibrate,
-        },
-        { icon: Bell, label: "Notifikasi Adzan", desc: "Pengingat waktu sholat" },
-      ],
+      icon: MapPin,
+      label: "Lokasi",
+      desc: isCalibrating ?
+      "Mengkalibrasi lokasi..." :
+      currentLocation || "Atur lokasi untuk waktu sholat akurat",
+      onClick: handleRecalibrate
     },
-    {
-      title: "Data",
-      items: [
-        { icon: Download, label: "Export Data", desc: "Unduh backup data ibadahmu", onClick: handleExport },
-        { icon: Upload, label: "Import Data", desc: "Pulihkan data dari file backup", onClick: handleImportClick },
-      ],
-    },
-    {
-      title: "Lainnya",
-      items: [
-        { icon: Info, label: "Tentang Kala", desc: "Versi 1.0 — Pendamping ibadah harianmu" },
-      ],
-    },
-  ];
+    { icon: Bell, label: "Notifikasi Adzan", desc: "Pengingat waktu sholat" }]
+
+  },
+  {
+    title: "Data",
+    items: [
+    { icon: Download, label: "Export Data", desc: "Unduh backup data ibadahmu", onClick: handleExport },
+    { icon: Upload, label: "Import Data", desc: "Pulihkan data dari file backup", onClick: handleImportClick }]
+
+  },
+  {
+    title: "Lainnya",
+    items: [
+    { icon: Info, label: "Tentang Kala", desc: "Versi 1.0 — Pendamping ibadah harianmu" }]
+
+  }];
+
 
   return (
     <div className="min-h-screen bg-background pb-24 relative overflow-hidden">
@@ -186,16 +186,16 @@ const SettingsPage = () => {
         className="absolute pointer-events-none"
         style={{
           width: 560, height: 341, left: '50%', top: -209, transform: 'translateX(-50%)',
-          background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0,
-        }}
-      />
+          background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0
+        }} />
+
       <div
         className="absolute pointer-events-none"
         style={{
           width: 546, height: 521, left: 19, top: -535,
-          background: '#00B4D8', filter: 'blur(100px)', transform: 'rotate(-76.22deg)', zIndex: 1,
-        }}
-      />
+          background: '#00B4D8', filter: 'blur(100px)', transform: 'rotate(-76.22deg)', zIndex: 1
+        }} />
+
 
       <div className="relative z-10 flex flex-col pt-6 px-4 gap-5">
         {/* Header */}
@@ -209,85 +209,85 @@ const SettingsPage = () => {
           style={{
             background: 'linear-gradient(135deg, hsl(150 70% 96%) 0%, hsl(80 100% 96%) 100%)',
             border: '1px solid hsl(var(--border))',
-            boxShadow: 'var(--shadow-warm)',
-          }}
-        >
+            boxShadow: 'var(--shadow-warm)'
+          }}>
+
           <div
             className="flex h-12 w-12 items-center justify-center rounded-full flex-shrink-0"
-            style={{ background: 'hsl(var(--primary) / 0.12)' }}
-          >
-            {isLoggedIn ? (
-              <img src="" alt="avatar" className="h-12 w-12 rounded-full object-cover" />
-            ) : (
-              <User className="h-5 w-5 text-primary" />
-            )}
+            style={{ background: 'hsl(var(--primary) / 0.12)' }}>
+
+            {isLoggedIn ?
+            <img src="" alt="avatar" className="h-12 w-12 rounded-full object-cover" /> :
+
+            <User className="h-5 w-5 text-primary" />
+            }
           </div>
           <div className="flex-1 min-w-0">
-            {isLoggedIn ? (
-              <>
+            {isLoggedIn ?
+            <>
                 <p className="font-semibold text-base text-foreground truncate">Nama User</p>
                 <p className="text-xs text-muted-foreground truncate">email@example.com</p>
-              </>
-            ) : (
-              <>
+              </> :
+
+            <>
                 <p className="font-semibold text-base text-foreground">Masuk ke Akun</p>
-                <p className="text-xs text-muted-foreground">Sinkronkan data ibadahmu ke cloud</p>
-              </>
-            )}
+                <p className="text-xs text-muted-foreground">Fitur ini akan tersedia secepatnya!
+              </p>
+              </>}
           </div>
-          {!isLoggedIn && (
-            <LogIn className="h-5 w-5 text-primary flex-shrink-0" />
-          )}
-          {isLoggedIn && (
-            <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-          )}
+          {!isLoggedIn &&
+          <LogIn className="h-5 w-5 text-primary flex-shrink-0" />
+          }
+          {isLoggedIn &&
+          <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+          }
         </div>
 
         {/* Setting Groups */}
-        {settingGroups.map((group) => (
-          <div key={group.title} className="flex flex-col gap-1.5">
+        {settingGroups.map((group) =>
+        <div key={group.title} className="flex flex-col gap-1.5">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1 mb-1">
               {group.title}
             </p>
             <div
-              className="flex flex-col rounded-2xl overflow-hidden"
-              style={{
-                border: '1px solid hsl(var(--border))',
-                boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)',
-              }}
-            >
+            className="flex flex-col rounded-2xl overflow-hidden"
+            style={{
+              border: '1px solid hsl(var(--border))',
+              boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)'
+            }}>
+
               {group.items.map((item, idx) => {
-                const Icon = item.icon;
-                const isClickable = !!item.onClick;
-                const isLocation = item.label === "Lokasi";
-                return (
-                  <div
-                    key={item.label}
-                    className={`flex w-full items-center gap-4 p-4 bg-card${isClickable ? ' cursor-pointer active:bg-muted transition-colors' : ''}${idx < group.items.length - 1 ? ' border-b border-border' : ''}`}
-                    onClick={item.onClick}
-                  >
+              const Icon = item.icon;
+              const isClickable = !!item.onClick;
+              const isLocation = item.label === "Lokasi";
+              return (
+                <div
+                  key={item.label}
+                  className={`flex w-full items-center gap-4 p-4 bg-card${isClickable ? ' cursor-pointer active:bg-muted transition-colors' : ''}${idx < group.items.length - 1 ? ' border-b border-border' : ''}`}
+                  onClick={item.onClick}>
+
                     <div
-                      className="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0 bg-muted"
-                    >
-                      {isLocation && isCalibrating ? (
-                        <Loader2 className="h-[18px] w-[18px] animate-spin text-foreground/70" />
-                      ) : (
-                        <Icon className="h-[18px] w-[18px] text-foreground/70" />
-                      )}
+                    className="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0 bg-muted">
+
+                      {isLocation && isCalibrating ?
+                    <Loader2 className="h-[18px] w-[18px] animate-spin text-foreground/70" /> :
+
+                    <Icon className="h-[18px] w-[18px] text-foreground/70" />
+                    }
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-[15px] text-foreground" style={{ letterSpacing: '-0.3px' }}>{item.label}</p>
                       <p className="text-xs text-muted-foreground mt-0.5" style={{ letterSpacing: '-0.1px' }}>{item.desc}</p>
                     </div>
-                    {isClickable && (
-                      <ChevronRight className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
-                    )}
-                  </div>
-                );
-              })}
+                    {isClickable &&
+                  <ChevronRight className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
+                  }
+                  </div>);
+
+            })}
             </div>
           </div>
-        ))}
+        )}
       </div>
 
       <input
@@ -295,8 +295,8 @@ const SettingsPage = () => {
         type="file"
         accept=".json"
         className="hidden"
-        onChange={handleFileChange}
-      />
+        onChange={handleFileChange} />
+
 
       <AlertDialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
         <AlertDialogContent className="rounded-2xl mx-4 max-w-sm">
@@ -312,8 +312,8 @@ const SettingsPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
-  );
+    </div>);
+
 };
 
 export default SettingsPage;
