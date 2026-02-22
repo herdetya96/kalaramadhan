@@ -231,6 +231,15 @@ const Quran = () => {
     setLoading(true);
     setSelectedSurah(surahNum);
     try {
+      // Check cache first
+      const cacheKey = `kala_quran_surah_${surahNum}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        setAyahs(JSON.parse(cached));
+        setLoading(false);
+        return;
+      }
+
       const [arRes, idRes, eqRes] = await Promise.all([
         fetch(`https://api.alquran.cloud/v1/surah/${surahNum}`).then((r) => r.json()),
         fetch(`https://api.alquran.cloud/v1/surah/${surahNum}/id.indonesian`).then((r) => r.json()),
@@ -254,6 +263,8 @@ const Quran = () => {
           };
         });
         setAyahs(merged);
+        // Cache for future use
+        try { localStorage.setItem(cacheKey, JSON.stringify(merged)); } catch { /* storage full */ }
       }
     } catch {
       setAyahs([]);
