@@ -345,9 +345,11 @@ const Quran = () => {
   };
 
   const handleMarkLastRead = () => {
-    if (!selectedAyahForAction || selectedSurah === null) return;
-    saveQuranProgress(selectedSurah, selectedAyahForAction.numberInSurah);
-    setBookmarkedSurah(selectedSurah);
+    if (!selectedAyahForAction) return;
+    const surahNum = selectedAyahForAction.surahNumber ?? selectedSurah;
+    if (surahNum === null || surahNum === undefined) return;
+    saveQuranProgress(surahNum, selectedAyahForAction.numberInSurah);
+    setBookmarkedSurah(surahNum);
     setBookmarkedAyah(selectedAyahForAction.numberInSurah);
     toast.success("Terakhir dibaca disimpan ✓");
     setDrawerOpen(false);
@@ -355,8 +357,10 @@ const Quran = () => {
 
   const handleCopyAyah = () => {
     if (!selectedAyahForAction) return;
-    const surah = surahs.find((s) => s.number === selectedSurah);
-    const text = `${selectedAyahForAction.text}\n\n${selectedAyahForAction.translation || ""}\n\n— ${surah?.englishName || ""} : ${selectedAyahForAction.numberInSurah}`;
+    const surahNum = selectedAyahForAction.surahNumber ?? selectedSurah;
+    const surah = surahs.find((s) => s.number === surahNum);
+    const surahLabel = selectedAyahForAction.surahName || surah?.englishName || "";
+    const text = `${selectedAyahForAction.text}\n\n${selectedAyahForAction.translation || ""}\n\n— ${surahLabel} : ${selectedAyahForAction.numberInSurah}`;
     navigator.clipboard.writeText(text).then(() => {
       toast.success("Ayat berhasil disalin");
     }).catch(() => {
@@ -366,20 +370,23 @@ const Quran = () => {
   };
 
   const handleToggleCheckpoint = () => {
-    if (!selectedAyahForAction || selectedSurah === null) return;
-    const surah = surahs.find((s) => s.number === selectedSurah);
+    if (!selectedAyahForAction) return;
+    const surahNum = selectedAyahForAction.surahNumber ?? selectedSurah;
+    if (surahNum === null || surahNum === undefined) return;
+    const surah = surahs.find((s) => s.number === surahNum);
+    const surahLabel = selectedAyahForAction.surahName || surah?.englishName || "";
     const exactMatch = bookmarks.findIndex(
-      (b) => b.surah === selectedSurah && b.ayahNumber === selectedAyahForAction.numberInSurah
+      (b) => b.surah === surahNum && b.ayahNumber === selectedAyahForAction.numberInSurah
     );
     let updated: BookmarkedAyah[];
     if (exactMatch !== -1) {
       updated = bookmarks.filter((_, i) => i !== exactMatch);
       toast.success("Checkpoint dihapus");
     } else {
-      updated = bookmarks.filter((b) => b.surah !== selectedSurah);
+      updated = bookmarks.filter((b) => b.surah !== surahNum);
       updated.push({
-        surah: selectedSurah,
-        surahName: surah?.englishName || "",
+        surah: surahNum,
+        surahName: surahLabel,
         ayahNumber: selectedAyahForAction.numberInSurah,
         arabicText: selectedAyahForAction.text,
         translation: selectedAyahForAction.translation || "",
@@ -1288,25 +1295,42 @@ const Quran = () => {
                 const isKhatamCp = khatamSession
                   && khatamSession.checkpointSurah === ayah.surahNumber
                   && khatamSession.checkpointAyah === ayah.numberInSurah;
+                const isLastRead = bookmarkedSurah === ayah.surahNumber && bookmarkedAyah === ayah.numberInSurah;
+                const isSaved = ayah.surahNumber ? isAyahBookmarked(ayah.surahNumber, ayah.numberInSurah) : false;
                 return (
                   <div
                     key={ayah.number}
-                    onClick={isKhatamJuz ? () => handleAyahTap(ayah) : undefined}
-                    className={isKhatamJuz ? "rounded-2xl p-4 flex flex-col gap-3 cursor-pointer active:scale-[0.99] transition-all" : "rounded-2xl p-4 flex flex-col gap-3"}
+                    id={`juz-ayah-${ayah.surahNumber}-${ayah.numberInSurah}`}
+                    onClick={() => handleAyahTap(ayah)}
+                    className="rounded-2xl p-4 flex flex-col gap-3 cursor-pointer transition-all active:scale-[0.99]"
                     style={{
                       background: '#FFFFFF',
                       border: '1px solid #F3EDE6',
                       boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)',
-                      borderLeft: isKhatamCp ? '3px solid #059669' : '1px solid #F3EDE6',
+                      borderLeft: isKhatamCp
+                        ? '3px solid #059669'
+                        : isLastRead
+                        ? '3px solid #38CA5E'
+                        : isSaved
+                        ? '3px solid #F59E0B'
+                        : '1px solid #F3EDE6',
                     }}
                   >
                     <div className="flex items-center gap-2">
-                      <div className="flex items-center justify-center h-7 w-7 rounded-full text-xs font-bold" style={{ background: '#F0FDF4', color: '#166534' }}>
+                      <div
+                        className="flex items-center justify-center h-7 w-7 rounded-full text-xs font-bold"
+                        style={{
+                          background: isLastRead ? '#38CA5E' : '#F0FDF4',
+                          color: isLastRead ? '#FFFFFF' : '#166534',
+                        }}
+                      >
                         {ayah.numberInSurah}
                       </div>
                       {ayah.surahName && (
                         <span className="text-xs font-medium" style={{ color: '#90A1B9' }}>{ayah.surahName}</span>
                       )}
+                      {isLastRead && <BookOpen className="h-4 w-4" style={{ color: '#38CA5E' }} />}
+                      {isSaved && <Flag className="h-4 w-4" style={{ color: '#F59E0B' }} />}
                       {isKhatamCp && <MapPin className="h-4 w-4 ml-auto" style={{ color: '#059669' }} />}
                     </div>
                     <p className="text-right text-xl leading-loose" dir="rtl" style={{ color: '#1D293D', fontFamily: "'LPMQ IsepMisbah', 'Scheherazade New', serif", lineHeight: 2.2 }}>
@@ -1338,19 +1362,20 @@ const Quran = () => {
           )}
         </div>
 
-        {/* Drawer — khatam juz context */}
-        {isKhatamJuz && (
-          <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-            <DrawerContent className="rounded-t-3xl">
-              <DrawerHeader className="pb-2">
-                <DrawerTitle className="text-base font-bold" style={{ color: '#1D293D' }}>
-                  {selectedAyahForAction?.surahName} : Ayat {selectedAyahForAction?.numberInSurah}
-                </DrawerTitle>
-                <DrawerDescription className="text-xs" style={{ color: '#838A96' }}>
-                  Pilih aksi untuk ayat ini
-                </DrawerDescription>
-              </DrawerHeader>
-              <div className="flex flex-col gap-2 px-4 pb-6">
+        {/* Drawer — juz context (works for both khatam and non-khatam) */}
+        <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+          <DrawerContent className="rounded-t-3xl">
+            <DrawerHeader className="pb-2">
+              <DrawerTitle className="text-base font-bold" style={{ color: '#1D293D' }}>
+                {selectedAyahForAction?.surahName} : Ayat {selectedAyahForAction?.numberInSurah}
+              </DrawerTitle>
+              <DrawerDescription className="text-xs" style={{ color: '#838A96' }}>
+                Pilih aksi untuk ayat ini
+              </DrawerDescription>
+            </DrawerHeader>
+            <div className="flex flex-col gap-2 px-4 pb-6">
+              {/* Khatam Checkpoint — only when reading from khatam */}
+              {khatamReadingId && (
                 <button
                   onClick={handleKhatamCheckpoint}
                   className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:bg-gray-50"
@@ -1364,23 +1389,68 @@ const Quran = () => {
                     <span className="text-xs" style={{ color: '#838A96' }}>Tandai posisi baca khatam di ayat ini</span>
                   </div>
                 </button>
-                <button
-                  onClick={handleCopyAyah}
-                  className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:bg-gray-50"
-                  style={{ background: '#F8F8F7' }}
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: '#E0F2FE' }}>
-                    <Copy className="h-5 w-5" style={{ color: '#0284C7' }} />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>Salin Ayat</span>
-                    <span className="text-xs" style={{ color: '#838A96' }}>Salin teks Arab & terjemahan</span>
-                  </div>
-                </button>
-              </div>
-            </DrawerContent>
-          </Drawer>
-        )}
+              )}
+
+              {/* Copy */}
+              <button
+                onClick={handleCopyAyah}
+                className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:bg-gray-50"
+                style={{ background: '#F8F8F7' }}
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: '#E0F2FE' }}>
+                  <Copy className="h-5 w-5" style={{ color: '#0284C7' }} />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>Salin Ayat</span>
+                  <span className="text-xs" style={{ color: '#838A96' }}>Salin teks Arab & terjemahan</span>
+                </div>
+              </button>
+
+              {/* Checkpoint & Tandai Terakhir Dibaca — hidden in khatam mode */}
+              {!khatamReadingId && (
+                <>
+                  <button
+                    onClick={handleToggleCheckpoint}
+                    className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:bg-gray-50"
+                    style={{ background: '#F8F8F7' }}
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: '#FEF3C7' }}>
+                      <Flag className="h-5 w-5" style={{ color: '#D97706' }} />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>
+                        {selectedAyahForAction && selectedAyahForAction.surahNumber && isAyahBookmarked(selectedAyahForAction.surahNumber, selectedAyahForAction.numberInSurah) ? 'Hapus Checkpoint' : 'Simpan Checkpoint'}
+                      </span>
+                      <span className="text-xs" style={{ color: '#838A96' }}>
+                        Tandai ayat ini sebagai checkpoint
+                      </span>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={handleMarkLastRead}
+                    className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:bg-gray-50"
+                    style={{
+                      background: selectedAyahForAction && bookmarkedSurah === selectedAyahForAction.surahNumber && bookmarkedAyah === selectedAyahForAction.numberInSurah ? '#F0FDF4' : '#F8F8F7',
+                    }}
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: '#ECFDF5' }}>
+                      <BookMarked className="h-5 w-5" style={{ color: '#059669' }} />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>
+                        {selectedAyahForAction && bookmarkedSurah === selectedAyahForAction.surahNumber && bookmarkedAyah === selectedAyahForAction.numberInSurah ? 'Sudah Ditandai' : 'Tandai Terakhir Dibaca'}
+                      </span>
+                      <span className="text-xs" style={{ color: '#838A96' }}>
+                        Lanjut membaca dari ayat ini nanti
+                      </span>
+                    </div>
+                  </button>
+                </>
+              )}
+            </div>
+          </DrawerContent>
+        </Drawer>
       </div>
     );
   }
