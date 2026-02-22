@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import {
   Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription,
 } from "@/components/ui/drawer";
+import { getSurahTranslation } from "@/lib/surah-translations";
 
 interface JuzInfo {
   number: number;
@@ -452,6 +453,7 @@ const Quran = () => {
     (s) =>
       s.englishName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.englishNameTranslation.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (getSurahTranslation(s.number) || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.number.toString() === searchQuery
   );
 
@@ -459,6 +461,7 @@ const Quran = () => {
     (s) =>
       s.englishName.toLowerCase().includes(khatamDetailSearch.toLowerCase()) ||
       s.englishNameTranslation.toLowerCase().includes(khatamDetailSearch.toLowerCase()) ||
+      (getSurahTranslation(s.number) || "").toLowerCase().includes(khatamDetailSearch.toLowerCase()) ||
       s.number.toString() === khatamDetailSearch
   );
 
@@ -503,7 +506,7 @@ const Quran = () => {
             </button>
             <div className="flex-1 text-center pr-10">
               <h1 className="text-xl font-bold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>{surah?.englishName}</h1>
-              <span className="text-xs" style={{ color: '#838A96' }}>{surah?.englishNameTranslation} · {surah?.numberOfAyahs} ayat</span>
+              <span className="text-xs" style={{ color: '#838A96' }}>{getSurahTranslation(surah?.number || 0) || surah?.englishNameTranslation} · {surah?.numberOfAyahs} ayat</span>
             </div>
           </div>
 
@@ -963,7 +966,7 @@ const Quran = () => {
                             {isCp && <MapPin className="h-3.5 w-3.5 flex-shrink-0" style={{ color: '#059669' }} />}
                           </div>
                           <span className="text-xs truncate" style={{ color: '#838A96' }}>
-                            {surah.englishNameTranslation} · {surah.numberOfAyahs} ayat
+                            {getSurahTranslation(surah.number) || surah.englishNameTranslation} · {surah.numberOfAyahs} ayat
                             {isCp ? ` · Ayat ${session.checkpointAyah}` : ''}
                           </span>
                         </div>
@@ -1503,7 +1506,7 @@ const Quran = () => {
                     </div>
                     <div className="flex flex-col flex-1 min-w-0">
                       <span className="font-semibold text-sm truncate" style={{ color: '#1D293D' }}>{surah.englishName}</span>
-                      <span className="text-xs truncate" style={{ color: '#838A96' }}>{surah.englishNameTranslation} · {surah.numberOfAyahs} ayat</span>
+                      <span className="text-xs truncate" style={{ color: '#838A96' }}>{getSurahTranslation(surah.number) || surah.englishNameTranslation} · {surah.numberOfAyahs} ayat</span>
                     </div>
                     <span className="text-base font-arabic flex-shrink-0" style={{ color: '#1D293D', fontFamily: "'LPMQ IsepMisbah', 'Scheherazade New', serif" }}>{surah.name}</span>
                   </motion.button>
