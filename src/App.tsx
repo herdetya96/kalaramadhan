@@ -22,6 +22,17 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Apply saved theme on app load (without useTheme hook, just read localStorage)
+const initTheme = () => {
+  const saved = localStorage.getItem("kala-theme");
+  if (saved === "dark") {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
+};
+initTheme();
+
 const AppLayout = ({ children }: { children: React.ReactNode }) => (
   <div className="mx-auto max-w-md min-h-screen relative">
     {children}
