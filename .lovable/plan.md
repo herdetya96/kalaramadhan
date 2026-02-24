@@ -1,55 +1,63 @@
 
-# Fitur Import & Export Data di Setelan
 
-## Ringkasan
-Menambahkan dua menu baru di halaman Setelan: **Export Data** dan **Import Data**, untuk backup dan restore seluruh data ibadah (sholat, sunnah, lokasi, progress Quran, dll) dalam format file JSON.
+## Plan: Migrate Quran Page to equran.id API v2 as Single Data Source
 
-## Yang Akan Dibuat
+### Current State
+The app makes **3 parallel API calls** per surah and **2+N calls** per juz:
+- `api.alquran.cloud/v1/surah` -- surah list
+- `api.alquran.cloud/v1/surah/{n}` -- Arabic text
+- `api.alquran.cloud/v1/surah/{n}/id.indonesian` -- Indonesian translation
+- `equran.id/api/v2/surat/{n}` -- transliteration only
 
-### Export Data
-- Kumpulkan semua data dari localStorage yang berprefix `kala_data_`, `kala_quran_*`, `kala-user-location`, `kala-user-coords`
-- Bungkus dalam satu objek JSON dengan metadata (tanggal export, versi app)
-- Download otomatis sebagai file `kala-backup-YYYY-MM-DD.json`
-- Tampilkan toast sukses
+### After Migration
+**1 call** per surah, **1 call** for surah list:
+- `equran.id/api/v2/surat` -- surah list (all 114)
+- `equran.id/api/v2/surat/{n}` -- Arabic + translation + transliteration + audio in one response
 
-### Import Data
-- Klik menu Import membuka file picker (accept `.json`)
-- Validasi format file: cek apakah ada key yang dikenali (`version`, `exportDate`, `data`)
-- Tampilkan dialog konfirmasi: "Data saat ini akan ditimpa. Lanjutkan?"
-- Tulis semua data ke localStorage, lalu reload halaman
-- Tampilkan toast sukses/error
+### Changes in `src/pages/Quran.tsx`
 
-### UI
-Dua item menu baru di halaman Setelan dengan style yang sama seperti menu yang sudah ada:
-- Icon `Download` untuk Export Data
-- Icon `Upload` untuk Import Data
-- Ditempatkan sebelum "Tentang Kala"
+**1. Update `Surah` interface** to match equran.id fields (`nomor`, `nama`, `namaLatin`, `jumlahAyat`, `tempatTurun`, `arti`)
 
-## Detail Teknis
+**2. Update surah list fetch** (line 218): Replace `api.alquran.cloud/v1/surah` with `equran.id/api/v2/surat`, mapping response fields to the existing interface shape
 
-### File yang diubah
-| File | Perubahan |
-|------|-----------|
-| `src/pages/SettingsPage.tsx` | Tambah menu Export & Import, handler logic, hidden file input, dialog konfirmasi |
+**3. Update `loadSurah` function** (lines 229-273): Replace 3 parallel `Promise.all` calls with a single `fetch('https://equran.id/api/v2/surat/{n}')`. Map `teksArab` to `text`, `teksIndonesia` to `translation`, `teksLatin` to `transliteration`
 
-### Struktur File Backup (JSON)
+**4. Update `loadJuz` function** (lines 280-330): Replace `api.alquran.cloud/v1/juz` calls. Since equran.id has no juz endpoint, load each surah in the juz range individually from equran.id and slice ayahs based on `JUZ_DATA` boundaries. This is already partially done (equran.id calls per surah), just remove the alquran.cloud juz calls
+
+**5. Clear stale cache**: Add a migration key (`kala_quran_v2_migrated`) check on mount. If not set, clear old cache keys (`kala_quran_surahs`, `kala_quran_surah_*`) so fresh equran.id data is fetched
+
+**6. Bismillah stripping**: The `stripBismillahFromAyah` function should still work since equran.id `teksArab` uses standard Arabic Unicode, but will need testing since the text encoding may differ slightly from alquran.cloud
+
+### Data Mapping Reference
+
 ```text
-{
-  "version": "1.0",
-  "exportDate": "2026-02-21T...",
-  "appName": "Kala",
-  "data": {
-    "dailyData": { "2026-02-18": {...}, "2026-02-19": {...} },
-    "quranProgress": {...},
-    "quranBookmarks": [...],
-    "quranKhatam": {...},
-    "location": "Jakarta, DKI Jakarta",
-    "coords": { "lat": -6.2, "lon": 106.8 }
-  }
-}
+equran.id v2 Surah List    →  App Interface
+─────────────────────────────────────────
+nomor                      →  number
+nama                       →  name
+namaLatin                  →  englishName
+arti                       →  englishNameTranslation
+jumlahAyat                 →  numberOfAyahs
+tempatTurun                →  revelationType
+
+equran.id v2 Ayat          →  App Interface
+─────────────────────────────────────────
+nomorAyat                  →  numberInSurah
+teksArab                   →  text
+teksIndonesia              →  translation
+teksLatin                  →  transliteration
 ```
 
-### Validasi Import
-- Cek `version` dan `appName` ada di file
-- Jika format tidak valid, tampilkan toast error "Format file tidak valid"
-- Konfirmasi user sebelum overwrite via Alert Dialog
+### Benefits
+- 3x fewer network requests per surah view
+- Single consistent data source
+- Audio URLs available per ayat (ready for future audio feature)
+- More up-to-date Indonesian translation text
+
+### Risk
+- Bismillah stripping regex may need adjustment for equran.id's text encoding (different diacritics than alquran.cloud's `quran-uthmani` edition)
+- Juz mode becomes slightly more complex (multiple surah fetches instead of single juz endpoint)
+
+### Files Modified
+- `src/pages/Quran.tsx` -- all API calls, interfaces, data mapping, cache migration
+
