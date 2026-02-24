@@ -208,6 +208,20 @@ const Quran = () => {
   const activeKhatam = khatamSessions.filter((s) => !s.completed);
   const completedKhatam = khatamSessions.filter((s) => s.completed);
 
+  // Cache migration: clear old alquran.cloud caches on first run
+  useEffect(() => {
+    if (!localStorage.getItem("kala_quran_v2_migrated")) {
+      localStorage.removeItem("kala_quran_surahs");
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.startsWith("kala_quran_surah_")) keysToRemove.push(key);
+      }
+      keysToRemove.forEach((k) => localStorage.removeItem(k));
+      localStorage.setItem("kala_quran_v2_migrated", "1");
+    }
+  }, []);
+
   useEffect(() => {
     const cached = localStorage.getItem("kala_quran_surahs");
     if (cached) {
@@ -215,12 +229,20 @@ const Quran = () => {
       setSurahLoading(false);
       return;
     }
-    fetch("https://api.alquran.cloud/v1/surah")
+    fetch("https://equran.id/api/v2/surat")
       .then((r) => r.json())
       .then((data) => {
         if (data.code === 200) {
-          setSurahs(data.data);
-          localStorage.setItem("kala_quran_surahs", JSON.stringify(data.data));
+          const mapped: Surah[] = data.data.map((s: any) => ({
+            number: s.nomor,
+            name: s.nama,
+            englishName: s.namaLatin,
+            englishNameTranslation: s.arti,
+            numberOfAyahs: s.jumlahAyat,
+            revelationType: s.tempatTurun,
+          }));
+          setSurahs(mapped);
+          localStorage.setItem("kala_quran_surahs", JSON.stringify(mapped));
         }
       })
       .finally(() => setSurahLoading(false));
@@ -230,7 +252,6 @@ const Quran = () => {
     setLoading(true);
     setSelectedSurah(surahNum);
     try {
-      // Check cache first
       const cacheKey = `kala_quran_surah_${surahNum}`;
       const cached = localStorage.getItem(cacheKey);
       if (cached) {
@@ -239,30 +260,23 @@ const Quran = () => {
         return;
       }
 
-      const [arRes, idRes, eqRes] = await Promise.all([
-        fetch(`https://api.alquran.cloud/v1/surah/${surahNum}`).then((r) => r.json()),
-        fetch(`https://api.alquran.cloud/v1/surah/${surahNum}/id.indonesian`).then((r) => r.json()),
-        fetch(`https://equran.id/api/v2/surat/${surahNum}`).then((r) => r.json()).catch(() => null),
-      ]);
-      if (arRes.code === 200) {
-        const arabic: Ayah[] = arRes.data.ayahs;
-        const indo = idRes.code === 200 ? idRes.data.ayahs : [];
-        const eqAyat = eqRes?.data?.ayat || [];
-        
-        const merged = arabic.map((a: Ayah, i: number) => {
-          let text = a.text;
-          if (a.numberInSurah === 1 && surahNum !== 1 && surahNum !== 9) {
+      const res = await fetch(`https://equran.id/api/v2/surat/${surahNum}`);
+      const data = await res.json();
+      if (data.code === 200) {
+        const merged: Ayah[] = data.data.ayat.map((a: any) => {
+          let text: string = a.teksArab;
+          if (a.nomorAyat === 1 && surahNum !== 1 && surahNum !== 9) {
             text = stripBismillahFromAyah(text);
           }
           return {
-            ...a,
+            number: a.nomorAyat,
             text,
-            translation: indo[i]?.text || "",
-            transliteration: eqAyat[i]?.teksLatin || "",
+            numberInSurah: a.nomorAyat,
+            translation: a.teksIndonesia || "",
+            transliteration: a.teksLatin || "",
           };
         });
         setAyahs(merged);
-        // Cache for future use
         try { localStorage.setItem(cacheKey, JSON.stringify(merged)); } catch { /* storage full */ }
       }
     } catch {
@@ -281,53 +295,57 @@ const Quran = () => {
     setJuzLoading(true);
     setSelectedJuz(juzNum);
     try {
-      const [arRes, idRes] = await Promise.all([
-        fetch(`https://api.alquran.cloud/v1/juz/${juzNum}/quran-uthmani`).then((r) => r.json()),
-        fetch(`https://api.alquran.cloud/v1/juz/${juzNum}/id.indonesian`).then((r) => r.json()),
-      ]);
-      if (arRes.code === 200) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const arabic = arRes.data.ayahs as any[];
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const indo = idRes.code === 200 ? (idRes.data.ayahs as any[]) : [];
-        
-        // Fetch Indonesian transliterations from equran.id for surahs in this juz
-        const surahNums = [...new Set(arabic.map((a: any) => a.surah?.number as number))];
-        const eqResults = await Promise.all(
-          surahNums.map((sn) => fetch(`https://equran.id/api/v2/surat/${sn}`).then((r) => r.json()).catch(() => null))
-        );
-        // Build a map: surahNum -> { ayahNum -> teksLatin }
-        const translitMap: Record<number, Record<number, string>> = {};
-        surahNums.forEach((sn, idx) => {
-          const ayat = eqResults[idx]?.data?.ayat || [];
-          translitMap[sn] = {};
-          ayat.forEach((a: any) => { translitMap[sn][a.nomorAyat] = a.teksLatin || ""; });
+      const juz = JUZ_DATA[juzNum - 1];
+      // Find surah number range for this juz using the surahs list
+      const startSurahNum = surahs.find((s) => s.englishName === juz.startSurah)?.number;
+      const endSurahNum = surahs.find((s) => s.englishName === juz.endSurah)?.number;
+      if (!startSurahNum || !endSurahNum) { setJuzAyahs([]); return; }
+
+      const surahNums: number[] = [];
+      for (let i = startSurahNum; i <= endSurahNum; i++) surahNums.push(i);
+
+      const results = await Promise.all(
+        surahNums.map((sn) => fetch(`https://equran.id/api/v2/surat/${sn}`).then((r) => r.json()).catch(() => null))
+      );
+
+      const allAyahs: Ayah[] = [];
+      results.forEach((res, idx) => {
+        if (!res?.data?.ayat) return;
+        const sn = surahNums[idx];
+        const surahName = surahs.find((s) => s.number === sn)?.englishName || "";
+        const ayat: any[] = res.data.ayat;
+
+        // Filter ayahs based on juz boundaries
+        const filtered = ayat.filter((a: any) => {
+          if (sn === startSurahNum && sn === endSurahNum) return a.nomorAyat >= juz.startAyah && a.nomorAyat <= juz.endAyah;
+          if (sn === startSurahNum) return a.nomorAyat >= juz.startAyah;
+          if (sn === endSurahNum) return a.nomorAyat <= juz.endAyah;
+          return true;
         });
-        
-        const merged: Ayah[] = arabic.map((a, i) => {
-          let text = a.text;
-          const sNum = a.surah?.number;
-          if (a.numberInSurah === 1 && sNum !== 1 && sNum !== 9) {
+
+        filtered.forEach((a: any) => {
+          let text: string = a.teksArab;
+          if (a.nomorAyat === 1 && sn !== 1 && sn !== 9) {
             text = stripBismillahFromAyah(text);
           }
-          return {
-            number: a.number,
+          allAyahs.push({
+            number: a.nomorAyat,
             text,
-            numberInSurah: a.numberInSurah,
-            translation: indo[i]?.text || "",
-            transliteration: translitMap[sNum]?.[a.numberInSurah] || "",
-            surahNumber: sNum,
-            surahName: a.surah?.englishName,
-          };
+            numberInSurah: a.nomorAyat,
+            translation: a.teksIndonesia || "",
+            transliteration: a.teksLatin || "",
+            surahNumber: sn,
+            surahName,
+          });
         });
-        setJuzAyahs(merged);
-      }
+      });
+      setJuzAyahs(allAyahs);
     } catch {
       setJuzAyahs([]);
     } finally {
       setJuzLoading(false);
     }
-  }, []);
+  }, [surahs]);
 
   useEffect(() => {
     if (!loading && ayahs.length > 0 && selectedSurah === bookmarkedSurah) {
