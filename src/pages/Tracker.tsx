@@ -142,7 +142,7 @@ const Tracker = () => {
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold px-4 py-2 rounded-full" style={{ background: 'var(--c-surface-alt)', color: 'var(--c-text-dark)' }}>{completedCount}/5</span>
               <button onClick={completeAll} className="text-xs font-bold px-4 py-2 rounded-full"
-                style={{ background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)', border: '1px solid var(--c-surface)', boxShadow: 'var(--s-complex)', color: 'var(--c-text-dark)' }}>
+                style={{ background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)', border: '1px solid #FFFFFF', boxShadow: 'var(--s-complex)', color: '#314158' }}>
                 Selesaikan semua
               </button>
             </div>

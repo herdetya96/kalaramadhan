@@ -152,30 +152,8 @@ const Puasa = () => {
 
   return (
     <div className="min-h-screen pb-24 relative overflow-hidden" style={{ background: 'var(--c-surface)' }}>
-      {/* bg atas - green */}
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          width: 560, height: 341,
-          left: '50%', top: -209,
-          transform: 'translateX(-50%)',
-          background: '#CCFF3F',
-          filter: 'blur(100px)',
-          zIndex: 0,
-        }}
-      />
-      {/* bg - blue */}
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          width: 546, height: 521,
-          left: 19, top: -535,
-          background: '#00B4D8',
-          filter: 'blur(100px)',
-          transform: 'rotate(-76.22deg)',
-          zIndex: 1,
-        }}
-      />
+      <div className="absolute pointer-events-none" style={{ width: 560, height: 341, left: '50%', top: -209, transform: 'translateX(-50%)', background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0 }} />
+      <div className="absolute pointer-events-none" style={{ width: 546, height: 521, left: 19, top: -535, background: '#00B4D8', filter: 'blur(100px)', transform: 'rotate(-76.22deg)', zIndex: 1 }} />
 
       <div className="relative z-10 flex flex-col items-center pt-6 px-4 gap-4">
         {/* Header with week nav */}
@@ -184,12 +162,8 @@ const Puasa = () => {
             <ChevronLeft className="h-6 w-6" style={{ color: 'var(--c-text-secondary)' }} strokeWidth={2} />
           </button>
           <div className="flex flex-col items-center">
-            <h1 className="text-xl font-bold" style={{ color: 'var(--c-text)', letterSpacing: '-0.44px' }}>
-              {isToday ? "Ramadhan Tracker" : "Ramadhan Tracker"}
-            </h1>
-            <span className="text-sm font-medium" style={{ color: 'var(--c-text-secondary)', letterSpacing: '-0.15px' }}>
-              {dateTitle}
-            </span>
+            <h1 className="text-xl font-bold" style={{ color: 'var(--c-text)', letterSpacing: '-0.44px' }}>Ramadhan Tracker</h1>
+            <span className="text-sm font-medium" style={{ color: 'var(--c-text-secondary)', letterSpacing: '-0.15px' }}>{dateTitle}</span>
           </div>
           <button onClick={() => navigateWeek(1)} className="p-2 rounded-full">
             <ChevronRight className="h-6 w-6" style={{ color: 'var(--c-text-secondary)' }} strokeWidth={2} />
@@ -204,24 +178,21 @@ const Puasa = () => {
             const dData = loadDayData(d);
             const hasPuasa = dData.sunnahCompleted["puasa"];
             return (
-              <button
-                key={i}
-                onClick={() => setSelectedDate(d)}
+              <button key={i} onClick={() => setSelectedDate(d)}
                 className="flex flex-col items-center justify-center gap-0.5 flex-shrink-0"
                 style={{
                   width: 48, height: 64,
                   borderRadius: isSelected ? 40 : 16,
                   ...(isSelected ? {
                     background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)',
-                    border: '1px solid var(--c-surface)',
+                    border: '1px solid #FFFFFF',
                     boxShadow: 'var(--s-card)',
                   } : {}),
-                }}
-              >
-                <span className="text-[10px] font-medium uppercase" style={{ color: isSelected ? 'var(--c-text-dark)' : 'var(--c-text-dim)', letterSpacing: '0.62px' }}>
+                }}>
+                <span className="text-[10px] font-medium uppercase" style={{ color: isSelected ? '#314158' : 'var(--c-text-dim)', letterSpacing: '0.62px' }}>
                   {DAY_LABELS[d.getDay()]}
                 </span>
-                <span className="text-lg font-bold" style={{ color: 'var(--c-text-dark)', letterSpacing: '-0.44px' }}>
+                <span className="text-lg font-bold" style={{ color: isSelected ? '#314158' : 'var(--c-text-dark)', letterSpacing: '-0.44px' }}>
                   {d.getDate()}
                 </span>
                 {isTodayDate && !isSelected && (
@@ -233,213 +204,112 @@ const Puasa = () => {
         </div>
 
         {/* Top card - Puasa hari ke-X */}
-        <motion.div
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
+        <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
           className="w-full rounded-3xl p-4 flex flex-col gap-4"
-          style={{
-            background: 'var(--c-surface)',
-            border: '1px solid var(--c-border-warm)',
-          }}
-        >
+          style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)' }}>
           <div className="flex items-center gap-4">
             <div className="flex flex-col flex-1 gap-4">
               <div className="flex flex-col gap-2">
-                <span className="text-lg font-semibold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
-                  Puasa Hari ke-{dayOfRamadan}
-                </span>
-                <span className="text-xs" style={{ color: '#838A96', letterSpacing: '-0.15px' }}>
-                  Selalu semangat ya!
-                </span>
+                <span className="text-lg font-semibold" style={{ color: 'var(--c-text)', letterSpacing: '-0.44px' }}>Puasa Hari ke-{dayOfRamadan}</span>
+                <span className="text-xs" style={{ color: 'var(--c-text-muted)', letterSpacing: '-0.15px' }}>Selalu semangat ya!</span>
               </div>
-              <div
-                className="flex items-center px-3 py-1.5 rounded-full self-start"
-                style={{ border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)' }}
-              >
+              <div className="flex items-center px-3 py-1.5 rounded-full self-start"
+                style={{ border: '1px solid var(--c-border-warm)', boxShadow: 'var(--s-card)' }}>
                 <span className="text-xs font-bold" style={{ color: '#38CA5E' }}>
                   {daysToEid > 0 ? `${daysToEid} hari menuju Lebaran!` : '🎉 Selamat Hari Raya!'}
                 </span>
               </div>
             </div>
-
-            {/* Circular progress mini */}
             <div className="relative flex items-center justify-center flex-shrink-0" style={{ width: 86, height: 86 }}>
               <svg width="86" height="86" viewBox="0 0 86 86">
-                <circle cx="43" cy="43" r={radius} fill="none" stroke="#EFEFEF" strokeWidth="8" strokeLinecap="round" />
-                <circle
-                  cx="43" cy="43" r={radius}
-                  fill="none"
-                  stroke="url(#puasaGrad)"
-                  strokeWidth="8"
-                  strokeLinecap="round"
-                  strokeDasharray={circumference}
-                  strokeDashoffset={strokeDashoffset}
-                  transform="rotate(-90 43 43)"
-                  style={{ transition: 'stroke-dashoffset 0.5s ease' }}
-                />
-                <defs>
-                  <linearGradient id="puasaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#7DF8AD" />
-                    <stop offset="100%" stopColor="#CAFF7B" />
-                  </linearGradient>
-                </defs>
+                <circle cx="43" cy="43" r={radius} fill="none" stroke="var(--c-progress-bg)" strokeWidth="8" strokeLinecap="round" />
+                <circle cx="43" cy="43" r={radius} fill="none" stroke="url(#puasaGrad)" strokeWidth="8" strokeLinecap="round"
+                  strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} transform="rotate(-90 43 43)"
+                  style={{ transition: 'stroke-dashoffset 0.5s ease' }} />
+                <defs><linearGradient id="puasaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#7DF8AD" /><stop offset="100%" stopColor="#CAFF7B" /></linearGradient></defs>
               </svg>
               <div className="absolute flex flex-col items-center justify-center">
-                <span className="text-sm font-semibold" style={{ color: '#1D293D', letterSpacing: '-0.13px' }}>
-                  {percentage}%
-                </span>
+                <span className="text-sm font-semibold" style={{ color: 'var(--c-text)', letterSpacing: '-0.13px' }}>{percentage}%</span>
               </div>
             </div>
           </div>
 
           {/* Imsak & Buka Puasa times */}
           <div className="flex gap-3 w-full">
-            <div
-              className="flex-1 flex flex-col items-center justify-center py-3 rounded-2xl"
-              style={{ background: '#FFFFFF', border: '1px solid #F3EDE6' }}
-            >
-              <span className="text-2xl font-bold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
+            <div className="flex-1 flex flex-col items-center justify-center py-3 rounded-2xl"
+              style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)' }}>
+              <span className="text-2xl font-bold" style={{ color: 'var(--c-text)', letterSpacing: '-0.44px' }}>
                 {prayers.find(p => p.name === "Imsak")?.time || "04:55"}
               </span>
-              <span className="text-xs" style={{ color: '#838A96', letterSpacing: '-0.15px' }}>Imsak</span>
+              <span className="text-xs" style={{ color: 'var(--c-text-muted)', letterSpacing: '-0.15px' }}>Imsak</span>
             </div>
-            <div
-              className="flex-1 flex flex-col items-center justify-center py-3 rounded-2xl"
-              style={{ background: '#FFFFFF', border: '1px solid #F3EDE6' }}
-            >
-              <span className="text-2xl font-bold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
+            <div className="flex-1 flex flex-col items-center justify-center py-3 rounded-2xl"
+              style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)' }}>
+              <span className="text-2xl font-bold" style={{ color: 'var(--c-text)', letterSpacing: '-0.44px' }}>
                 {prayers.find(p => p.name === "Maghrib")?.time || "18:02"}
               </span>
-              <span className="text-xs" style={{ color: '#838A96', letterSpacing: '-0.15px' }}>Buka Puasa</span>
+              <span className="text-xs" style={{ color: 'var(--c-text-muted)', letterSpacing: '-0.15px' }}>Buka Puasa</span>
             </div>
           </div>
         </motion.div>
 
         {/* Streak card */}
-        <motion.div
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.05 }}
+        <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.05 }}
           className="w-full rounded-3xl p-6 flex items-center justify-between"
-          style={{
-            background: '#FFFFFF',
-            border: '1px solid #F3EDE6',
-            boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)',
-          }}
-        >
+          style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)', boxShadow: 'var(--s-card)' }}>
           <div className="flex flex-col gap-2">
-            <span className="text-lg font-semibold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
+            <span className="text-lg font-semibold" style={{ color: 'var(--c-text)', letterSpacing: '-0.44px' }}>
               {streak > 0 ? `${streak} hari beruntun puasa!` : 'Mulai streak puasamu!'}
             </span>
-            <span className="text-xs" style={{ color: '#838A96', letterSpacing: '-0.15px' }}>
+            <span className="text-xs" style={{ color: 'var(--c-text-muted)', letterSpacing: '-0.15px' }}>
               {streak > 0 ? 'Jangan sampai bolong ya puasanya!' : 'Tandai puasa untuk memulai'}
             </span>
           </div>
-          <div
-            className="flex items-center justify-center flex-shrink-0"
-            style={{
-              width: 40, height: 40,
-              background: 'linear-gradient(180deg, #F87D7D 0%, #FFE2D2 100%)',
-              border: '1px solid #FFFFFF',
-              boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1)',
-              borderRadius: 40,
-            }}
-          >
+          <div className="flex items-center justify-center flex-shrink-0"
+            style={{ width: 40, height: 40, background: 'linear-gradient(180deg, #F87D7D 0%, #FFE2D2 100%)',
+              border: '1px solid #FFFFFF', boxShadow: 'var(--s-complex)', borderRadius: 40 }}>
             <span className="text-lg">🔥</span>
           </div>
         </motion.div>
 
         {/* Puasa Tracker checklist card */}
-        <motion.div
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.1 }}
+        <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}
           className="w-full rounded-3xl p-4 flex flex-col gap-3"
-          style={{
-            background: '#FFFFFF',
-            border: '1px solid #F3EDE6',
-            boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)',
-          }}
-        >
-          {/* Header row */}
+          style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)', boxShadow: 'var(--s-card)' }}>
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
-              Puasa Tracker
-            </h2>
+            <h2 className="text-lg font-semibold" style={{ color: 'var(--c-text)', letterSpacing: '-0.44px' }}>Puasa Tracker</h2>
             <div className="flex items-center gap-2">
-              <span
-                className="text-xs font-bold px-4 py-2 rounded-full"
-                style={{ background: '#F8F8F7', color: '#314158' }}
-              >
+              <span className="text-xs font-bold px-4 py-2 rounded-full" style={{ background: 'var(--c-surface-alt)', color: 'var(--c-text-dark)' }}>
                 {completedCount}/{PUASA_TASKS.length}
               </span>
-              <button
-                onClick={completeAll}
-                className="text-xs font-bold px-4 py-2 rounded-full"
-                style={{
-                  background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)',
-                  border: '1px solid #FFFFFF',
-                  boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1)',
-                  color: '#314158',
-                }}
-              >
+              <button onClick={completeAll} className="text-xs font-bold px-4 py-2 rounded-full"
+                style={{ background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)', border: '1px solid #FFFFFF', boxShadow: 'var(--s-complex)', color: '#314158' }}>
                 Selesaikan semua
               </button>
             </div>
           </div>
-
-          {/* Progress bar */}
-          <div className="h-2 w-full rounded-full" style={{ background: '#F8F8F7' }}>
-            <motion.div
-              className="h-full rounded-full"
-              style={{ background: 'linear-gradient(90deg, #3AE886 0%, #46C0F1 100%)' }}
-              initial={{ width: 0 }}
-              animate={{ width: `${(completedCount / PUASA_TASKS.length) * 100}%` }}
-              transition={{ duration: 0.4 }}
-            />
+          <div className="h-2 w-full rounded-full" style={{ background: 'var(--c-surface-alt)' }}>
+            <motion.div className="h-full rounded-full" style={{ background: 'linear-gradient(90deg, #3AE886 0%, #46C0F1 100%)' }}
+              initial={{ width: 0 }} animate={{ width: `${(completedCount / PUASA_TASKS.length) * 100}%` }} transition={{ duration: 0.4 }} />
           </div>
-
-          {/* Task items */}
           <div className="flex flex-col gap-2">
             {PUASA_TASKS.map((task, i) => {
               const completed = dayData.sunnahCompleted[task.id];
               return (
-                <motion.button
-                  key={task.id}
-                  initial={{ y: 10, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: i * 0.04 }}
-                  onClick={() => toggle(task.id)}
+                <motion.button key={task.id} initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: i * 0.04 }} onClick={() => toggle(task.id)}
                   className="flex w-full items-center justify-between rounded-2xl p-4"
-                  style={{
-                    background: '#FFFFFF',
-                    border: '1px solid #F3EDE6',
-                    boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)',
-                  }}
-                >
+                  style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)', boxShadow: 'var(--s-card-light)' }}>
                   <div className="flex items-center gap-4">
-                    <div
-                      className="flex h-10 w-10 items-center justify-center rounded-full"
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full"
                       style={completed ? {
                         background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)',
-                        border: '1px solid #FFFFFF',
-                        boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1)',
-                      } : {
-                        background: '#F8F8F7',
-                      }}
-                    >
-                      {completed && (
-                        <Check className="h-5 w-5" style={{ color: '#334258' }} strokeWidth={2.5} />
-                      )}
+                        border: '1px solid #FFFFFF', boxShadow: 'var(--s-complex)',
+                      } : { background: 'var(--c-surface-alt)' }}>
+                      {completed && <Check className="h-5 w-5" style={{ color: '#334258' }} strokeWidth={2.5} />}
                     </div>
-                    <span
-                      className="font-semibold text-base"
-                      style={{
-                        color: completed ? '#90A1B9' : '#1D293D',
-                        textDecoration: completed ? 'line-through' : 'none',
-                        letterSpacing: '-0.44px',
-                      }}
-                    >
+                    <span className="font-semibold text-base"
+                      style={{ color: completed ? 'var(--c-text-completed)' : 'var(--c-text)', textDecoration: completed ? 'line-through' : 'none', letterSpacing: '-0.44px' }}>
                       {task.label}
                     </span>
                   </div>
@@ -450,26 +320,16 @@ const Puasa = () => {
         </motion.div>
 
         {/* Jadwal Imsakiyah */}
-        <motion.div
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.15 }}
+        <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.15 }}
           className="w-full rounded-3xl p-4 flex flex-col gap-3"
-          style={{
-            background: '#FFFFFF',
-            border: '1px solid #F3EDE6',
-            boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)',
-          }}
-        >
-          <h2 className="text-lg font-semibold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
-            Jadwal Imsakiyah
-          </h2>
-          <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #F3EDE6' }}>
-            <div className="grid grid-cols-4 gap-0 px-4 py-2.5" style={{ background: '#F8F8F7' }}>
-              <span className="text-[10px] font-semibold" style={{ color: '#838A96' }}>Hari</span>
-              <span className="text-[10px] font-semibold text-center" style={{ color: '#838A96' }}>Imsak</span>
-              <span className="text-[10px] font-semibold text-center" style={{ color: '#838A96' }}>Subuh</span>
-              <span className="text-[10px] font-semibold text-center" style={{ color: '#838A96' }}>Maghrib</span>
+          style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)', boxShadow: 'var(--s-card)' }}>
+          <h2 className="text-lg font-semibold" style={{ color: 'var(--c-text)', letterSpacing: '-0.44px' }}>Jadwal Imsakiyah</h2>
+          <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--c-border-warm)' }}>
+            <div className="grid grid-cols-4 gap-0 px-4 py-2.5" style={{ background: 'var(--c-surface-alt)' }}>
+              <span className="text-[10px] font-semibold" style={{ color: 'var(--c-text-muted)' }}>Hari</span>
+              <span className="text-[10px] font-semibold text-center" style={{ color: 'var(--c-text-muted)' }}>Imsak</span>
+              <span className="text-[10px] font-semibold text-center" style={{ color: 'var(--c-text-muted)' }}>Subuh</span>
+              <span className="text-[10px] font-semibold text-center" style={{ color: 'var(--c-text-muted)' }}>Maghrib</span>
             </div>
             <div className="max-h-64 overflow-y-auto">
               {Array.from({ length: imsakiyahData.length || 30 }, (_, i) => {
@@ -479,18 +339,13 @@ const Puasa = () => {
                 const maghribTime = daySchedule?.maghrib || prayers.find(p => p.name === "Maghrib")?.time || "-";
                 const isCurrent = ramadan.isRamadan && ramadan.dayOfRamadan === i + 1;
                 return (
-                  <div
-                    key={i}
-                    className="grid grid-cols-4 gap-0 px-4 py-2.5 text-xs"
-                    style={{
-                      borderTop: '1px solid #F3EDE6',
-                      ...(isCurrent ? { background: 'linear-gradient(180deg, rgba(125,248,173,0.15) 0%, rgba(249,255,210,0.15) 100%)' } : {}),
-                    }}
-                  >
-                    <span className="font-semibold" style={{ color: isCurrent ? '#38CA5E' : '#1D293D' }}>{i + 1}</span>
-                    <span className="text-center" style={{ color: '#62748E' }}>{imsakTime}</span>
-                    <span className="text-center" style={{ color: '#62748E' }}>{subuhTime}</span>
-                    <span className="text-center" style={{ color: '#62748E' }}>{maghribTime}</span>
+                  <div key={i} className="grid grid-cols-4 gap-0 px-4 py-2.5 text-xs"
+                    style={{ borderTop: '1px solid var(--c-border-warm)',
+                      ...(isCurrent ? { background: 'linear-gradient(180deg, rgba(125,248,173,0.15) 0%, rgba(249,255,210,0.15) 100%)' } : {}) }}>
+                    <span className="font-semibold" style={{ color: isCurrent ? '#38CA5E' : 'var(--c-text)' }}>{i + 1}</span>
+                    <span className="text-center" style={{ color: 'var(--c-text-secondary)' }}>{imsakTime}</span>
+                    <span className="text-center" style={{ color: 'var(--c-text-secondary)' }}>{subuhTime}</span>
+                    <span className="text-center" style={{ color: 'var(--c-text-secondary)' }}>{maghribTime}</span>
                   </div>
                 );
               })}

@@ -48,10 +48,10 @@ const WeekSelector = ({ selectedDate, realToday, onSelectDate }: WeekSelectorPro
               boxShadow: 'var(--s-card)',
             } : {}}
           >
-            <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: d.isSelected ? 'var(--c-text-dark)' : 'var(--c-text-dim)' }}>
+            <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: d.isSelected ? '#314158' : 'var(--c-text-dim)' }}>
               {dayNames[i]}
             </span>
-            <span className="mt-0.5 text-lg font-bold" style={{ color: 'var(--c-text-dark)', letterSpacing: '-0.44px' }}>
+            <span className="mt-0.5 text-lg font-bold" style={{ color: d.isSelected ? '#314158' : 'var(--c-text-dark)', letterSpacing: '-0.44px' }}>
               {d.day}
             </span>
           </button>
