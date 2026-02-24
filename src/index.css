@@ -100,6 +100,9 @@
     --c-overlay: rgba(0,0,0,0.4);
     --c-transliteration: #2E7D32;
 
+    /* Page header gradient */
+    --page-header-bg: linear-gradient(180deg, #CCFF3F 0%, transparent 100%);
+
     /* Hero card tokens */
     --hero-bg: linear-gradient(180deg, #F9FFD2 0%, #7DF8AD 100%);
     --hero-border: #F3EDE6;
@@ -223,6 +226,9 @@
     --hero-imsakiyah-label: #6B7280;
     --hero-imsakiyah-time: #E3E2E5;
     --hero-shadow: none;
+
+    /* Page header gradient */
+    --page-header-bg: linear-gradient(180deg, #1B3C36 0%, #161722 100%);
 
     /* Shadows — all removed in dark mode */
     --s-card: none;
