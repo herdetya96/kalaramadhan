@@ -73,7 +73,7 @@ const Tracker = () => {
 
   return (
     <div className="min-h-screen pb-24 relative overflow-hidden" style={{ background: 'var(--c-surface)' }}>
-      <div className="absolute pointer-events-none" style={{ width: 560, height: 341, left: '50%', top: -280, transform: 'translateX(-50%)', background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0 }} />
+      <div className="absolute pointer-events-none" style={{ width: '100%', height: 286, left: 0, top: 0, background: 'var(--page-header-bg)', zIndex: 0 }} />
 
       <div className="relative z-10 flex flex-col items-center pt-6 px-4 gap-[16px]">
         <div className="flex flex-col items-center w-full">

@@ -18,7 +18,7 @@ const Progress = () => {
 
   return (
     <div className="min-h-screen pb-24 relative overflow-hidden" style={{ background: 'var(--c-surface)' }}>
-      <div className="absolute pointer-events-none" style={{ width: 560, height: 341, left: '50%', top: -280, transform: 'translateX(-50%)', background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0 }} />
+      <div className="absolute pointer-events-none" style={{ width: '100%', height: 286, left: 0, top: 0, background: 'var(--page-header-bg)', zIndex: 0 }} />
       <div className="relative z-10 flex flex-col items-center pt-6 gap-6 px-4">
         <div className="flex items-center w-full">
           <button onClick={() => navigate(-1)} className="p-2 rounded-full">
