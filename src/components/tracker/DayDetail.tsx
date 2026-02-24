@@ -31,39 +31,37 @@ const DayDetail = ({ date, onClose }: DayDetailProps) => {
         exit={{ y: 20, opacity: 0 }}
         className="w-full rounded-3xl p-4 flex flex-col gap-4"
         style={{
-          background: '#FFFFFF',
-          border: '1px solid #F3EDE6',
-          boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)',
+          background: 'var(--c-surface)',
+          border: '1px solid var(--c-border-warm)',
+          boxShadow: 'var(--s-card)',
         }}
       >
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
-            <h3 className="text-base font-semibold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
+            <h3 className="text-base font-semibold" style={{ color: 'var(--c-text)', letterSpacing: '-0.44px' }}>
               Detail Hari
             </h3>
-            <span className="text-xs" style={{ color: '#838A96' }}>{dateLabel}</span>
+            <span className="text-xs" style={{ color: 'var(--c-text-muted)' }}>{dateLabel}</span>
           </div>
-          <button onClick={onClose} className="p-2 rounded-full" style={{ background: '#F8F8F7' }}>
-            <X className="h-4 w-4" style={{ color: '#62748E' }} />
+          <button onClick={onClose} className="p-2 rounded-full" style={{ background: 'var(--c-surface-alt)' }}>
+            <X className="h-4 w-4" style={{ color: 'var(--c-text-secondary)' }} />
           </button>
         </div>
 
         {isFuture ? (
           <div className="text-center py-6">
-            <span className="text-sm" style={{ color: '#838A96' }}>Hari ini belum tiba</span>
+            <span className="text-sm" style={{ color: 'var(--c-text-muted)' }}>Hari ini belum tiba</span>
           </div>
         ) : (
           <>
-            {/* Sholat Wajib */}
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold" style={{ color: '#1D293D' }}>Sholat Wajib</span>
-                <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: '#F8F8F7', color: '#314158' }}>
+                <span className="text-sm font-semibold" style={{ color: 'var(--c-text)' }}>Sholat Wajib</span>
+                <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: 'var(--c-surface-alt)', color: 'var(--c-text-dark)' }}>
                   {prayersDone}/5
                 </span>
               </div>
-              <div className="h-1.5 w-full rounded-full" style={{ background: '#F8F8F7' }}>
+              <div className="h-1.5 w-full rounded-full" style={{ background: 'var(--c-surface-alt)' }}>
                 <div
                   className="h-full rounded-full transition-all"
                   style={{ background: 'linear-gradient(90deg, #3AE886 0%, #46C0F1 100%)', width: `${(prayersDone / 5) * 100}%` }}
@@ -73,37 +71,36 @@ const DayDetail = ({ date, onClose }: DayDetailProps) => {
                 {WAJIB_PRAYERS.map((prayer, i) => {
                   const done = data.prayerCompleted[i];
                   return (
-                    <div key={prayer.name} className="flex items-center gap-3 rounded-xl p-3" style={{ background: '#FAFAFA' }}>
+                    <div key={prayer.name} className="flex items-center gap-3 rounded-xl p-3" style={{ background: 'var(--c-surface-elevated)' }}>
                       <div
                         className="flex h-7 w-7 items-center justify-center rounded-full flex-shrink-0"
                         style={done ? {
                           background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)',
-                        } : { background: '#EFEFEF' }}
+                        } : { background: 'var(--c-progress-bg)' }}
                       >
-                        {done && <Check className="h-3.5 w-3.5" style={{ color: '#334258' }} strokeWidth={3} />}
+                        {done && <Check className="h-3.5 w-3.5" style={{ color: 'var(--c-text-check)' }} strokeWidth={3} />}
                       </div>
                       <span className="text-sm font-medium" style={{
-                        color: done ? '#90A1B9' : '#1D293D',
+                        color: done ? 'var(--c-text-completed)' : 'var(--c-text)',
                         textDecoration: done ? 'line-through' : 'none',
                       }}>
                         {prayer.name}
                       </span>
-                      <span className="text-xs ml-auto" style={{ color: '#90A1B9' }}>{prayer.time}</span>
+                      <span className="text-xs ml-auto" style={{ color: 'var(--c-text-completed)' }}>{prayer.time}</span>
                     </div>
                   );
                 })}
               </div>
             </div>
 
-            {/* Ibadah Sunnah */}
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold" style={{ color: '#1D293D' }}>Ibadah Sunnah</span>
-                <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: '#F8F8F7', color: '#314158' }}>
+                <span className="text-sm font-semibold" style={{ color: 'var(--c-text)' }}>Ibadah Sunnah</span>
+                <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: 'var(--c-surface-alt)', color: 'var(--c-text-dark)' }}>
                   {sunnahDone}/{SUNNAH_TASKS.length}
                 </span>
               </div>
-              <div className="h-1.5 w-full rounded-full" style={{ background: '#F8F8F7' }}>
+              <div className="h-1.5 w-full rounded-full" style={{ background: 'var(--c-surface-alt)' }}>
                 <div
                   className="h-full rounded-full transition-all"
                   style={{ background: 'linear-gradient(90deg, #F8C77E 0%, #FFE2D2 100%)', width: `${(sunnahDone / SUNNAH_TASKS.length) * 100}%` }}
@@ -113,17 +110,17 @@ const DayDetail = ({ date, onClose }: DayDetailProps) => {
                 {SUNNAH_TASKS.map((task) => {
                   const done = data.sunnahCompleted[task.id];
                   return (
-                    <div key={task.id} className="flex items-center gap-3 rounded-xl p-3" style={{ background: '#FAFAFA' }}>
+                    <div key={task.id} className="flex items-center gap-3 rounded-xl p-3" style={{ background: 'var(--c-surface-elevated)' }}>
                       <div
                         className="flex h-7 w-7 items-center justify-center rounded-full flex-shrink-0"
                         style={done ? {
                           background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)',
-                        } : { background: '#EFEFEF' }}
+                        } : { background: 'var(--c-progress-bg)' }}
                       >
-                        {done && <Check className="h-3.5 w-3.5" style={{ color: '#334258' }} strokeWidth={3} />}
+                        {done && <Check className="h-3.5 w-3.5" style={{ color: 'var(--c-text-check)' }} strokeWidth={3} />}
                       </div>
                       <span className="text-sm font-medium" style={{
-                        color: done ? '#90A1B9' : '#1D293D',
+                        color: done ? 'var(--c-text-completed)' : 'var(--c-text)',
                         textDecoration: done ? 'line-through' : 'none',
                       }}>
                         {task.label}

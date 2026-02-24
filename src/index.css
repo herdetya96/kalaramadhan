@@ -63,6 +63,138 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Semantic color tokens for inline styles */
+    --c-surface: #FFFFFF;
+    --c-surface-alt: #F8F8F7;
+    --c-surface-elevated: #FAFAFA;
+    --c-surface-hover: #F9FAFB;
+    --c-text: #1D293D;
+    --c-text-secondary: #62748E;
+    --c-text-muted: #838A96;
+    --c-text-dim: #5C5C5C;
+    --c-text-dark: #314158;
+    --c-text-darkest: #0F172B;
+    --c-text-completed: #90A1B9;
+    --c-text-check: #334258;
+    --c-border-warm: #F3EDE6;
+    --c-progress-bg: #EFEFEF;
+    --c-green-dark: #124D2F;
+    --c-green-text: #15A450;
+    --c-green-accent: #38CA5E;
+    --c-badge-green-bg: #F0FDF4;
+    --c-badge-green-text: #166534;
+    --c-badge-green-active-bg: #E8FAED;
+    --c-badge-green-dark-bg: #D1FAE5;
+    --c-badge-green-dark-text: #065F46;
+    --c-badge-green-border: #D1FAE5;
+    --c-badge-green-medium-text: #059669;
+    --c-badge-yellow-bg: #FEF3C7;
+    --c-badge-yellow-text: #D97706;
+    --c-badge-blue-bg: #E0F2FE;
+    --c-badge-blue-text: #0284C7;
+    --c-badge-gray-bg: #F6FFE7;
+    --c-disabled: #D1D5DB;
+    --c-divider: #E5E7EB;
+    --c-progress-fill: #F3F4F6;
+    --c-overlay: rgba(0,0,0,0.4);
+    --c-transliteration: #2E7D32;
+
+    /* Shadows as CSS vars */
+    --s-card: 0px 30px 46px rgba(223, 150, 55, 0.1);
+    --s-card-light: 0px 30px 46px rgba(223, 150, 55, 0.05);
+    --s-complex: 0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1);
+    --s-btn: 0px 4px 20px rgba(0, 0, 0, 0.08);
+    --s-small: 0px 4px 14px rgba(0, 0, 0, 0.1);
+    --s-subtle: 0px 30px 46px rgba(223, 150, 55, 0.08);
+  }
+
+  .dark {
+    --background: 230 15% 8%;
+    --foreground: 210 20% 90%;
+
+    --card: 230 15% 11%;
+    --card-foreground: 210 20% 90%;
+
+    --popover: 230 15% 11%;
+    --popover-foreground: 210 20% 90%;
+
+    --primary: 150 70% 40%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 230 12% 16%;
+    --secondary-foreground: 210 20% 85%;
+
+    --muted: 230 12% 14%;
+    --muted-foreground: 215 15% 55%;
+
+    --accent: 150 40% 12%;
+    --accent-foreground: 150 70% 60%;
+
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 230 12% 18%;
+    --input: 230 12% 18%;
+    --ring: 150 70% 40%;
+
+    --gradient-hero: linear-gradient(180deg, #0d1f0f 0%, #0d1f0f 100%);
+    --gradient-countdown: linear-gradient(180deg, #e0e0e0 0%, #4ade80 100%);
+    --shadow-warm: none;
+    --shadow-card: none;
+
+    --sidebar-background: 230 15% 10%;
+    --sidebar-foreground: 210 20% 80%;
+    --sidebar-primary: 210 20% 90%;
+    --sidebar-primary-foreground: 230 15% 10%;
+    --sidebar-accent: 230 12% 16%;
+    --sidebar-accent-foreground: 210 20% 90%;
+    --sidebar-border: 230 12% 18%;
+    --sidebar-ring: 150 70% 40%;
+
+    /* Semantic color tokens — dark */
+    --c-surface: #151722;
+    --c-surface-alt: #1c1e2b;
+    --c-surface-elevated: #1e2030;
+    --c-surface-hover: #22243a;
+    --c-text: #e2e4e9;
+    --c-text-secondary: #8b95a8;
+    --c-text-muted: #6b7280;
+    --c-text-dim: #9ca3af;
+    --c-text-dark: #c8d0e0;
+    --c-text-darkest: #f0f2f8;
+    --c-text-completed: #6b7280;
+    --c-text-check: #e2e4e9;
+    --c-border-warm: #2a2b35;
+    --c-progress-bg: #2a2b35;
+    --c-green-dark: #4ade80;
+    --c-green-text: #4ade80;
+    --c-green-accent: #38CA5E;
+    --c-badge-green-bg: #0d2818;
+    --c-badge-green-text: #4ade80;
+    --c-badge-green-active-bg: #0d2818;
+    --c-badge-green-dark-bg: #0d3320;
+    --c-badge-green-dark-text: #6ee7b7;
+    --c-badge-green-border: #16503a;
+    --c-badge-green-medium-text: #34d399;
+    --c-badge-yellow-bg: #422006;
+    --c-badge-yellow-text: #fbbf24;
+    --c-badge-blue-bg: #0c2d48;
+    --c-badge-blue-text: #38bdf8;
+    --c-badge-gray-bg: #1a2a14;
+    --c-disabled: #4b5563;
+    --c-divider: #374151;
+    --c-progress-fill: #2a2b35;
+    --c-overlay: rgba(0,0,0,0.6);
+    --c-transliteration: #4ade80;
+
+    /* Shadows — all removed in dark mode */
+    --s-card: none;
+    --s-card-light: none;
+    --s-complex: none;
+    --s-btn: none;
+    --s-small: none;
+    --s-subtle: none;
   }
 }
 

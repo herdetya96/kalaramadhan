@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { Clock } from "lucide-react";
 import type { PrayerSchedule } from "@/lib/kala-utils";
-import heroBg from "@/assets/hero-bg.svg";
 
 interface HeroCardProps {
   selectedDate: Date;
@@ -33,72 +32,68 @@ const HeroCard = ({
       style={{
         borderRadius: 24,
         background: 'linear-gradient(180deg, #F9FFD2 0%, #7DF8AD 100%)',
-        border: '1px solid #FFFFFF',
-        boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1)',
+        border: '1px solid var(--c-border-warm)',
+        boxShadow: 'var(--s-complex)',
       }}>
 
       <div className="relative items-center gap-[42px] p-4 flex flex-col" style={{ zIndex: 4 }}>
         {/* Greeting */}
         <div className="flex flex-col items-center gap-1">
-          <h1 className="font-medium text-lg" style={{ color: '#0F172B', letterSpacing: '-0.02em' }}>
+          <h1 className="font-medium text-lg" style={{ color: 'var(--c-text-darkest)', letterSpacing: '-0.02em' }}>
             Gimana puasamu hari ini?
           </h1>
           <div className="flex items-center justify-center gap-1">
-            <span className="text-sm" style={{ color: '#62748E', letterSpacing: '-0.15px' }}>{dateStr}</span>
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#62748E', boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1)' }} />
-            <span className="text-sm" style={{ color: '#62748E', letterSpacing: '-0.15px' }}>{locationShort}</span>
+            <span className="text-sm" style={{ color: 'var(--c-text-secondary)', letterSpacing: '-0.15px' }}>{dateStr}</span>
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--c-text-secondary)' }} />
+            <span className="text-sm" style={{ color: 'var(--c-text-secondary)', letterSpacing: '-0.15px' }}>{locationShort}</span>
           </div>
         </div>
 
-        {/* Counter section: badge + countdown + next prayer */}
+        {/* Counter section */}
         <div className="flex flex-col items-center gap-4">
-          {/* Ramadan / Hijri badge */}
           {ramadan.isRamadan ?
           <div className="flex items-center justify-center px-2 py-1 rounded-full" style={{
-            background: '#FFFFFF', border: '1px solid #FFFFFF',
-            boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1)',
+            background: 'var(--c-surface)', border: '1px solid var(--c-surface)',
+            boxShadow: 'var(--s-complex)',
             borderRadius: 40
           }}>
-              <span className="text-sm" style={{ color: '#15A450', letterSpacing: '-0.15px' }}>
+              <span className="text-sm" style={{ color: 'var(--c-green-text)', letterSpacing: '-0.15px' }}>
                 {ramadan.dayOfRamadan} Ramadan 1447H
               </span>
             </div> :
-
           <div className="flex items-center justify-center px-2 py-1 rounded-full" style={{
-            background: '#FFFFFF', border: '1px solid #FFFFFF',
-            boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1)',
+            background: 'var(--c-surface)', border: '1px solid var(--c-surface)',
+            boxShadow: 'var(--s-complex)',
             borderRadius: 40
           }}>
-              <span className="text-sm" style={{ color: '#15A450', letterSpacing: '-0.15px' }}>{hijriDate}</span>
+              <span className="text-sm" style={{ color: 'var(--c-green-text)', letterSpacing: '-0.15px' }}>{hijriDate}</span>
             </div>
           }
 
           {isToday && nextPrayerName &&
           <>
-              {/* Countdown numbers */}
               <div className="flex items-center justify-center gap-4 py-1">
                 <div className="flex flex-col items-center gap-1">
                   <span className="font-bold gradient-countdown-text" style={{ fontSize: 48, lineHeight: '48px', letterSpacing: '-2.4px' }}>{countdownData.hours}</span>
-                  <span className="text-xs" style={{ color: '#5D5D5D' }}>jam</span>
+                  <span className="text-xs" style={{ color: 'var(--c-text-dim)' }}>jam</span>
                 </div>
-                <span className="font-bold opacity-50" style={{ fontSize: 30, lineHeight: '36px', color: '#000', letterSpacing: '0.4px' }}>:</span>
+                <span className="font-bold opacity-50" style={{ fontSize: 30, lineHeight: '36px', color: 'var(--c-text)', letterSpacing: '0.4px' }}>:</span>
                 <div className="flex flex-col items-center gap-1">
                   <span className="font-bold gradient-countdown-text" style={{ fontSize: 48, lineHeight: '48px', letterSpacing: '-2.4px' }}>{countdownData.minutes}</span>
-                  <span className="text-xs" style={{ color: '#5D5D5D' }}>menit</span>
+                  <span className="text-xs" style={{ color: 'var(--c-text-dim)' }}>menit</span>
                 </div>
-                <span className="font-bold opacity-50" style={{ fontSize: 30, lineHeight: '36px', color: '#000', letterSpacing: '0.4px' }}>:</span>
+                <span className="font-bold opacity-50" style={{ fontSize: 30, lineHeight: '36px', color: 'var(--c-text)', letterSpacing: '0.4px' }}>:</span>
                 <div className="flex flex-col items-center gap-1">
                   <span className="font-bold gradient-countdown-text" style={{ fontSize: 48, lineHeight: '48px', letterSpacing: '-2.4px' }}>{countdownData.seconds}</span>
-                  <span className="text-xs" style={{ color: '#5D5D5D' }}>detik</span>
+                  <span className="text-xs" style={{ color: 'var(--c-text-dim)' }}>detik</span>
                 </div>
               </div>
 
-              {/* Next prayer info */}
               <div className="flex items-center gap-2 opacity-90">
-                <Clock className="h-4 w-4" style={{ color: '#124D2F' }} strokeWidth={1.5} />
-                <span className="text-sm font-medium" style={{ color: '#124D2F', letterSpacing: '-0.01em' }}>Menuju {nextPrayerName}</span>
-                <span className="text-sm font-medium" style={{ color: '#124D2F', letterSpacing: '-0.01em' }}>|</span>
-                <span className="text-sm font-medium" style={{ color: '#124D2F', letterSpacing: '-0.01em' }}>Pukul {nextPrayerTime}</span>
+                <Clock className="h-4 w-4" style={{ color: 'var(--c-green-dark)' }} strokeWidth={1.5} />
+                <span className="text-sm font-medium" style={{ color: 'var(--c-green-dark)', letterSpacing: '-0.01em' }}>Menuju {nextPrayerName}</span>
+                <span className="text-sm font-medium" style={{ color: 'var(--c-green-dark)', letterSpacing: '-0.01em' }}>|</span>
+                <span className="text-sm font-medium" style={{ color: 'var(--c-green-dark)', letterSpacing: '-0.01em' }}>Pukul {nextPrayerTime}</span>
               </div>
             </>
           }
@@ -109,19 +104,18 @@ const HeroCard = ({
         <div className="flex w-full gap-3">
             {imsakiyahPrayers.map((p) =>
           <div key={p.name} className="flex-1 flex flex-col items-center gap-0.5 py-2" style={{
-            background: '#FFFFFF',
-            boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1)',
+            background: 'var(--c-surface)',
+            boxShadow: 'var(--s-complex)',
             borderRadius: 12
           }}>
-                <span className="text-xs" style={{ color: '#62748E' }}>{p.name}</span>
-                <span className="text-sm font-bold" style={{ color: '#0F172B', letterSpacing: '-0.5px' }}>{p.time}</span>
+                <span className="text-xs" style={{ color: 'var(--c-text-secondary)' }}>{p.name}</span>
+                <span className="text-sm font-bold" style={{ color: 'var(--c-text-darkest)', letterSpacing: '-0.5px' }}>{p.time}</span>
               </div>
           )}
           </div>
         }
       </div>
     </motion.div>);
-
 };
 
 export default HeroCard;

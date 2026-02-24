@@ -33,20 +33,13 @@ const Today = () => {
   useEffect(() => {
     const saved = localStorage.getItem("kala-user-location");
     if (saved) setUserLocation(saved);
-
-    if (!navigator.geolocation) {
-      setUserLocation("Lokasi tidak tersedia");
-      return;
-    }
-
+    if (!navigator.geolocation) { setUserLocation("Lokasi tidak tersedia"); return; }
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
           const { latitude, longitude } = pos.coords;
           setUserCoords({ lat: latitude, lon: longitude });
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=id`
-          );
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=id`);
           const data = await res.json();
           const city = data.address?.city || data.address?.town || data.address?.village || data.address?.county || "";
           const state = data.address?.state || "";
@@ -54,9 +47,7 @@ const Today = () => {
           setUserLocation(locationStr);
           localStorage.setItem("kala-user-location", locationStr);
           localStorage.setItem("kala-user-coords", JSON.stringify({ lat: latitude, lon: longitude }));
-        } catch {
-          setUserLocation("Gagal memuat lokasi");
-        }
+        } catch { setUserLocation("Gagal memuat lokasi"); }
       },
       () => {
         const savedCoords = localStorage.getItem("kala-user-coords");
@@ -72,21 +63,13 @@ const Today = () => {
   const hijriDate = formatHijriDate(selectedDate);
   const trivia = getDailyTrivia(selectedDate);
 
-  useEffect(() => {
-    setDayData(loadDayData(selectedDate));
-  }, [selectedDate]);
+  useEffect(() => { setDayData(loadDayData(selectedDate)); }, [selectedDate]);
 
   useEffect(() => {
     if (!userCoords) return;
     fetchPrayerTimes(userCoords.lat, userCoords.lon, selectedDate)
-      .then((fetched) => {
-        setPrayers(fetched);
-        setWajibPrayers(getWajibFromPrayers(fetched));
-      })
-      .catch(() => {
-        setPrayers(DEFAULT_PRAYERS);
-        setWajibPrayers(WAJIB_PRAYERS);
-      });
+      .then((fetched) => { setPrayers(fetched); setWajibPrayers(getWajibFromPrayers(fetched)); })
+      .catch(() => { setPrayers(DEFAULT_PRAYERS); setWajibPrayers(WAJIB_PRAYERS); });
   }, [userCoords, selectedDate]);
 
   const updateDayData = useCallback((newData: DayData) => {
@@ -97,11 +80,7 @@ const Today = () => {
   useEffect(() => {
     const update = () => {
       const next = getNextPrayer(new Date(), wajibPrayers);
-      if (next) {
-        setCountdownData(formatCountdown(next.remainingSeconds));
-        setNextPrayerName(next.prayer.name);
-        setNextPrayerTime(next.prayer.time);
-      }
+      if (next) { setCountdownData(formatCountdown(next.remainingSeconds)); setNextPrayerName(next.prayer.name); setNextPrayerTime(next.prayer.time); }
     };
     update();
     const interval = setInterval(update, 1000);
@@ -115,31 +94,19 @@ const Today = () => {
   };
 
   const toggleSunnah = (id: string) => {
-    updateDayData({
-      ...dayData,
-      sunnahCompleted: { ...dayData.sunnahCompleted, [id]: !dayData.sunnahCompleted[id] }
-    });
+    updateDayData({ ...dayData, sunnahCompleted: { ...dayData.sunnahCompleted, [id]: !dayData.sunnahCompleted[id] } });
   };
 
   const completedCount = dayData.prayerCompleted.filter(Boolean).length;
-
-  // Location short name (city only)
   const locationShort = userLocation.split(",")[0]?.trim() || userLocation;
 
   return (
-    <div className="min-h-screen bg-white pb-24">
-      {/* Hero Card */}
+    <div className="min-h-screen pb-24" style={{ background: 'var(--c-surface)' }}>
       <div className="px-4 pt-6">
         <HeroCard
-          selectedDate={selectedDate}
-          hijriDate={hijriDate}
-          locationShort={locationShort}
-          ramadan={ramadan}
-          isToday={isToday}
-          countdownData={countdownData}
-          nextPrayerName={nextPrayerName}
-          nextPrayerTime={nextPrayerTime}
-          prayers={prayers}
+          selectedDate={selectedDate} hijriDate={hijriDate} locationShort={locationShort}
+          ramadan={ramadan} isToday={isToday} countdownData={countdownData}
+          nextPrayerName={nextPrayerName} nextPrayerTime={nextPrayerTime} prayers={prayers}
         />
       </div>
 
@@ -149,17 +116,17 @@ const Today = () => {
           onClick={() => navigate('/puasa')}
           className="w-full rounded-3xl p-4 flex flex-col gap-4 text-left"
           style={{
-            background: '#FFFFFF',
-            border: '1px solid #F3EDE6',
-            boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)',
+            background: 'var(--c-surface)',
+            border: '1px solid var(--c-border-warm)',
+            boxShadow: 'var(--s-card)',
           }}
         >
           <div className="flex items-center justify-between w-full">
             <div className="flex flex-col gap-2">
-              <span className="text-lg font-semibold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
+              <span className="text-lg font-semibold" style={{ color: 'var(--c-text)', letterSpacing: '-0.44px' }}>
                 Check-in puasa harian
               </span>
-              <span className="text-xs" style={{ color: '#838A96', letterSpacing: '-0.15px' }}>
+              <span className="text-xs" style={{ color: 'var(--c-text-muted)', letterSpacing: '-0.15px' }}>
                 Check-in baru bisa dilakukan setelah Maghrib ya!
               </span>
             </div>
@@ -168,67 +135,37 @@ const Today = () => {
               style={{
                 width: 40, height: 40,
                 background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)',
-                border: '1px solid #FFFFFF',
-                boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1)',
+                border: '1px solid var(--c-surface)',
+                boxShadow: 'var(--s-complex)',
                 borderRadius: 40,
               }}
             >
-              <ChevronRightIcon className="h-5 w-5" style={{ color: '#334258' }} strokeWidth={2} />
+              <ChevronRightIcon className="h-5 w-5" style={{ color: 'var(--c-text-dark)' }} strokeWidth={2} />
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <span
-              className="text-xs px-3 py-1.5 rounded-full"
-              style={{ border: '1px solid #F3EDE6', letterSpacing: '-0.15px' }}
-            >
-              <span style={{ color: '#62748E' }}>Durasi puasa hari ini </span><span style={{ color: '#38CA5E', fontWeight: 700 }}>13j 25m</span>
+            <span className="text-xs px-3 py-1.5 rounded-full" style={{ border: '1px solid var(--c-border-warm)', letterSpacing: '-0.15px' }}>
+              <span style={{ color: 'var(--c-text-secondary)' }}>Durasi puasa hari ini </span><span style={{ color: 'var(--c-green-accent)', fontWeight: 700 }}>13j 25m</span>
             </span>
-            <span
-              className="text-xs px-3 py-1.5 rounded-full"
-              style={{ border: '1px solid #F3EDE6', letterSpacing: '-0.15px' }}
-            >
-              <span style={{ color: '#62748E' }}>Streak </span><span style={{ color: '#38CA5E', fontWeight: 700 }}>{(() => { const d = new Date(); for (let i = 0; i < 90; i++) { if (loadDayData(d).sunnahCompleted["puasa"]) break; d.setDate(d.getDate() - 1); if (i === 89) return 0; } let c = 0; while (true) { const data = loadDayData(d); if (data.sunnahCompleted["puasa"]) { c++; d.setDate(d.getDate() - 1); } else break; } return c; })()} hari</span>
+            <span className="text-xs px-3 py-1.5 rounded-full" style={{ border: '1px solid var(--c-border-warm)', letterSpacing: '-0.15px' }}>
+              <span style={{ color: 'var(--c-text-secondary)' }}>Streak </span><span style={{ color: 'var(--c-green-accent)', fontWeight: 700 }}>{(() => { const d = new Date(); for (let i = 0; i < 90; i++) { if (loadDayData(d).sunnahCompleted["puasa"]) break; d.setDate(d.getDate() - 1); if (i === 89) return 0; } let c = 0; while (true) { const data = loadDayData(d); if (data.sunnahCompleted["puasa"]) { c++; d.setDate(d.getDate() - 1); } else break; } return c; })()} hari</span>
             </span>
           </div>
         </button>
       </div>
 
-      {/* Week Selector */}
       <div className="px-4 mt-2">
-        <WeekSelector
-          selectedDate={selectedDate}
-          realToday={realToday}
-          onSelectDate={setSelectedDate}
-        />
+        <WeekSelector selectedDate={selectedDate} realToday={realToday} onSelectDate={setSelectedDate} />
       </div>
 
-      {/* Content */}
       <div className="px-4 mt-2 flex flex-col gap-2">
-        {/* Not today indicator */}
         {!isToday && (
-          <button
-            onClick={() => setSelectedDate(realToday)}
-            className="w-full rounded-xl bg-accent/50 py-2 text-center text-xs font-medium text-accent-foreground"
-          >
+          <button onClick={() => setSelectedDate(realToday)} className="w-full rounded-xl bg-accent/50 py-2 text-center text-xs font-medium text-accent-foreground">
             📅 Melihat {selectedDate.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long" })} — Tap untuk kembali ke hari ini
           </button>
         )}
-
-        {/* Prayer Card */}
-        <PrayerCard
-          wajibPrayers={wajibPrayers}
-          dayData={dayData}
-          completedCount={completedCount}
-          onTogglePrayer={togglePrayer}
-        />
-
-        {/* Sunnah Section */}
-        <SunnahSection
-          dayData={dayData}
-          onToggleSunnah={toggleSunnah}
-        />
-
-        {/* Trivia */}
+        <PrayerCard wajibPrayers={wajibPrayers} dayData={dayData} completedCount={completedCount} onTogglePrayer={togglePrayer} />
+        <SunnahSection dayData={dayData} onToggleSunnah={toggleSunnah} />
         <TriviaCard trivia={trivia} ramadan={ramadan} />
       </div>
     </div>

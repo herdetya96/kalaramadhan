@@ -151,7 +151,7 @@ const Puasa = () => {
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   return (
-    <div className="min-h-screen bg-white pb-24 relative overflow-hidden">
+    <div className="min-h-screen pb-24 relative overflow-hidden" style={{ background: 'var(--c-surface)' }}>
       {/* bg atas - green */}
       <div
         className="absolute pointer-events-none"
@@ -181,18 +181,18 @@ const Puasa = () => {
         {/* Header with week nav */}
         <div className="flex items-center justify-between w-full">
           <button onClick={() => navigateWeek(-1)} className="p-2 rounded-full">
-            <ChevronLeft className="h-6 w-6" style={{ color: '#62748E' }} strokeWidth={2} />
+            <ChevronLeft className="h-6 w-6" style={{ color: 'var(--c-text-secondary)' }} strokeWidth={2} />
           </button>
           <div className="flex flex-col items-center">
-            <h1 className="text-xl font-bold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
+            <h1 className="text-xl font-bold" style={{ color: 'var(--c-text)', letterSpacing: '-0.44px' }}>
               {isToday ? "Ramadhan Tracker" : "Ramadhan Tracker"}
             </h1>
-            <span className="text-sm font-medium" style={{ color: '#62748E', letterSpacing: '-0.15px' }}>
+            <span className="text-sm font-medium" style={{ color: 'var(--c-text-secondary)', letterSpacing: '-0.15px' }}>
               {dateTitle}
             </span>
           </div>
           <button onClick={() => navigateWeek(1)} className="p-2 rounded-full">
-            <ChevronRight className="h-6 w-6" style={{ color: '#62748E' }} strokeWidth={2} />
+            <ChevronRight className="h-6 w-6" style={{ color: 'var(--c-text-secondary)' }} strokeWidth={2} />
           </button>
         </div>
 
@@ -213,19 +213,19 @@ const Puasa = () => {
                   borderRadius: isSelected ? 40 : 16,
                   ...(isSelected ? {
                     background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)',
-                    border: '1px solid #FFFFFF',
-                    boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)',
+                    border: '1px solid var(--c-surface)',
+                    boxShadow: 'var(--s-card)',
                   } : {}),
                 }}
               >
-                <span className="text-[10px] font-medium uppercase" style={{ color: isSelected ? '#314158' : '#5C5C5C', letterSpacing: '0.62px' }}>
+                <span className="text-[10px] font-medium uppercase" style={{ color: isSelected ? 'var(--c-text-dark)' : 'var(--c-text-dim)', letterSpacing: '0.62px' }}>
                   {DAY_LABELS[d.getDay()]}
                 </span>
-                <span className="text-lg font-bold" style={{ color: '#314158', letterSpacing: '-0.44px' }}>
+                <span className="text-lg font-bold" style={{ color: 'var(--c-text-dark)', letterSpacing: '-0.44px' }}>
                   {d.getDate()}
                 </span>
                 {isTodayDate && !isSelected && (
-                  <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#38CA5E' }} />
+                  <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--c-green-accent)' }} />
                 )}
               </button>
             );
@@ -238,8 +238,8 @@ const Puasa = () => {
           animate={{ y: 0, opacity: 1 }}
           className="w-full rounded-3xl p-4 flex flex-col gap-4"
           style={{
-            background: '#FFFFFF',
-            border: '1px solid #F3EDE6',
+            background: 'var(--c-surface)',
+            border: '1px solid var(--c-border-warm)',
           }}
         >
           <div className="flex items-center gap-4">
