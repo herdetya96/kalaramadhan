@@ -72,7 +72,7 @@ const DoaHarian = () => {
               style={{
                 background: activeCategory === cat ? 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)' : 'var(--c-surface-alt)',
                 border: activeCategory === cat ? '1px solid var(--c-surface)' : '1px solid var(--c-border-warm)',
-                color: activeCategory === cat ? 'var(--c-badge-green-dark-text)' : 'var(--c-text-secondary)',
+                color: activeCategory === cat ? 'var(--c-text-dark)' : 'var(--c-text-secondary)',
                 boxShadow: activeCategory === cat ? 'var(--s-small)' : 'none',
               }}
             >
