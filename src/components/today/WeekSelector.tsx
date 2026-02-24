@@ -33,7 +33,7 @@ const WeekSelector = ({ selectedDate, realToday, onSelectDate }: WeekSelectorPro
 
   return (
     <div className="flex items-center gap-0 pt-2">
-      <button onClick={() => goWeek(-1)} className="p-1 rounded-full bg-white/50 shadow-sm" style={{ color: '#62748E' }}>
+      <button onClick={() => goWeek(-1)} className="p-1 rounded-full" style={{ color: 'var(--c-text-secondary)' }}>
         <ChevronLeft className="h-4 w-4" />
       </button>
       <div className="flex flex-1 gap-0.5 px-1">
@@ -44,20 +44,20 @@ const WeekSelector = ({ selectedDate, realToday, onSelectDate }: WeekSelectorPro
             className="flex flex-1 flex-col items-center rounded-[40px] py-2 transition-all"
             style={d.isSelected ? {
               background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)',
-              border: '1px solid #FFFFFF',
-              boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)',
+              border: '1px solid var(--c-surface)',
+              boxShadow: 'var(--s-card)',
             } : {}}
           >
-            <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: d.isSelected ? '#314158' : '#5C5C5C' }}>
+            <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: d.isSelected ? 'var(--c-text-dark)' : 'var(--c-text-dim)' }}>
               {dayNames[i]}
             </span>
-            <span className="mt-0.5 text-lg font-bold" style={{ color: '#314158', letterSpacing: '-0.44px' }}>
+            <span className="mt-0.5 text-lg font-bold" style={{ color: 'var(--c-text-dark)', letterSpacing: '-0.44px' }}>
               {d.day}
             </span>
           </button>
         ))}
       </div>
-      <button onClick={() => goWeek(1)} className="p-1 rounded-full bg-white/50 shadow-sm" style={{ color: '#62748E' }}>
+      <button onClick={() => goWeek(1)} className="p-1 rounded-full" style={{ color: 'var(--c-text-secondary)' }}>
         <ChevronRight className="h-4 w-4" />
       </button>
     </div>

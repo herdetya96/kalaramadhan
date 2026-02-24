@@ -19,7 +19,6 @@ const Tracker = () => {
   const [wajibPrayers, setWajibPrayers] = useState<PrayerSchedule[]>(WAJIB_PRAYERS);
   const [userCoords, setUserCoords] = useState<{lat: number;lon: number;} | null>(null);
 
-  // Load coords
   useEffect(() => {
     const savedCoords = localStorage.getItem("kala-user-coords");
     if (savedCoords) setUserCoords(JSON.parse(savedCoords));
@@ -32,383 +31,168 @@ const Tracker = () => {
     }
   }, []);
 
-  useEffect(() => {
-    setDayData(loadDayData(selectedDate));
-  }, [selectedDate]);
+  useEffect(() => { setDayData(loadDayData(selectedDate)); }, [selectedDate]);
 
   useEffect(() => {
     if (!userCoords) return;
-    fetchPrayerTimes(userCoords.lat, userCoords.lon, selectedDate).
-    then((fetched) => {
-      setPrayers(fetched);
-      setWajibPrayers(getWajibFromPrayers(fetched));
-    }).
-    catch(() => {
-      setPrayers(DEFAULT_PRAYERS);
-      setWajibPrayers(WAJIB_PRAYERS);
-    });
+    fetchPrayerTimes(userCoords.lat, userCoords.lon, selectedDate)
+      .then((fetched) => { setPrayers(fetched); setWajibPrayers(getWajibFromPrayers(fetched)); })
+      .catch(() => { setPrayers(DEFAULT_PRAYERS); setWajibPrayers(WAJIB_PRAYERS); });
   }, [userCoords, selectedDate]);
 
-  const updateDayData = useCallback((newData: DayData) => {
-    setDayData(newData);
-    saveDayData(selectedDate, newData);
-  }, [selectedDate]);
-
-  const togglePrayer = (index: number) => {
-    const newCompleted = [...dayData.prayerCompleted];
-    newCompleted[index] = !newCompleted[index];
-    updateDayData({ ...dayData, prayerCompleted: newCompleted });
-  };
-
-  const toggleSunnah = (id: string) => {
-    const newSunnah = { ...dayData.sunnahCompleted, [id]: !dayData.sunnahCompleted[id] };
-    updateDayData({ ...dayData, sunnahCompleted: newSunnah });
-  };
-
-  const completeAll = () => {
-    updateDayData({ ...dayData, prayerCompleted: [true, true, true, true, true] });
-  };
-
+  const updateDayData = useCallback((newData: DayData) => { setDayData(newData); saveDayData(selectedDate, newData); }, [selectedDate]);
+  const togglePrayer = (index: number) => { const n = [...dayData.prayerCompleted]; n[index] = !n[index]; updateDayData({ ...dayData, prayerCompleted: n }); };
+  const toggleSunnah = (id: string) => { updateDayData({ ...dayData, sunnahCompleted: { ...dayData.sunnahCompleted, [id]: !dayData.sunnahCompleted[id] } }); };
+  const completeAll = () => { updateDayData({ ...dayData, prayerCompleted: [true, true, true, true, true] }); };
 
   const completedCount = dayData.prayerCompleted.filter(Boolean).length;
   const percentage = Math.round(completedCount / 5 * 100);
 
-  // Week days around selected date
   const weekDays = useMemo(() => {
     const startOfWeek = new Date(realToday);
-    const dayOfWeek = startOfWeek.getDay();
-    startOfWeek.setDate(startOfWeek.getDate() - dayOfWeek);
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(startOfWeek);
-      d.setDate(d.getDate() + i);
-      return d;
-    });
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+    return Array.from({ length: 7 }, (_, i) => { const d = new Date(startOfWeek); d.setDate(d.getDate() + i); return d; });
   }, []);
 
-
-  // Streak calculation — find the most recent completed day, then count consecutive days backwards
   const streak = useMemo(() => {
     const d = new Date(realToday);
-    // Find the most recent day with all 5 prayers completed (scan up to 90 days back)
     let found = false;
-    for (let i = 0; i < 90; i++) {
-      const data = loadDayData(d);
-      if (data.prayerCompleted.filter(Boolean).length === 5) {
-        found = true;
-        break;
-      }
-      d.setDate(d.getDate() - 1);
-    }
+    for (let i = 0; i < 90; i++) { if (loadDayData(d).prayerCompleted.filter(Boolean).length === 5) { found = true; break; } d.setDate(d.getDate() - 1); }
     if (!found) return 0;
-    // Count consecutive days from that point backwards
     let count = 0;
-    while (true) {
-      const data = loadDayData(d);
-      if (data.prayerCompleted.filter(Boolean).length === 5) {
-        count++;
-        d.setDate(d.getDate() - 1);
-      } else break;
-    }
+    while (true) { if (loadDayData(d).prayerCompleted.filter(Boolean).length === 5) { count++; d.setDate(d.getDate() - 1); } else break; }
     return count;
   }, [realToday, completedCount]);
 
   const dateTitle = selectedDate.toLocaleDateString("id-ID", { month: "long", day: "numeric", year: "numeric" });
   const isToday = getDayKey(selectedDate) === getDayKey(realToday);
 
-  // Circular progress
   const radius = 120;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - percentage / 100 * circumference;
 
   return (
-    <div className="min-h-screen bg-white pb-24 relative overflow-hidden">
-      {/* Green blur bg */}
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          width: 560, height: 341,
-          left: '50%', top: -280,
-          transform: 'translateX(-50%)',
-          background: '#CCFF3F',
-          filter: 'blur(100px)',
-          zIndex: 0
-        }} />
-
+    <div className="min-h-screen pb-24 relative overflow-hidden" style={{ background: 'var(--c-surface)' }}>
+      <div className="absolute pointer-events-none" style={{ width: 560, height: 341, left: '50%', top: -280, transform: 'translateX(-50%)', background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0 }} />
 
       <div className="relative z-10 flex flex-col items-center pt-6 px-4 gap-[16px]">
-        {/* Header with month nav */}
         <div className="flex flex-col items-center w-full">
-          <h1 className="text-xl font-bold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
+          <h1 className="text-xl font-bold" style={{ color: 'var(--c-text)', letterSpacing: '-0.44px' }}>
             {isToday ? "Today" : selectedDate.toLocaleDateString("id-ID", { weekday: "long" })}
           </h1>
-          <span className="text-sm" style={{ color: '#62748E', letterSpacing: '-0.15px' }}>{dateTitle}</span>
+          <span className="text-sm" style={{ color: 'var(--c-text-secondary)', letterSpacing: '-0.15px' }}>{dateTitle}</span>
         </div>
 
-        {/* Week day selector */}
-        <div className="flex items-start gap-0 w-full justify-between px-1" style={{ scrollbarWidth: 'none' }}>
+        <div className="flex items-start gap-0 w-full justify-between px-1">
           {weekDays.map((d, i) => {
             const isSelected = getDayKey(d) === getDayKey(selectedDate);
             const isTodayDate = getDayKey(d) === getDayKey(realToday);
             return (
-              <button
-                key={i}
-                onClick={() => setSelectedDate(d)}
+              <button key={i} onClick={() => setSelectedDate(d)}
                 className="flex flex-col items-center justify-center gap-0.5 flex-shrink-0"
                 style={{
-                  width: 48, height: 64,
-                  borderRadius: isSelected ? 40 : 16,
-                  ...(isSelected ? {
-                    background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)',
-                    border: '1px solid #FFFFFF',
-                    boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)'
-                  } : {})
+                  width: 48, height: 64, borderRadius: isSelected ? 40 : 16,
+                  ...(isSelected ? { background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)', border: '1px solid var(--c-surface)', boxShadow: 'var(--s-card)' } : {})
                 }}>
-
-                <span
-                  className="text-[10px] font-medium uppercase"
-                  style={{ color: isSelected ? '#314158' : '#5C5C5C', letterSpacing: '0.62px' }}>
-
-                  {DAY_LABELS[d.getDay()]}
-                </span>
-                <span
-                  className="text-lg font-bold"
-                  style={{ color: '#314158', letterSpacing: '-0.44px' }}>
-
-                  {d.getDate()}
-                </span>
-                {isTodayDate && !isSelected && (
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#38CA5E' }} />
-                )}
-              </button>);
-
+                <span className="text-[10px] font-medium uppercase" style={{ color: isSelected ? 'var(--c-text-dark)' : 'var(--c-text-dim)', letterSpacing: '0.62px' }}>{DAY_LABELS[d.getDay()]}</span>
+                <span className="text-lg font-bold" style={{ color: 'var(--c-text-dark)', letterSpacing: '-0.44px' }}>{d.getDate()}</span>
+                {isTodayDate && !isSelected && <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--c-green-accent)' }} />}
+              </button>
+            );
           })}
         </div>
 
         {/* Circular progress */}
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="relative flex items-center justify-center"
-          style={{ width: 280, height: 280 }}>
-
+        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative flex items-center justify-center" style={{ width: 280, height: 280 }}>
           <svg width="280" height="280" viewBox="0 0 280 280" className="absolute">
-            {/* Background circle */}
-            <circle
-              cx="140" cy="140" r={radius}
-              fill="none"
-              stroke="#EFEFEF"
-              strokeWidth="20"
-              strokeLinecap="round" />
-
-            {/* Progress arc */}
-            <circle
-              cx="140" cy="140" r={radius}
-              fill="none"
-              stroke="url(#progressGrad)"
-              strokeWidth="20"
-              strokeLinecap="round"
-              strokeDasharray={circumference}
-              strokeDashoffset={strokeDashoffset}
-              transform="rotate(-90 140 140)"
-              style={{ transition: 'stroke-dashoffset 0.5s ease' }} />
-
-            <defs>
-              <linearGradient id="progressGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#7DF8AD" />
-                <stop offset="100%" stopColor="#CAFF7B" />
-              </linearGradient>
-            </defs>
+            <circle cx="140" cy="140" r={radius} fill="none" stroke="var(--c-progress-bg)" strokeWidth="20" strokeLinecap="round" />
+            <circle cx="140" cy="140" r={radius} fill="none" stroke="url(#progressGrad)" strokeWidth="20" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} transform="rotate(-90 140 140)" style={{ transition: 'stroke-dashoffset 0.5s ease' }} />
+            <defs><linearGradient id="progressGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#7DF8AD" /><stop offset="100%" stopColor="#CAFF7B" /></linearGradient></defs>
           </svg>
           <div className="flex flex-col items-center gap-2 z-10">
-            <span className="text-sm font-semibold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
-              Tracker Solat Wajib
-            </span>
-            <span className="font-semibold" style={{ fontSize: 48, color: '#1D293D', letterSpacing: '-0.44px' }}>
-              {percentage}%
-            </span>
-            <span className="text-xs" style={{ color: '#838A96', letterSpacing: '-0.15px' }}>
-              {completedCount}/5 Completed
-            </span>
+            <span className="text-sm font-semibold" style={{ color: 'var(--c-text)', letterSpacing: '-0.44px' }}>Tracker Solat Wajib</span>
+            <span className="font-semibold" style={{ fontSize: 48, color: 'var(--c-text)', letterSpacing: '-0.44px' }}>{percentage}%</span>
+            <span className="text-xs" style={{ color: 'var(--c-text-muted)', letterSpacing: '-0.15px' }}>{completedCount}/5 Completed</span>
           </div>
         </motion.div>
 
         {/* Streak card */}
-        <motion.div
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
+        <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
           className="w-full rounded-3xl p-6 flex items-center justify-between"
-          style={{
-            background: '#FFFFFF',
-            border: '1px solid #F3EDE6',
-            boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)'
-          }}>
-
+          style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)', boxShadow: 'var(--s-card)' }}>
           <div className="flex flex-col gap-2">
-            <span className="text-lg font-semibold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
+            <span className="text-lg font-semibold" style={{ color: 'var(--c-text)', letterSpacing: '-0.44px' }}>
               {streak > 0 ? `${streak} hari beruntun salat 5 waktu!` : 'Mulai streak salat 5 waktumu!'}
             </span>
-            <span className="text-xs" style={{ color: '#838A96', letterSpacing: '-0.15px' }}>
+            <span className="text-xs" style={{ color: 'var(--c-text-muted)', letterSpacing: '-0.15px' }}>
               {streak > 0 ? 'Jangan sampai bolong ya solatnya!' : 'Selesaikan 5 sholat hari ini'}
             </span>
           </div>
-          <div
-            className="flex items-center justify-center flex-shrink-0"
-            style={{
-              width: 40, height: 40,
-              background: 'linear-gradient(180deg, #F87D7D 0%, #FFE2D2 100%)',
-              border: '1px solid #FFFFFF',
-              boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1)',
-              borderRadius: 40
-            }}>
-
+          <div className="flex items-center justify-center flex-shrink-0" style={{ width: 40, height: 40, background: 'linear-gradient(180deg, #F87D7D 0%, #FFE2D2 100%)', border: '1px solid var(--c-surface)', boxShadow: 'var(--s-complex)', borderRadius: 40 }}>
             <span className="text-lg">🔥</span>
           </div>
         </motion.div>
 
         {/* Prayer list card */}
-        <motion.div
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.1 }}
+        <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}
           className="w-full rounded-3xl p-4 flex flex-col gap-3"
-          style={{
-            background: '#FFFFFF',
-            border: '1px solid #F3EDE6',
-            boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)'
-          }}>
-
-          {/* Header row */}
+          style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)', boxShadow: 'var(--s-card)' }}>
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
-              Sholat Wajib
-            </h2>
+            <h2 className="text-lg font-semibold" style={{ color: 'var(--c-text)', letterSpacing: '-0.44px' }}>Sholat Wajib</h2>
             <div className="flex items-center gap-2">
-              <span
-                className="text-xs font-bold px-4 py-2 rounded-full"
-                style={{ background: '#F8F8F7', color: '#314158' }}>
-
-                {completedCount}/5
-              </span>
-              <button
-                onClick={completeAll}
-                className="text-xs font-bold px-4 py-2 rounded-full"
-                style={{
-                  background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)',
-                  border: '1px solid #FFFFFF',
-                  boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1)',
-                  color: '#314158'
-                }}>
-
+              <span className="text-xs font-bold px-4 py-2 rounded-full" style={{ background: 'var(--c-surface-alt)', color: 'var(--c-text-dark)' }}>{completedCount}/5</span>
+              <button onClick={completeAll} className="text-xs font-bold px-4 py-2 rounded-full"
+                style={{ background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)', border: '1px solid var(--c-surface)', boxShadow: 'var(--s-complex)', color: 'var(--c-text-dark)' }}>
                 Selesaikan semua
               </button>
             </div>
           </div>
 
-          {/* Progress bar */}
-          <div className="h-2 w-full rounded-full" style={{ background: '#F8F8F7' }}>
-            <motion.div
-              className="h-full rounded-full"
-              style={{ background: 'linear-gradient(90deg, #3AE886 0%, #46C0F1 100%)' }}
-              initial={{ width: 0 }}
-              animate={{ width: `${completedCount / 5 * 100}%` }}
-              transition={{ duration: 0.4 }} />
-
+          <div className="h-2 w-full rounded-full" style={{ background: 'var(--c-surface-alt)' }}>
+            <motion.div className="h-full rounded-full" style={{ background: 'linear-gradient(90deg, #3AE886 0%, #46C0F1 100%)' }} initial={{ width: 0 }} animate={{ width: `${completedCount / 5 * 100}%` }} transition={{ duration: 0.4 }} />
           </div>
 
-          {/* Prayer items */}
           <div className="flex flex-col gap-2">
             {wajibPrayers.map((prayer, i) => {
               const completed = dayData.prayerCompleted[i];
               return (
-                <motion.button
-                  key={prayer.name}
-                  initial={{ y: 10, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: i * 0.04 }}
-                  onClick={() => togglePrayer(i)}
-                  className="flex w-full items-center justify-between rounded-2xl p-4"
-                  style={{
-                    background: '#FFFFFF',
-                    border: '1px solid #F3EDE6',
-                    boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)'
-                  }}>
-
+                <motion.button key={prayer.name} initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: i * 0.04 }}
+                  onClick={() => togglePrayer(i)} className="flex w-full items-center justify-between rounded-2xl p-4"
+                  style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)', boxShadow: 'var(--s-card-light)' }}>
                   <div className="flex items-center gap-4">
-                    <div
-                      className="flex h-10 w-10 items-center justify-center rounded-full"
-                      style={completed ? {
-                        background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)',
-                        border: '1px solid #FFFFFF',
-                        boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1), 0px 30px 46px rgba(223, 150, 55, 0.1)'
-                      } : {
-                        background: '#F8F8F7'
-                      }}>
-
-                      {completed &&
-                      <Check className="h-5 w-5" style={{ color: '#334258' }} strokeWidth={2.5} />
-                      }
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full"
+                      style={completed ? { background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)', border: '1px solid var(--c-surface)', boxShadow: 'var(--s-complex)' } : { background: 'var(--c-surface-alt)' }}>
+                      {completed && <Check className="h-5 w-5" style={{ color: 'var(--c-text-check)' }} strokeWidth={2.5} />}
                     </div>
-                    <span
-                      className="font-semibold text-base"
-                      style={{
-                        color: completed ? '#90A1B9' : '#1D293D',
-                        textDecoration: completed ? 'line-through' : 'none',
-                        letterSpacing: '-0.44px'
-                      }}>
-
-                      {prayer.name}
-                    </span>
+                    <span className="font-semibold text-base" style={{ color: completed ? 'var(--c-text-completed)' : 'var(--c-text)', textDecoration: completed ? 'line-through' : 'none', letterSpacing: '-0.44px' }}>{prayer.name}</span>
                   </div>
-                  <span className="text-sm" style={{ color: '#90A1B9', letterSpacing: '-0.15px' }}>
-                    {prayer.time}
-                  </span>
-                </motion.button>);
-
+                  <span className="text-sm" style={{ color: 'var(--c-text-completed)', letterSpacing: '-0.15px' }}>{prayer.time}</span>
+                </motion.button>
+              );
             })}
           </div>
         </motion.div>
 
-        {/* Sunnah section */}
         <TrackerSunnahSection dayData={dayData} onToggleSunnah={toggleSunnah} />
 
         {/* Progress link */}
-        <motion.button
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          onClick={() => navigate('/progress')}
-          className="w-full rounded-3xl p-5 flex items-center justify-between"
-          style={{
-            background: '#FFFFFF',
-            border: '1px solid #F3EDE6',
-            boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)'
-          }}>
-
+        <motion.button initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}
+          onClick={() => navigate('/progress')} className="w-full rounded-3xl p-5 flex items-center justify-between"
+          style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)', boxShadow: 'var(--s-card)' }}>
           <div className="flex items-center gap-3">
-            <div
-              className="flex h-10 w-10 items-center justify-center rounded-full"
-              style={{
-                background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)',
-                border: '1px solid #FFFFFF',
-                boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1)'
-              }}>
-
-              <BarChart3 className="h-5 w-5" style={{ color: '#334258' }} strokeWidth={2} />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)', border: '1px solid var(--c-surface)', boxShadow: 'var(--s-small)' }}>
+              <BarChart3 className="h-5 w-5" style={{ color: 'var(--c-text-check)' }} strokeWidth={2} />
             </div>
             <div className="flex flex-col items-start">
-              <span className="font-semibold text-base" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
-                Progress Bulanan
-              </span>
-              <span className="text-xs" style={{ color: '#838A96' }}>
-                Lihat konsistensi ibadahmu
-              </span>
+              <span className="font-semibold text-base" style={{ color: 'var(--c-text)', letterSpacing: '-0.44px' }}>Progress Bulanan</span>
+              <span className="text-xs" style={{ color: 'var(--c-text-muted)' }}>Lihat konsistensi ibadahmu</span>
             </div>
           </div>
-          <ChevronRight className="h-5 w-5" style={{ color: '#90A1B9' }} />
+          <ChevronRight className="h-5 w-5" style={{ color: 'var(--c-text-completed)' }} />
         </motion.button>
       </div>
-    </div>);
-
+    </div>
+  );
 };
 
 export default Tracker;

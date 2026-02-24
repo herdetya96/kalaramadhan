@@ -17,31 +17,18 @@ const Progress = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white pb-24 relative overflow-hidden">
-      {/* Green blur bg */}
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          width: 560, height: 341,
-          left: '50%', top: -280,
-          transform: 'translateX(-50%)',
-          background: '#CCFF3F',
-          filter: 'blur(100px)',
-          zIndex: 0
-        }} />
+    <div className="min-h-screen pb-24 relative overflow-hidden" style={{ background: 'var(--c-surface)' }}>
+      <div className="absolute pointer-events-none" style={{ width: 560, height: 341, left: '50%', top: -280, transform: 'translateX(-50%)', background: '#CCFF3F', filter: 'blur(100px)', zIndex: 0 }} />
       <div className="relative z-10 flex flex-col items-center pt-6 gap-6 px-4">
-        {/* Header */}
         <div className="flex items-center w-full">
           <button onClick={() => navigate(-1)} className="p-2 rounded-full">
-            <ChevronLeft className="h-6 w-6" style={{ color: '#62748E' }} strokeWidth={2} />
+            <ChevronLeft className="h-6 w-6" style={{ color: 'var(--c-text-secondary)' }} strokeWidth={2} />
           </button>
-          <h1 className="text-xl font-bold flex-1 text-center pr-10" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
+          <h1 className="text-xl font-bold flex-1 text-center pr-10" style={{ color: 'var(--c-text)', letterSpacing: '-0.44px' }}>
             Progress Bulanan
           </h1>
         </div>
-
         <MonthlyProgress selectedDate={monthViewDate} onMonthChange={handleMonthChange} onDayClick={setSelectedDay} />
-
         {selectedDay && <DayDetail date={selectedDay} onClose={() => setSelectedDay(null)} />}
       </div>
     </div>
