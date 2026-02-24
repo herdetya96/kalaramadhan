@@ -152,7 +152,7 @@ const SettingsPage = () => {
 
         {/* Profile Card */}
         <div className="flex items-center gap-4 rounded-2xl p-4 cursor-pointer active:scale-[0.98] transition-transform"
-          style={{ background: 'linear-gradient(135deg, hsl(150 70% 96%) 0%, hsl(80 100% 96%) 100%)', border: '1px solid var(--c-border-warm)', boxShadow: 'var(--s-card)' }}>
+          style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)', boxShadow: 'var(--s-card)' }}>
           <div className="flex h-12 w-12 items-center justify-center rounded-full flex-shrink-0" style={{ background: 'hsl(var(--primary) / 0.12)' }}>
             {isLoggedIn ? <img src="" alt="avatar" className="h-12 w-12 rounded-full object-cover" /> : <User className="h-5 w-5 text-primary" />}
           </div>
