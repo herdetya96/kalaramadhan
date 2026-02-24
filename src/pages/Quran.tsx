@@ -504,7 +504,7 @@ const Quran = () => {
   if (selectedSurah !== null) {
     const surah = surahs.find((s) => s.number === selectedSurah);
     return (
-      <div className="min-h-screen bg-white pb-24 relative overflow-hidden">
+      <div className="min-h-screen pb-24 relative overflow-hidden" style={{ background: 'var(--c-surface)' }}>
         <BgBlobs />
         <div className="relative z-10 flex flex-col pt-6 px-4 gap-4">
           <div className="flex items-center w-full">
@@ -512,35 +512,30 @@ const Quran = () => {
               onClick={() => {
                 setSelectedSurah(null);
                 setAyahs([]);
-                // If came from khatam, go back to khatam detail
                 if (khatamReadingId) {
                   setKhatamDetailId(khatamReadingId);
                   setKhatamReadingId(null);
                 }
               }}
-              className="p-2 rounded-full"
-            >
-              <ChevronLeft className="h-6 w-6" style={{ color: '#62748E' }} strokeWidth={2} />
+              className="p-2 rounded-full">
+              <ChevronLeft className="h-6 w-6" style={{ color: 'var(--c-text-secondary)' }} strokeWidth={2} />
             </button>
             <div className="flex-1 text-center pr-10">
-              <h1 className="text-xl font-bold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>{surah?.englishName}</h1>
-              <span className="text-xs" style={{ color: '#838A96' }}>{getSurahTranslation(surah?.number || 0) || surah?.englishNameTranslation} · {surah?.numberOfAyahs} ayat</span>
+              <h1 className="text-xl font-bold" style={{ color: 'var(--c-text)', letterSpacing: '-0.44px' }}>{surah?.englishName}</h1>
+              <span className="text-xs" style={{ color: 'var(--c-text-muted)' }}>{getSurahTranslation(surah?.number || 0) || surah?.englishNameTranslation} · {surah?.numberOfAyahs} ayat</span>
             </div>
           </div>
 
-          {/* Khatam context banner */}
           {khatamReadingId && (
-            <div className="flex items-center gap-2 px-3 py-2 rounded-2xl" style={{ background: '#F0FDF4', border: '1px solid #D1FAE5' }}>
-              <Trophy className="h-4 w-4 flex-shrink-0" style={{ color: '#059669' }} />
-              <span className="text-xs font-medium" style={{ color: '#065F46' }}>
-                Membaca untuk Khatam · ketuk ayat untuk checkpoint
-              </span>
+            <div className="flex items-center gap-2 px-3 py-2 rounded-2xl" style={{ background: 'var(--c-badge-green-bg)', border: '1px solid var(--c-badge-green-dark-bg)' }}>
+              <Trophy className="h-4 w-4 flex-shrink-0" style={{ color: 'var(--c-badge-green-medium-text)' }} />
+              <span className="text-xs font-medium" style={{ color: 'var(--c-badge-green-dark-text)' }}>Membaca untuk Khatam · ketuk ayat untuk checkpoint</span>
             </div>
           )}
 
           {selectedSurah !== 1 && selectedSurah !== 9 && (
             <div className="text-center py-4">
-              <span className="text-2xl font-arabic" style={{ color: '#1D293D', fontFamily: "'LPMQ IsepMisbah', 'Scheherazade New', serif" }}>بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ</span>
+              <span className="text-2xl font-arabic" style={{ color: 'var(--c-text)', fontFamily: "'LPMQ IsepMisbah', 'Scheherazade New', serif" }}>بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ</span>
             </div>
           )}
 
@@ -557,64 +552,42 @@ const Quran = () => {
                   && activeKhatamSession.checkpointSurah === selectedSurah
                   && activeKhatamSession.checkpointAyah === ayah.numberInSurah;
                 return (
-                  <div
-                    key={ayah.number}
-                    id={`ayah-${ayah.numberInSurah}`}
+                  <div key={ayah.number} id={`ayah-${ayah.numberInSurah}`}
                     onClick={() => handleAyahTap(ayah)}
                     className="rounded-2xl p-4 flex flex-col gap-3 cursor-pointer transition-all active:scale-[0.99]"
                     style={{
-                      background: '#FFFFFF',
-                      border: '1px solid #F3EDE6',
-                      boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)',
-                      borderLeft: isKhatamCp
-                        ? '3px solid #059669'
-                        : isLastRead
-                        ? '3px solid #38CA5E'
-                        : isSaved
-                        ? '3px solid #F59E0B'
-                        : '1px solid #F3EDE6',
-                    }}
-                  >
+                      background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)',
+                      boxShadow: 'var(--s-card-light)',
+                      borderLeft: isKhatamCp ? '3px solid #059669' : isLastRead ? '3px solid #38CA5E' : isSaved ? '3px solid #F59E0B' : '1px solid var(--c-border-warm)',
+                    }}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div
-                          className="flex items-center justify-center h-7 w-7 rounded-full text-xs font-bold"
-                          style={{
-                            background: isLastRead ? '#38CA5E' : '#F0FDF4',
-                            color: isLastRead ? '#FFFFFF' : '#166534',
-                          }}
-                        >
+                        <div className="flex items-center justify-center h-7 w-7 rounded-full text-xs font-bold"
+                          style={{ background: isLastRead ? '#38CA5E' : 'var(--c-badge-green-bg)', color: isLastRead ? '#FFFFFF' : 'var(--c-badge-green-text)' }}>
                           {ayah.numberInSurah}
                         </div>
                         {isLastRead && <BookOpen className="h-4 w-4" style={{ color: '#38CA5E' }} />}
                         {isSaved && <Flag className="h-4 w-4" style={{ color: '#F59E0B' }} />}
-                        {isKhatamCp && <MapPin className="h-4 w-4" style={{ color: '#059669' }} />}
+                        {isKhatamCp && <MapPin className="h-4 w-4" style={{ color: 'var(--c-badge-green-medium-text)' }} />}
                       </div>
                     </div>
-
-                    <p className="text-right text-xl leading-loose" dir="rtl" style={{ color: '#1D293D', fontFamily: "'LPMQ IsepMisbah', 'Scheherazade New', serif", lineHeight: 2.2 }}>
-                      {ayah.text}
-                    </p>
-
-                    {ayah.transliteration && (
-                      <p className="text-sm italic leading-relaxed" style={{ color: '#2E7D32' }}>{ayah.transliteration}</p>
-                    )}
-
-                    {ayah.translation && (
-                      <p className="text-sm leading-relaxed" style={{ color: '#62748E' }}>{ayah.translation}</p>
-                    )}
+                    <p className="text-right text-xl leading-loose" dir="rtl" style={{ color: 'var(--c-text)', fontFamily: "'LPMQ IsepMisbah', 'Scheherazade New', serif", lineHeight: 2.2 }}>{ayah.text}</p>
+                    {ayah.transliteration && <p className="text-sm italic leading-relaxed" style={{ color: 'var(--c-transliteration)' }}>{ayah.transliteration}</p>}
+                    {ayah.translation && <p className="text-sm leading-relaxed" style={{ color: 'var(--c-text-secondary)' }}>{ayah.translation}</p>}
                   </div>
                 );
               })}
 
               <div className="flex gap-3 pt-2">
                 {selectedSurah > 1 && (
-                  <button onClick={() => loadSurah(selectedSurah - 1)} className="flex-1 rounded-2xl p-4 flex items-center justify-center gap-2 font-semibold text-sm" style={{ background: '#F8F8F7', color: '#314158' }}>
+                  <button onClick={() => loadSurah(selectedSurah - 1)} className="flex-1 rounded-2xl p-4 flex items-center justify-center gap-2 font-semibold text-sm"
+                    style={{ background: 'var(--c-surface-alt)', color: 'var(--c-text-dark)' }}>
                     <ChevronLeft className="h-4 w-4" /> Surah Sebelumnya
                   </button>
                 )}
                 {selectedSurah < 114 && (
-                  <button onClick={() => loadSurah(selectedSurah + 1)} className="flex-1 rounded-2xl p-4 flex items-center justify-center gap-2 font-semibold text-sm" style={{ background: 'linear-gradient(180deg, #6EE7B7 0%, #D1FAE5 100%)', color: '#065F46' }}>
+                  <button onClick={() => loadSurah(selectedSurah + 1)} className="flex-1 rounded-2xl p-4 flex items-center justify-center gap-2 font-semibold text-sm"
+                    style={{ background: 'linear-gradient(180deg, #6EE7B7 0%, #D1FAE5 100%)', color: '#065F46' }}>
                     Surah Selanjutnya <ChevronRight className="h-4 w-4" />
                   </button>
                 )}
@@ -623,90 +596,61 @@ const Quran = () => {
           )}
         </div>
 
-        {/* Action Drawer */}
         <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
           <DrawerContent className="rounded-t-3xl">
             <DrawerHeader className="pb-2">
-              <DrawerTitle className="text-base font-bold" style={{ color: '#1D293D' }}>
+              <DrawerTitle className="text-base font-bold" style={{ color: 'var(--c-text)' }}>
                 {currentSurahForDrawer?.englishName} : {selectedAyahForAction?.numberInSurah}
               </DrawerTitle>
-              <DrawerDescription className="text-xs" style={{ color: '#838A96' }}>
-                Pilih aksi untuk ayat ini
-              </DrawerDescription>
+              <DrawerDescription className="text-xs" style={{ color: 'var(--c-text-muted)' }}>Pilih aksi untuk ayat ini</DrawerDescription>
             </DrawerHeader>
             <div className="flex flex-col gap-2 px-4 pb-6">
-              {/* Khatam Checkpoint — only shown when reading from khatam */}
               {khatamReadingId && (
-                <button
-                  onClick={handleKhatamCheckpoint}
-                  className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:bg-gray-50"
-                  style={{ background: isKhatamCheckpointed ? '#F0FDF4' : '#F8F8F7' }}
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: '#D1FAE5' }}>
-                    <MapPin className="h-5 w-5" style={{ color: '#059669' }} />
+                <button onClick={handleKhatamCheckpoint}
+                  className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:opacity-80"
+                  style={{ background: isKhatamCheckpointed ? 'var(--c-badge-green-bg)' : 'var(--c-surface-alt)' }}>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: 'var(--c-badge-green-dark-bg)' }}>
+                    <MapPin className="h-5 w-5" style={{ color: 'var(--c-badge-green-medium-text)' }} />
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>
-                      {isKhatamCheckpointed ? 'Checkpoint Khatam (aktif)' : 'Set Checkpoint Khatam'}
-                    </span>
-                    <span className="text-xs" style={{ color: '#838A96' }}>
-                      Tandai posisi baca khatam di ayat ini
-                    </span>
+                    <span className="font-semibold text-sm" style={{ color: 'var(--c-text)' }}>{isKhatamCheckpointed ? 'Checkpoint Khatam (aktif)' : 'Set Checkpoint Khatam'}</span>
+                    <span className="text-xs" style={{ color: 'var(--c-text-muted)' }}>Tandai posisi baca khatam di ayat ini</span>
                   </div>
                 </button>
               )}
-
-              {/* Copy */}
-              <button
-                onClick={handleCopyAyah}
-                className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:bg-gray-50"
-                style={{ background: '#F8F8F7' }}
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: '#E0F2FE' }}>
-                  <Copy className="h-5 w-5" style={{ color: '#0284C7' }} />
+              <button onClick={handleCopyAyah}
+                className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:opacity-80"
+                style={{ background: 'var(--c-surface-alt)' }}>
+                <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: 'var(--c-badge-blue-bg)' }}>
+                  <Copy className="h-5 w-5" style={{ color: 'var(--c-badge-blue-text)' }} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>Salin Ayat</span>
-                  <span className="text-xs" style={{ color: '#838A96' }}>Salin teks Arab & terjemahan</span>
+                  <span className="font-semibold text-sm" style={{ color: 'var(--c-text)' }}>Salin Ayat</span>
+                  <span className="text-xs" style={{ color: 'var(--c-text-muted)' }}>Salin teks Arab & terjemahan</span>
                 </div>
               </button>
-
-              {/* Checkpoint & Tandai Terakhir Dibaca — hidden when in khatam reading mode */}
               {!khatamReadingId && (
                 <>
-                  <button
-                    onClick={handleToggleCheckpoint}
-                    className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:bg-gray-50"
-                    style={{ background: '#F8F8F7' }}
-                  >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: '#FEF3C7' }}>
-                      <Flag className="h-5 w-5" style={{ color: isSelectedBookmarked ? '#F59E0B' : '#D97706' }} />
+                  <button onClick={handleToggleCheckpoint}
+                    className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:opacity-80"
+                    style={{ background: 'var(--c-surface-alt)' }}>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: 'var(--c-badge-yellow-bg)' }}>
+                      <Flag className="h-5 w-5" style={{ color: isSelectedBookmarked ? '#F59E0B' : 'var(--c-badge-yellow-text)' }} />
                     </div>
                     <div className="flex flex-col">
-                      <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>
-                        {isSelectedBookmarked ? 'Hapus Checkpoint' : 'Simpan Checkpoint'}
-                      </span>
-                      <span className="text-xs" style={{ color: '#838A96' }}>
-                        {isSelectedBookmarked ? 'Hapus checkpoint di surah ini' : 'Tandai ayat ini sebagai checkpoint'}
-                      </span>
+                      <span className="font-semibold text-sm" style={{ color: 'var(--c-text)' }}>{isSelectedBookmarked ? 'Hapus Checkpoint' : 'Simpan Checkpoint'}</span>
+                      <span className="text-xs" style={{ color: 'var(--c-text-muted)' }}>{isSelectedBookmarked ? 'Hapus checkpoint di surah ini' : 'Tandai ayat ini sebagai checkpoint'}</span>
                     </div>
                   </button>
-
-                  <button
-                    onClick={handleMarkLastRead}
-                    className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:bg-gray-50"
-                    style={{ background: isSelectedLastRead ? '#F0FDF4' : '#F8F8F7' }}
-                  >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: isSelectedLastRead ? '#D1FAE5' : '#ECFDF5' }}>
-                      <BookMarked className="h-5 w-5" style={{ color: '#059669' }} />
+                  <button onClick={handleMarkLastRead}
+                    className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:opacity-80"
+                    style={{ background: isSelectedLastRead ? 'var(--c-badge-green-bg)' : 'var(--c-surface-alt)' }}>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: isSelectedLastRead ? 'var(--c-badge-green-dark-bg)' : 'var(--c-badge-green-bg)' }}>
+                      <BookMarked className="h-5 w-5" style={{ color: 'var(--c-badge-green-medium-text)' }} />
                     </div>
                     <div className="flex flex-col">
-                      <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>
-                        {isSelectedLastRead ? 'Sudah Ditandai' : 'Tandai Terakhir Dibaca'}
-                      </span>
-                      <span className="text-xs" style={{ color: '#838A96' }}>
-                        {isSelectedLastRead ? 'Ayat ini adalah terakhir dibaca' : 'Lanjut membaca dari ayat ini nanti'}
-                      </span>
+                      <span className="font-semibold text-sm" style={{ color: 'var(--c-text)' }}>{isSelectedLastRead ? 'Sudah Ditandai' : 'Tandai Terakhir Dibaca'}</span>
+                      <span className="text-xs" style={{ color: 'var(--c-text-muted)' }}>{isSelectedLastRead ? 'Ayat ini adalah terakhir dibaca' : 'Lanjut membaca dari ayat ini nanti'}</span>
                     </div>
                   </button>
                 </>
@@ -723,28 +667,26 @@ const Quran = () => {
   // ──────────────────────────────────────────────
   if (showCheckpoints) {
     return (
-      <div className="min-h-screen bg-white pb-24 relative overflow-hidden">
+      <div className="min-h-screen pb-24 relative overflow-hidden" style={{ background: 'var(--c-surface)' }}>
         <BgBlobs />
         <div className="relative z-10 flex flex-col pt-6 px-4 gap-4">
           <div className="flex items-center w-full">
             <button onClick={() => setShowCheckpoints(false)} className="p-2 rounded-full">
-              <ChevronLeft className="h-6 w-6" style={{ color: '#62748E' }} strokeWidth={2} />
+              <ChevronLeft className="h-6 w-6" style={{ color: 'var(--c-text-secondary)' }} strokeWidth={2} />
             </button>
-            <h1 className="text-xl font-bold flex-1 text-center pr-10" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>Checkpoint</h1>
+            <h1 className="text-xl font-bold flex-1 text-center pr-10" style={{ color: 'var(--c-text)', letterSpacing: '-0.44px' }}>Checkpoint</h1>
           </div>
 
           {bookmarks.length === 0 ? (
             <div className="text-center py-20">
-              <Flag className="h-10 w-10 mx-auto mb-3" style={{ color: '#D1D5DB' }} />
-              <span className="text-sm" style={{ color: '#838A96' }}>Belum ada checkpoint</span>
+              <Flag className="h-10 w-10 mx-auto mb-3" style={{ color: 'var(--c-disabled)' }} />
+              <span className="text-sm" style={{ color: 'var(--c-text-muted)' }}>Belum ada checkpoint</span>
             </div>
           ) : (
             <div className="flex flex-col gap-2 pb-6">
               {bookmarks.map((bm, i) => (
-                <motion.button
-                  key={`${bm.surah}-${bm.ayahNumber}`}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
+                <motion.button key={`${bm.surah}-${bm.ayahNumber}`}
+                  initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: Math.min(i * 0.03, 0.2) }}
                   onClick={() => {
                     setShowCheckpoints(false);
@@ -756,20 +698,15 @@ const Quran = () => {
                     });
                   }}
                   className="w-full rounded-2xl p-4 flex items-center gap-4 text-left"
-                  style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full flex-shrink-0" style={{ background: '#FEF3C7' }}>
-                    <Flag className="h-4 w-4" style={{ color: '#D97706' }} />
+                  style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)', boxShadow: 'var(--s-card-light)' }}>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full flex-shrink-0" style={{ background: 'var(--c-badge-yellow-bg)' }}>
+                    <Flag className="h-4 w-4" style={{ color: 'var(--c-badge-yellow-text)' }} />
                   </div>
                   <div className="flex flex-col flex-1 min-w-0">
-                    <span className="font-semibold text-sm truncate" style={{ color: '#1D293D' }}>
-                      {bm.surahName} : Ayat {bm.ayahNumber}
-                    </span>
-                    <span className="text-xs truncate" style={{ color: '#838A96' }}>
-                      {bm.translation.slice(0, 80)}{bm.translation.length > 80 ? '...' : ''}
-                    </span>
+                    <span className="font-semibold text-sm truncate" style={{ color: 'var(--c-text)' }}>{bm.surahName} : Ayat {bm.ayahNumber}</span>
+                    <span className="text-xs truncate" style={{ color: 'var(--c-text-muted)' }}>{bm.translation.slice(0, 80)}{bm.translation.length > 80 ? '...' : ''}</span>
                   </div>
-                  <ChevronRight className="h-4 w-4 flex-shrink-0" style={{ color: '#90A1B9' }} />
+                  <ChevronRight className="h-4 w-4 flex-shrink-0" style={{ color: 'var(--c-text-completed)' }} />
                 </motion.button>
               ))}
             </div>
@@ -782,137 +719,102 @@ const Quran = () => {
   // ──────────────────────────────────────────────
   // KHATAM DETAIL SCREEN
   // ──────────────────────────────────────────────
-  if (khatamDetailId !== null) {
+  if (khatamDetailId) {
     const session = khatamSessions.find((s) => s.id === khatamDetailId);
-    if (!session) {
-      setKhatamDetailId(null);
-      return null;
-    }
+    if (!session) { setKhatamDetailId(null); return null; }
     const daysLeft = getDaysRemaining(session.targetDate);
     const elapsed = session.durationDays - daysLeft;
     const pct = Math.min(Math.max((elapsed / session.durationDays) * 100, 0), 100);
 
     return (
-      <div className="min-h-screen bg-white pb-24 relative overflow-hidden">
+      <div className="min-h-screen pb-24 relative overflow-hidden" style={{ background: 'var(--c-surface)' }}>
         <BgBlobs />
         <div className="relative z-10 flex flex-col pt-6 px-4 gap-4">
-          {/* Header */}
           <div className="flex items-center w-full">
             <button onClick={() => { setKhatamDetailId(null); setShowKhatam(true); }} className="p-2 rounded-full">
-              <ChevronLeft className="h-6 w-6" style={{ color: '#62748E' }} strokeWidth={2} />
+              <ChevronLeft className="h-6 w-6" style={{ color: 'var(--c-text-secondary)' }} strokeWidth={2} />
             </button>
-            <div className="flex-1 text-center">
-              <h1 className="text-xl font-bold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>
-                Khatam {session.durationDays} Hari
-              </h1>
-              <span className="text-xs" style={{ color: '#838A96' }}>
-                Selesai {formatDate(session.targetDate)}
-              </span>
-            </div>
+            <h1 className="text-xl font-bold flex-1 text-center pr-10" style={{ color: 'var(--c-text)', letterSpacing: '-0.44px' }}>Khatam</h1>
             <div className="relative">
-              <button
-                onClick={() => setShowKhatamMenu((v) => !v)}
-                className="p-2 rounded-full"
-              >
-                <MoreVertical className="h-5 w-5" style={{ color: '#62748E' }} />
+              <button onClick={() => setShowKhatamMenu(!showKhatamMenu)} className="p-2 rounded-full">
+                <MoreVertical className="h-5 w-5" style={{ color: 'var(--c-text-secondary)' }} />
               </button>
               {showKhatamMenu && (
-                <>
-                  {/* Backdrop to close */}
-                  <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setShowKhatamMenu(false)}
-                  />
-                  <div
-                    className="absolute right-0 top-10 z-50 flex flex-col rounded-2xl overflow-hidden"
-                    style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 8px 24px rgba(0,0,0,0.10)', minWidth: 160 }}
-                  >
-                    {!session.completed && (
-                      <button
-                        onClick={() => { handleCompleteKhatam(session.id); setShowKhatamMenu(false); }}
-                        className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
-                        style={{ color: '#059669' }}
-                      >
-                        <Check className="h-4 w-4" />
-                        Tandai Selesai
-                      </button>
-                    )}
-                    <button
-                      onClick={() => { handleDeleteKhatam(session.id); setKhatamDetailId(null); setShowKhatam(true); setShowKhatamMenu(false); }}
-                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
-                      style={{ color: '#EF4444' }}
-                    >
-                      <X className="h-4 w-4" />
-                      Hapus Khatam
+                <div className="absolute right-0 top-10 rounded-2xl py-2 z-50 min-w-[160px]"
+                  style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)', boxShadow: 'var(--s-complex)' }}>
+                  {!session.completed && (
+                    <button onClick={() => { handleCompleteKhatam(session.id); setShowKhatamMenu(false); }}
+                      className="w-full text-left px-4 py-2.5 text-sm" style={{ color: 'var(--c-badge-green-medium-text)' }}>
+                      ✅ Tandai Selesai
                     </button>
-                  </div>
-                </>
+                  )}
+                  <button onClick={() => { handleDeleteKhatam(session.id); setShowKhatamMenu(false); setKhatamDetailId(null); setShowKhatam(true); }}
+                    className="w-full text-left px-4 py-2.5 text-sm" style={{ color: '#EF4444' }}>
+                    🗑 Hapus Khatam
+                  </button>
+                </div>
               )}
             </div>
           </div>
 
-          {/* Reading progress card */}
-          <div className="rounded-2xl p-4 flex flex-col gap-3" style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}>
+          {/* Progress card */}
+          <div className="rounded-3xl p-5 flex flex-col gap-3"
+            style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)', boxShadow: 'var(--s-card)' }}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Trophy className="h-4 w-4" style={{ color: 'var(--c-badge-yellow-text)' }} />
+                <span className="font-bold text-sm" style={{ color: 'var(--c-text)' }}>Target {session.durationDays} Hari</span>
+              </div>
+              <span className="text-xs font-bold px-3 py-1 rounded-full"
+                style={{ background: daysLeft < 0 ? '#FEE2E2' : 'var(--c-badge-green-bg)', color: daysLeft < 0 ? '#EF4444' : 'var(--c-badge-green-medium-text)' }}>
+                {daysLeft < 0 ? `${Math.abs(daysLeft)} hari terlewat` : `${daysLeft} hari lagi`}
+              </span>
+            </div>
+            <div className="flex flex-col gap-1">
+              <div className="flex justify-between text-xs" style={{ color: 'var(--c-text-muted)' }}>
+                <span>Mulai {formatDate(session.startDate)}</span>
+                <span>Target {formatDate(session.targetDate)}</span>
+              </div>
+              <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ background: 'var(--c-progress-fill)' }}>
+                <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #6EE7B7, #38CA5E)' }} />
+              </div>
+              <span className="text-xs" style={{ color: 'var(--c-badge-green-medium-text)' }}>{Math.round(pct)}% waktu berlalu</span>
+            </div>
+
             {session.checkpointSurah ? (
               <>
-                {/* Reading progress based on checkpoint */}
-                {(() => {
-                  const readingPct = Math.round((session.checkpointSurah / 114) * 100);
-                  return (
-                    <>
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs font-semibold" style={{ color: '#62748E' }}>Progress Khatam</span>
-                        <span className="text-xs font-bold" style={{ color: '#059669' }}>{readingPct}%</span>
-                      </div>
-                      <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ background: '#F3F4F6' }}>
-                        <div
-                          className="h-full rounded-full transition-all"
-                          style={{ width: `${readingPct}%`, background: 'linear-gradient(90deg, #6EE7B7, #38CA5E)' }}
-                        />
-                      </div>
-                    </>
-                  );
-                })()}
-
-                {/* Checkpoint detail + lanjut button */}
-                <div className="flex items-center gap-2 pt-1 rounded-xl px-3 py-2" style={{ background: '#F0FDF4' }}>
-                  <MapPin className="h-3.5 w-3.5 flex-shrink-0" style={{ color: '#059669' }} />
-                  <div className="flex flex-col flex-1 min-w-0">
-                    <span className="text-xs font-semibold" style={{ color: '#065F46' }}>
-                      {session.checkpointSurahName} · Ayat {session.checkpointAyah}
-                    </span>
-                    <span className="text-[10px]" style={{ color: '#6EE7B7' }}>
-                      Surah ke-{session.checkpointSurah} dari 114
-                    </span>
+                <div className="h-px w-full" style={{ background: 'var(--c-divider)' }} />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4" style={{ color: 'var(--c-badge-green-medium-text)' }} />
+                    <div className="flex flex-col">
+                      <span className="text-xs font-semibold" style={{ color: 'var(--c-text)' }}>Terakhir: {session.checkpointSurahName}</span>
+                      <span className="text-xs" style={{ color: 'var(--c-text-muted)' }}>Ayat {session.checkpointAyah}</span>
+                    </div>
                   </div>
-                  <button
-                    onClick={() => {
-                      if (session.checkpointSurah) {
-                        setKhatamDetailId(null);
-                        loadSurahFromKhatam(session.checkpointSurah, session.id).then(() => {
-                          setTimeout(() => {
-                            const el = document.getElementById(`ayah-${session.checkpointAyah}`);
-                            if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-                          }, 500);
-                        });
+                  <button onClick={() => {
+                    setKhatamDetailId(null);
+                    loadSurahFromKhatam(session.checkpointSurah!, session.id).then(() => {
+                      if (session.checkpointAyah) {
+                        setTimeout(() => {
+                          const el = document.getElementById(`ayah-${session.checkpointAyah}`);
+                          if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }, 500);
                       }
-                    }}
+                    });
+                  }}
                     className="flex-shrink-0 text-xs font-bold px-3 py-1.5 rounded-xl"
-                    style={{ background: '#D1FAE5', color: '#059669' }}
-                  >
+                    style={{ background: 'var(--c-badge-green-dark-bg)', color: 'var(--c-badge-green-medium-text)' }}>
                     Lanjut Baca
                   </button>
                 </div>
               </>
             ) : (
-              /* No checkpoint yet */
               <div className="flex flex-col items-center gap-2 py-2">
-                <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ background: '#F3F4F6' }}>
+                <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ background: 'var(--c-progress-fill)' }}>
                   <div className="h-full rounded-full" style={{ width: '0%', background: 'linear-gradient(90deg, #6EE7B7, #38CA5E)' }} />
                 </div>
-                <span className="text-xs text-center" style={{ color: '#90A1B9' }}>
-                  Belum ada checkpoint · buka surah dan tandai ayat terakhir dibaca
-                </span>
+                <span className="text-xs text-center" style={{ color: 'var(--c-text-completed)' }}>Belum ada checkpoint · buka surah dan tandai ayat terakhir dibaca</span>
               </div>
             )}
           </div>
@@ -920,75 +822,52 @@ const Quran = () => {
           {/* Surah / Juz tabs */}
           <div className="flex gap-2">
             {(["surah", "juz"] as const).map((mode) => (
-              <button
-                key={mode}
-                onClick={() => setKhatamDetailViewMode(mode)}
+              <button key={mode} onClick={() => setKhatamDetailViewMode(mode)}
                 className="flex-1 py-2.5 rounded-2xl text-sm font-semibold transition-all"
                 style={{
-                  background: khatamDetailViewMode === mode ? 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)' : '#F8F8F7',
-                  border: khatamDetailViewMode === mode ? '1px solid #FFFFFF' : '1px solid #F3EDE6',
-                  color: khatamDetailViewMode === mode ? '#065F46' : '#62748E',
-                  boxShadow: khatamDetailViewMode === mode ? '0px 4px 14px rgba(0, 0, 0, 0.1)' : 'none',
-                }}
-              >
+                  background: khatamDetailViewMode === mode ? 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)' : 'var(--c-surface-alt)',
+                  border: khatamDetailViewMode === mode ? '1px solid #FFFFFF' : '1px solid var(--c-border-warm)',
+                  color: khatamDetailViewMode === mode ? '#065F46' : 'var(--c-text-secondary)',
+                  boxShadow: khatamDetailViewMode === mode ? 'var(--s-small)' : 'none',
+                }}>
                 {mode === "surah" ? "Surah" : "Juz"}
               </button>
             ))}
           </div>
 
-          {/* Surah list */}
           {khatamDetailViewMode === "surah" && (
             <>
-              <input
-                type="text"
-                placeholder="Cari surah..."
-                value={khatamDetailSearch}
+              <input type="text" placeholder="Cari surah..." value={khatamDetailSearch}
                 onChange={(e) => setKhatamDetailSearch(e.target.value)}
                 className="w-full rounded-2xl px-4 py-3 text-sm outline-none"
-                style={{ background: '#F8F8F7', border: '1px solid #F3EDE6', color: '#1D293D' }}
-              />
+                style={{ background: 'var(--c-surface-alt)', border: '1px solid var(--c-border-warm)', color: 'var(--c-text)' }} />
               {surahLoading ? (
-                <div className="flex items-center justify-center py-20">
-                  <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#34D399' }} />
-                </div>
+                <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin" style={{ color: '#34D399' }} /></div>
               ) : (
                 <div className="flex flex-col gap-2 pb-6">
                   {filteredKhatamSurahs.map((surah, i) => {
                     const isCp = session.checkpointSurah === surah.number;
                     return (
-                      <motion.button
-                        key={surah.number}
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
+                      <motion.button key={surah.number} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: Math.min(i * 0.01, 0.3) }}
-                        onClick={() => {
-                          setKhatamDetailId(null);
-                          loadSurahFromKhatam(surah.number, session.id);
-                        }}
+                        onClick={() => { setKhatamDetailId(null); loadSurahFromKhatam(surah.number, session.id); }}
                         className="w-full rounded-2xl p-4 flex items-center gap-4 text-left"
-                        style={{
-                          background: '#FFFFFF',
-                          border: isCp ? '1.5px solid #6EE7B7' : '1px solid #F3EDE6',
-                          boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)',
-                        }}
-                      >
-                        <div
-                          className="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0 text-sm font-bold"
-                          style={{ background: isCp ? '#D1FAE5' : '#F8F8F7', color: isCp ? '#059669' : '#314158' }}
-                        >
+                        style={{ background: 'var(--c-surface)', border: isCp ? '1.5px solid #6EE7B7' : '1px solid var(--c-border-warm)', boxShadow: 'var(--s-card-light)' }}>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0 text-sm font-bold"
+                          style={{ background: isCp ? 'var(--c-badge-green-dark-bg)' : 'var(--c-surface-alt)', color: isCp ? 'var(--c-badge-green-medium-text)' : 'var(--c-text-dark)' }}>
                           {surah.number}
                         </div>
                         <div className="flex flex-col flex-1 min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-semibold text-sm truncate" style={{ color: '#1D293D' }}>{surah.englishName}</span>
-                            {isCp && <MapPin className="h-3.5 w-3.5 flex-shrink-0" style={{ color: '#059669' }} />}
+                            <span className="font-semibold text-sm truncate" style={{ color: 'var(--c-text)' }}>{surah.englishName}</span>
+                            {isCp && <MapPin className="h-3.5 w-3.5 flex-shrink-0" style={{ color: 'var(--c-badge-green-medium-text)' }} />}
                           </div>
-                          <span className="text-xs truncate" style={{ color: '#838A96' }}>
+                          <span className="text-xs truncate" style={{ color: 'var(--c-text-muted)' }}>
                             {getSurahTranslation(surah.number) || surah.englishNameTranslation} · {surah.numberOfAyahs} ayat
                             {isCp ? ` · Ayat ${session.checkpointAyah}` : ''}
                           </span>
                         </div>
-                        <span className="text-base font-arabic flex-shrink-0" style={{ color: '#1D293D', fontFamily: "'LPMQ IsepMisbah', 'Scheherazade New', serif" }}>{surah.name}</span>
+                        <span className="text-base font-arabic flex-shrink-0" style={{ color: 'var(--c-text)', fontFamily: "'LPMQ IsepMisbah', 'Scheherazade New', serif" }}>{surah.name}</span>
                       </motion.button>
                     );
                   })}
@@ -997,33 +876,21 @@ const Quran = () => {
             </>
           )}
 
-          {/* Juz list */}
           {khatamDetailViewMode === "juz" && (
             <div className="flex flex-col gap-2 pb-6">
               {JUZ_DATA.map((juz, i) => (
-                <motion.button
-                  key={juz.number}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
+                <motion.button key={juz.number} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: Math.min(i * 0.02, 0.3) }}
-                  onClick={() => {
-                    setKhatamDetailId(null);
-                    setKhatamReadingId(session.id);
-                    loadJuz(juz.number);
-                  }}
+                  onClick={() => { setKhatamDetailId(null); setKhatamReadingId(session.id); loadJuz(juz.number); }}
                   className="w-full rounded-2xl p-4 flex items-center gap-4 text-left"
-                  style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0 text-sm font-bold" style={{ background: '#F8F8F7', color: '#314158' }}>
-                    {juz.number}
-                  </div>
+                  style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)', boxShadow: 'var(--s-card-light)' }}>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0 text-sm font-bold"
+                    style={{ background: 'var(--c-surface-alt)', color: 'var(--c-text-dark)' }}>{juz.number}</div>
                   <div className="flex flex-col flex-1 min-w-0">
-                    <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>Juz {juz.number}</span>
-                    <span className="text-xs" style={{ color: '#838A96' }}>
-                      {juz.startSurah} : {juz.startAyah} — {juz.endSurah} : {juz.endAyah}
-                    </span>
+                    <span className="font-semibold text-sm" style={{ color: 'var(--c-text)' }}>Juz {juz.number}</span>
+                    <span className="text-xs" style={{ color: 'var(--c-text-muted)' }}>{juz.startSurah} : {juz.startAyah} — {juz.endSurah} : {juz.endAyah}</span>
                   </div>
-                  <ChevronRight className="h-4 w-4 flex-shrink-0" style={{ color: '#90A1B9' }} />
+                  <ChevronRight className="h-4 w-4 flex-shrink-0" style={{ color: 'var(--c-text-completed)' }} />
                 </motion.button>
               ))}
             </div>
@@ -1038,159 +905,127 @@ const Quran = () => {
   // ──────────────────────────────────────────────
   if (showKhatam) {
     return (
-      <div className="min-h-screen bg-white pb-24 relative overflow-hidden">
+      <div className="min-h-screen pb-24 relative overflow-hidden" style={{ background: 'var(--c-surface)' }}>
         <BgBlobs />
         <div className="relative z-10 flex flex-col pt-6 px-4 gap-4">
           <div className="flex items-center w-full">
             <button onClick={() => { setShowKhatam(false); setShowNewKhatam(false); }} className="p-2 rounded-full">
-              <ChevronLeft className="h-6 w-6" style={{ color: '#62748E' }} strokeWidth={2} />
+              <ChevronLeft className="h-6 w-6" style={{ color: 'var(--c-text-secondary)' }} strokeWidth={2} />
             </button>
-            <h1 className="text-xl font-bold flex-1 text-center pr-10" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>Khatam</h1>
+            <h1 className="text-xl font-bold flex-1 text-center pr-10" style={{ color: 'var(--c-text)', letterSpacing: '-0.44px' }}>Khatam</h1>
           </div>
 
-          {/* New Khatam form */}
           {showNewKhatam ? (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
               className="rounded-3xl p-5 flex flex-col gap-4"
-              style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.08)' }}
-            >
+              style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)', boxShadow: 'var(--s-subtle)' }}>
               <div className="flex items-center justify-between">
-                <span className="font-bold text-base" style={{ color: '#1D293D' }}>Target Khatam Baru</span>
-                <button onClick={() => setShowNewKhatam(false)}>
-                  <X className="h-5 w-5" style={{ color: '#90A1B9' }} />
-                </button>
+                <span className="font-bold text-base" style={{ color: 'var(--c-text)' }}>Target Khatam Baru</span>
+                <button onClick={() => setShowNewKhatam(false)}><X className="h-5 w-5" style={{ color: 'var(--c-text-completed)' }} /></button>
               </div>
-
               <div>
-                <span className="text-xs font-semibold mb-2 block" style={{ color: '#62748E' }}>Pilih durasi</span>
+                <span className="text-xs font-semibold mb-2 block" style={{ color: 'var(--c-text-secondary)' }}>Pilih durasi</span>
                 <div className="grid grid-cols-4 gap-2">
                   {DURATION_TEMPLATES.map((d) => (
-                    <button
-                      key={d}
-                      onClick={() => { setSelectedDuration(d); setUseCustom(false); }}
+                    <button key={d} onClick={() => { setSelectedDuration(d); setUseCustom(false); }}
                       className="rounded-2xl py-3 flex flex-col items-center gap-0.5 transition-all"
                       style={{
-                        background: !useCustom && selectedDuration === d ? 'linear-gradient(180deg, #7DF8AD 0%, #D1FAE5 100%)' : '#F8F8F7',
-                        border: !useCustom && selectedDuration === d ? '1px solid #FFFFFF' : '1px solid #F3EDE6',
-                        boxShadow: !useCustom && selectedDuration === d ? '0px 4px 14px rgba(0,0,0,0.08)' : 'none',
-                      }}
-                    >
-                      <span className="font-bold text-sm" style={{ color: !useCustom && selectedDuration === d ? '#065F46' : '#314158' }}>{d}</span>
-                      <span className="text-[10px]" style={{ color: !useCustom && selectedDuration === d ? '#059669' : '#90A1B9' }}>hari</span>
+                        background: !useCustom && selectedDuration === d ? 'linear-gradient(180deg, #7DF8AD 0%, #D1FAE5 100%)' : 'var(--c-surface-alt)',
+                        border: !useCustom && selectedDuration === d ? '1px solid #FFFFFF' : '1px solid var(--c-border-warm)',
+                        boxShadow: !useCustom && selectedDuration === d ? 'var(--s-btn)' : 'none',
+                      }}>
+                      <span className="font-bold text-sm" style={{ color: !useCustom && selectedDuration === d ? '#065F46' : 'var(--c-text-dark)' }}>{d}</span>
+                      <span className="text-[10px]" style={{ color: !useCustom && selectedDuration === d ? '#059669' : 'var(--c-text-completed)' }}>hari</span>
                     </button>
                   ))}
                 </div>
               </div>
-
               <div>
-                <span className="text-xs font-semibold mb-2 block" style={{ color: '#62748E' }}>Atau masukkan manual</span>
+                <span className="text-xs font-semibold mb-2 block" style={{ color: 'var(--c-text-secondary)' }}>Atau masukkan manual</span>
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setUseCustom(true)}
+                  <button onClick={() => setUseCustom(true)}
                     className="flex items-center justify-center h-5 w-5 rounded-full border-2 flex-shrink-0 transition-all"
-                    style={{ borderColor: useCustom ? '#38CA5E' : '#D1D5DB', background: useCustom ? '#38CA5E' : 'transparent' }}
-                  >
+                    style={{ borderColor: useCustom ? '#38CA5E' : 'var(--c-disabled)', background: useCustom ? '#38CA5E' : 'transparent' }}>
                     {useCustom && <Check className="h-3 w-3 text-white" />}
                   </button>
-                  <input
-                    type="number"
-                    min="1"
-                    placeholder="Contoh: 120"
-                    value={customDuration}
+                  <input type="number" min="1" placeholder="Contoh: 120" value={customDuration}
                     onFocus={() => setUseCustom(true)}
                     onChange={(e) => { setCustomDuration(e.target.value); setUseCustom(true); }}
                     className="flex-1 rounded-2xl px-4 py-2.5 text-sm outline-none"
-                    style={{ background: '#F8F8F7', border: useCustom ? '1.5px solid #38CA5E' : '1px solid #F3EDE6', color: '#1D293D' }}
-                  />
-                  <span className="text-sm font-medium" style={{ color: '#62748E' }}>hari</span>
+                    style={{ background: 'var(--c-surface-alt)', border: useCustom ? '1.5px solid #38CA5E' : '1px solid var(--c-border-warm)', color: 'var(--c-text)' }} />
+                  <span className="text-sm font-medium" style={{ color: 'var(--c-text-secondary)' }}>hari</span>
                 </div>
               </div>
-
               {((!useCustom && selectedDuration) || (useCustom && customDuration)) && (
-                <div className="rounded-2xl px-4 py-3 flex items-center gap-3" style={{ background: '#F0FDF4', border: '1px solid #D1FAE5' }}>
-                  <Trophy className="h-4 w-4 flex-shrink-0" style={{ color: '#059669' }} />
-                  <span className="text-xs" style={{ color: '#065F46' }}>
+                <div className="rounded-2xl px-4 py-3 flex items-center gap-3" style={{ background: 'var(--c-badge-green-bg)', border: '1px solid var(--c-badge-green-dark-bg)' }}>
+                  <Trophy className="h-4 w-4 flex-shrink-0" style={{ color: 'var(--c-badge-green-medium-text)' }} />
+                  <span className="text-xs" style={{ color: 'var(--c-badge-green-dark-text)' }}>
                     Target selesai pada{' '}
                     <span className="font-bold">
                       {(() => {
                         const d = useCustom ? parseInt(customDuration) : selectedDuration!;
                         if (!d || isNaN(d)) return '...';
-                        const t = new Date();
-                        t.setDate(t.getDate() + d);
+                        const t = new Date(); t.setDate(t.getDate() + d);
                         return formatDate(t.toISOString());
                       })()}
                     </span>
                   </span>
                 </div>
               )}
-
-              <button
-                onClick={handleCreateKhatam}
-                className="w-full rounded-2xl py-3.5 font-semibold text-sm"
-                style={{ background: 'linear-gradient(180deg, #6EE7B7 0%, #D1FAE5 100%)', color: '#065F46' }}
-              >
+              <button onClick={handleCreateKhatam} className="w-full rounded-2xl py-3.5 font-semibold text-sm"
+                style={{ background: 'linear-gradient(180deg, #6EE7B7 0%, #D1FAE5 100%)', color: '#065F46' }}>
                 Buat Target Khatam
               </button>
             </motion.div>
           ) : (
-            <button
-              onClick={() => setShowNewKhatam(true)}
+            <button onClick={() => setShowNewKhatam(true)}
               className="w-full rounded-2xl p-4 flex items-center gap-3"
-              style={{ background: '#F0FDF4', border: '1.5px dashed #6EE7B7' }}
-            >
-              <div className="flex h-9 w-9 items-center justify-center rounded-full" style={{ background: '#D1FAE5' }}>
-                <Plus className="h-4 w-4" style={{ color: '#059669' }} />
+              style={{ background: 'var(--c-badge-green-bg)', border: '1.5px dashed #6EE7B7' }}>
+              <div className="flex h-9 w-9 items-center justify-center rounded-full" style={{ background: 'var(--c-badge-green-dark-bg)' }}>
+                <Plus className="h-4 w-4" style={{ color: 'var(--c-badge-green-medium-text)' }} />
               </div>
-              <span className="font-semibold text-sm" style={{ color: '#059669' }}>Buat Target Khatam Baru</span>
+              <span className="font-semibold text-sm" style={{ color: 'var(--c-badge-green-medium-text)' }}>Buat Target Khatam Baru</span>
             </button>
           )}
 
-          {/* Active sessions */}
           {activeKhatam.length > 0 && (
             <div className="flex flex-col gap-2">
-              <span className="text-xs font-semibold px-1" style={{ color: '#62748E' }}>SEDANG BERJALAN</span>
+              <span className="text-xs font-semibold px-1" style={{ color: 'var(--c-text-secondary)' }}>SEDANG BERJALAN</span>
               {activeKhatam.map((session, i) => {
                 const daysLeft = getDaysRemaining(session.targetDate);
                 const elapsed = session.durationDays - daysLeft;
                 const pct = Math.min(Math.max((elapsed / session.durationDays) * 100, 0), 100);
                 return (
-                  <motion.button
-                    key={session.id}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
+                  <motion.button key={session.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.04 }}
                     onClick={() => { setShowKhatam(false); setKhatamDetailId(session.id); }}
                     className="w-full rounded-2xl p-4 flex flex-col gap-3 text-left active:scale-[0.99] transition-transform"
-                    style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}
-                  >
+                    style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)', boxShadow: 'var(--s-card-light)' }}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Trophy className="h-4 w-4" style={{ color: '#D97706' }} />
-                        <span className="font-bold text-sm" style={{ color: '#1D293D' }}>{session.durationDays} Hari</span>
+                        <Trophy className="h-4 w-4" style={{ color: 'var(--c-badge-yellow-text)' }} />
+                        <span className="font-bold text-sm" style={{ color: 'var(--c-text)' }}>{session.durationDays} Hari</span>
                       </div>
-                      <ChevronRight className="h-4 w-4" style={{ color: '#90A1B9' }} />
+                      <ChevronRight className="h-4 w-4" style={{ color: 'var(--c-text-completed)' }} />
                     </div>
-
                     <div className="flex flex-col gap-1">
-                      <div className="flex justify-between text-xs" style={{ color: '#838A96' }}>
+                      <div className="flex justify-between text-xs" style={{ color: 'var(--c-text-muted)' }}>
                         <span>Mulai {formatDate(session.startDate)}</span>
                         <span>Target {formatDate(session.targetDate)}</span>
                       </div>
-                      <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: '#F3F4F6' }}>
+                      <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: 'var(--c-progress-fill)' }}>
                         <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #6EE7B7, #38CA5E)' }} />
                       </div>
                       <div className="flex justify-between text-xs">
-                        <span style={{ color: '#059669' }}>{Math.round(pct)}% berlalu</span>
-                        <span style={{ color: daysLeft < 0 ? '#EF4444' : '#838A96' }}>
+                        <span style={{ color: 'var(--c-badge-green-medium-text)' }}>{Math.round(pct)}% berlalu</span>
+                        <span style={{ color: daysLeft < 0 ? '#EF4444' : 'var(--c-text-muted)' }}>
                           {daysLeft < 0 ? `${Math.abs(daysLeft)} hari terlewat` : `${daysLeft} hari lagi`}
                         </span>
                       </div>
                       {session.checkpointSurah && (
                         <div className="flex items-center gap-1.5 mt-0.5">
-                          <MapPin className="h-3 w-3" style={{ color: '#059669' }} />
-                          <span className="text-xs" style={{ color: '#059669' }}>
+                          <MapPin className="h-3 w-3" style={{ color: 'var(--c-badge-green-medium-text)' }} />
+                          <span className="text-xs" style={{ color: 'var(--c-badge-green-medium-text)' }}>
                             Checkpoint: {session.checkpointSurahName} Ayat {session.checkpointAyah}
                           </span>
                         </div>
@@ -1202,31 +1037,22 @@ const Quran = () => {
             </div>
           )}
 
-          {/* Completed sessions */}
           {completedKhatam.length > 0 && (
             <div className="flex flex-col gap-2 pb-6">
-              <span className="text-xs font-semibold px-1" style={{ color: '#62748E' }}>SELESAI</span>
+              <span className="text-xs font-semibold px-1" style={{ color: 'var(--c-text-secondary)' }}>SELESAI</span>
               {completedKhatam.map((session, i) => (
-                <motion.div
-                  key={session.id}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
+                <motion.div key={session.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.04 }}
                   className="rounded-2xl p-4 flex items-center gap-3"
-                  style={{ background: '#F9FAFB', border: '1px solid #F3EDE6' }}
-                >
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full flex-shrink-0" style={{ background: '#D1FAE5' }}>
-                    <Check className="h-4 w-4" style={{ color: '#059669' }} />
+                  style={{ background: 'var(--c-surface-hover)', border: '1px solid var(--c-border-warm)' }}>
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full flex-shrink-0" style={{ background: 'var(--c-badge-green-dark-bg)' }}>
+                    <Check className="h-4 w-4" style={{ color: 'var(--c-badge-green-medium-text)' }} />
                   </div>
                   <div className="flex flex-col flex-1 min-w-0">
-                    <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>Khatam {session.durationDays} Hari</span>
-                    <span className="text-xs" style={{ color: '#838A96' }}>
-                      Selesai {formatDate(session.completedDate || session.targetDate)}
-                    </span>
+                    <span className="font-semibold text-sm" style={{ color: 'var(--c-text)' }}>Khatam {session.durationDays} Hari</span>
+                    <span className="text-xs" style={{ color: 'var(--c-text-muted)' }}>Selesai {formatDate(session.completedDate || session.targetDate)}</span>
                   </div>
-                  <button onClick={() => handleDeleteKhatam(session.id)}>
-                    <X className="h-4 w-4" style={{ color: '#D1D5DB' }} />
-                  </button>
+                  <button onClick={() => handleDeleteKhatam(session.id)}><X className="h-4 w-4" style={{ color: 'var(--c-disabled)' }} /></button>
                 </motion.div>
               ))}
             </div>
@@ -1234,8 +1060,8 @@ const Quran = () => {
 
           {khatamSessions.length === 0 && !showNewKhatam && (
             <div className="text-center py-16">
-              <Trophy className="h-10 w-10 mx-auto mb-3" style={{ color: '#D1D5DB' }} />
-              <span className="text-sm" style={{ color: '#838A96' }}>Belum ada target khatam</span>
+              <Trophy className="h-10 w-10 mx-auto mb-3" style={{ color: 'var(--c-disabled)' }} />
+              <span className="text-sm" style={{ color: 'var(--c-text-muted)' }}>Belum ada target khatam</span>
             </div>
           )}
         </div>
@@ -1252,108 +1078,73 @@ const Quran = () => {
     const khatamSession = khatamReadingId ? khatamSessions.find((s) => s.id === khatamReadingId) : null;
 
     return (
-      <div className="min-h-screen bg-white pb-24 relative overflow-hidden">
+      <div className="min-h-screen pb-24 relative overflow-hidden" style={{ background: 'var(--c-surface)' }}>
         <BgBlobs />
         <div className="relative z-10 flex flex-col pt-6 px-4 gap-4">
           <div className="flex items-center w-full">
-            <button
-              onClick={() => {
-                setSelectedJuz(null);
-                setJuzAyahs([]);
-                if (khatamReadingId) {
-                  setKhatamDetailId(khatamReadingId);
-                  setKhatamReadingId(null);
-                }
-              }}
-              className="p-2 rounded-full"
-            >
-              <ChevronLeft className="h-6 w-6" style={{ color: '#62748E' }} strokeWidth={2} />
+            <button onClick={() => {
+              setSelectedJuz(null); setJuzAyahs([]);
+              if (khatamReadingId) { setKhatamDetailId(khatamReadingId); setKhatamReadingId(null); }
+            }} className="p-2 rounded-full">
+              <ChevronLeft className="h-6 w-6" style={{ color: 'var(--c-text-secondary)' }} strokeWidth={2} />
             </button>
             <div className="flex-1 text-center pr-10">
-              <h1 className="text-xl font-bold" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>Juz {selectedJuz}</h1>
-              <span className="text-xs" style={{ color: '#838A96' }}>{juz?.startSurah} — {juz?.endSurah}</span>
+              <h1 className="text-xl font-bold" style={{ color: 'var(--c-text)', letterSpacing: '-0.44px' }}>Juz {selectedJuz}</h1>
+              <span className="text-xs" style={{ color: 'var(--c-text-muted)' }}>{juz?.startSurah} — {juz?.endSurah}</span>
             </div>
           </div>
 
-          {/* Khatam context banner */}
           {isKhatamJuz && (
-            <div className="flex items-center gap-2 px-3 py-2 rounded-2xl" style={{ background: '#F0FDF4', border: '1px solid #D1FAE5' }}>
-              <Trophy className="h-4 w-4 flex-shrink-0" style={{ color: '#059669' }} />
-              <span className="text-xs font-medium" style={{ color: '#065F46' }}>
-                Membaca untuk Khatam · ketuk ayat untuk checkpoint
-              </span>
+            <div className="flex items-center gap-2 px-3 py-2 rounded-2xl" style={{ background: 'var(--c-badge-green-bg)', border: '1px solid var(--c-badge-green-dark-bg)' }}>
+              <Trophy className="h-4 w-4 flex-shrink-0" style={{ color: 'var(--c-badge-green-medium-text)' }} />
+              <span className="text-xs font-medium" style={{ color: 'var(--c-badge-green-dark-text)' }}>Membaca untuk Khatam · ketuk ayat untuk checkpoint</span>
             </div>
           )}
 
           {juzLoading ? (
-            <div className="flex items-center justify-center py-20">
-              <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#34D399' }} />
-            </div>
+            <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin" style={{ color: '#34D399' }} /></div>
           ) : (
             <div className="flex flex-col gap-4 pb-6">
               {juzAyahs.map((ayah) => {
-                const isKhatamCp = khatamSession
-                  && khatamSession.checkpointSurah === ayah.surahNumber
-                  && khatamSession.checkpointAyah === ayah.numberInSurah;
+                const isKhatamCp = khatamSession && khatamSession.checkpointSurah === ayah.surahNumber && khatamSession.checkpointAyah === ayah.numberInSurah;
                 const isLastRead = bookmarkedSurah === ayah.surahNumber && bookmarkedAyah === ayah.numberInSurah;
                 const isSaved = ayah.surahNumber ? isAyahBookmarked(ayah.surahNumber, ayah.numberInSurah) : false;
                 return (
-                  <div
-                    key={ayah.number}
-                    id={`juz-ayah-${ayah.surahNumber}-${ayah.numberInSurah}`}
+                  <div key={ayah.number} id={`juz-ayah-${ayah.surahNumber}-${ayah.numberInSurah}`}
                     onClick={() => handleAyahTap(ayah)}
                     className="rounded-2xl p-4 flex flex-col gap-3 cursor-pointer transition-all active:scale-[0.99]"
                     style={{
-                      background: '#FFFFFF',
-                      border: '1px solid #F3EDE6',
-                      boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)',
-                      borderLeft: isKhatamCp
-                        ? '3px solid #059669'
-                        : isLastRead
-                        ? '3px solid #38CA5E'
-                        : isSaved
-                        ? '3px solid #F59E0B'
-                        : '1px solid #F3EDE6',
-                    }}
-                  >
+                      background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)',
+                      boxShadow: 'var(--s-card-light)',
+                      borderLeft: isKhatamCp ? '3px solid #059669' : isLastRead ? '3px solid #38CA5E' : isSaved ? '3px solid #F59E0B' : '1px solid var(--c-border-warm)',
+                    }}>
                     <div className="flex items-center gap-2">
-                      <div
-                        className="flex items-center justify-center h-7 w-7 rounded-full text-xs font-bold"
-                        style={{
-                          background: isLastRead ? '#38CA5E' : '#F0FDF4',
-                          color: isLastRead ? '#FFFFFF' : '#166534',
-                        }}
-                      >
+                      <div className="flex items-center justify-center h-7 w-7 rounded-full text-xs font-bold"
+                        style={{ background: isLastRead ? '#38CA5E' : 'var(--c-badge-green-bg)', color: isLastRead ? '#FFFFFF' : 'var(--c-badge-green-text)' }}>
                         {ayah.numberInSurah}
                       </div>
-                      {ayah.surahName && (
-                        <span className="text-xs font-medium" style={{ color: '#90A1B9' }}>{ayah.surahName}</span>
-                      )}
+                      {ayah.surahName && <span className="text-xs font-medium" style={{ color: 'var(--c-text-completed)' }}>{ayah.surahName}</span>}
                       {isLastRead && <BookOpen className="h-4 w-4" style={{ color: '#38CA5E' }} />}
                       {isSaved && <Flag className="h-4 w-4" style={{ color: '#F59E0B' }} />}
-                      {isKhatamCp && <MapPin className="h-4 w-4 ml-auto" style={{ color: '#059669' }} />}
+                      {isKhatamCp && <MapPin className="h-4 w-4 ml-auto" style={{ color: 'var(--c-badge-green-medium-text)' }} />}
                     </div>
-                    <p className="text-right text-xl leading-loose" dir="rtl" style={{ color: '#1D293D', fontFamily: "'LPMQ IsepMisbah', 'Scheherazade New', serif", lineHeight: 2.2 }}>
-                      {ayah.text}
-                    </p>
-                    {ayah.transliteration && (
-                      <p className="text-sm italic leading-relaxed" style={{ color: '#2E7D32' }}>{ayah.transliteration}</p>
-                    )}
-                    {ayah.translation && (
-                      <p className="text-sm leading-relaxed" style={{ color: '#62748E' }}>{ayah.translation}</p>
-                    )}
+                    <p className="text-right text-xl leading-loose" dir="rtl" style={{ color: 'var(--c-text)', fontFamily: "'LPMQ IsepMisbah', 'Scheherazade New', serif", lineHeight: 2.2 }}>{ayah.text}</p>
+                    {ayah.transliteration && <p className="text-sm italic leading-relaxed" style={{ color: 'var(--c-transliteration)' }}>{ayah.transliteration}</p>}
+                    {ayah.translation && <p className="text-sm leading-relaxed" style={{ color: 'var(--c-text-secondary)' }}>{ayah.translation}</p>}
                   </div>
                 );
               })}
 
               <div className="flex gap-3 pt-2">
                 {selectedJuz > 1 && (
-                  <button onClick={() => loadJuz(selectedJuz - 1)} className="flex-1 rounded-2xl p-4 flex items-center justify-center gap-2 font-semibold text-sm" style={{ background: '#F8F8F7', color: '#314158' }}>
+                  <button onClick={() => loadJuz(selectedJuz - 1)} className="flex-1 rounded-2xl p-4 flex items-center justify-center gap-2 font-semibold text-sm"
+                    style={{ background: 'var(--c-surface-alt)', color: 'var(--c-text-dark)' }}>
                     <ChevronLeft className="h-4 w-4" /> Juz Sebelumnya
                   </button>
                 )}
                 {selectedJuz < 30 && (
-                  <button onClick={() => loadJuz(selectedJuz + 1)} className="flex-1 rounded-2xl p-4 flex items-center justify-center gap-2 font-semibold text-sm" style={{ background: 'linear-gradient(180deg, #6EE7B7 0%, #D1FAE5 100%)', color: '#065F46' }}>
+                  <button onClick={() => loadJuz(selectedJuz + 1)} className="flex-1 rounded-2xl p-4 flex items-center justify-center gap-2 font-semibold text-sm"
+                    style={{ background: 'linear-gradient(180deg, #6EE7B7 0%, #D1FAE5 100%)', color: '#065F46' }}>
                     Juz Selanjutnya <ChevronRight className="h-4 w-4" />
                   </button>
                 )}
@@ -1362,88 +1153,65 @@ const Quran = () => {
           )}
         </div>
 
-        {/* Drawer — juz context (works for both khatam and non-khatam) */}
         <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
           <DrawerContent className="rounded-t-3xl">
             <DrawerHeader className="pb-2">
-              <DrawerTitle className="text-base font-bold" style={{ color: '#1D293D' }}>
+              <DrawerTitle className="text-base font-bold" style={{ color: 'var(--c-text)' }}>
                 {selectedAyahForAction?.surahName} : Ayat {selectedAyahForAction?.numberInSurah}
               </DrawerTitle>
-              <DrawerDescription className="text-xs" style={{ color: '#838A96' }}>
-                Pilih aksi untuk ayat ini
-              </DrawerDescription>
+              <DrawerDescription className="text-xs" style={{ color: 'var(--c-text-muted)' }}>Pilih aksi untuk ayat ini</DrawerDescription>
             </DrawerHeader>
             <div className="flex flex-col gap-2 px-4 pb-6">
-              {/* Khatam Checkpoint — only when reading from khatam */}
               {khatamReadingId && (
-                <button
-                  onClick={handleKhatamCheckpoint}
-                  className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:bg-gray-50"
-                  style={{ background: '#F8F8F7' }}
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: '#D1FAE5' }}>
-                    <MapPin className="h-5 w-5" style={{ color: '#059669' }} />
+                <button onClick={handleKhatamCheckpoint}
+                  className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:opacity-80"
+                  style={{ background: 'var(--c-surface-alt)' }}>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: 'var(--c-badge-green-dark-bg)' }}>
+                    <MapPin className="h-5 w-5" style={{ color: 'var(--c-badge-green-medium-text)' }} />
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>Set Checkpoint Khatam</span>
-                    <span className="text-xs" style={{ color: '#838A96' }}>Tandai posisi baca khatam di ayat ini</span>
+                    <span className="font-semibold text-sm" style={{ color: 'var(--c-text)' }}>Set Checkpoint Khatam</span>
+                    <span className="text-xs" style={{ color: 'var(--c-text-muted)' }}>Tandai posisi baca khatam di ayat ini</span>
                   </div>
                 </button>
               )}
-
-              {/* Copy */}
-              <button
-                onClick={handleCopyAyah}
-                className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:bg-gray-50"
-                style={{ background: '#F8F8F7' }}
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: '#E0F2FE' }}>
-                  <Copy className="h-5 w-5" style={{ color: '#0284C7' }} />
+              <button onClick={handleCopyAyah}
+                className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:opacity-80"
+                style={{ background: 'var(--c-surface-alt)' }}>
+                <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: 'var(--c-badge-blue-bg)' }}>
+                  <Copy className="h-5 w-5" style={{ color: 'var(--c-badge-blue-text)' }} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>Salin Ayat</span>
-                  <span className="text-xs" style={{ color: '#838A96' }}>Salin teks Arab & terjemahan</span>
+                  <span className="font-semibold text-sm" style={{ color: 'var(--c-text)' }}>Salin Ayat</span>
+                  <span className="text-xs" style={{ color: 'var(--c-text-muted)' }}>Salin teks Arab & terjemahan</span>
                 </div>
               </button>
-
-              {/* Checkpoint & Tandai Terakhir Dibaca — hidden in khatam mode */}
               {!khatamReadingId && (
                 <>
-                  <button
-                    onClick={handleToggleCheckpoint}
-                    className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:bg-gray-50"
-                    style={{ background: '#F8F8F7' }}
-                  >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: '#FEF3C7' }}>
-                      <Flag className="h-5 w-5" style={{ color: '#D97706' }} />
+                  <button onClick={handleToggleCheckpoint}
+                    className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:opacity-80"
+                    style={{ background: 'var(--c-surface-alt)' }}>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: 'var(--c-badge-yellow-bg)' }}>
+                      <Flag className="h-5 w-5" style={{ color: 'var(--c-badge-yellow-text)' }} />
                     </div>
                     <div className="flex flex-col">
-                      <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>
+                      <span className="font-semibold text-sm" style={{ color: 'var(--c-text)' }}>
                         {selectedAyahForAction && selectedAyahForAction.surahNumber && isAyahBookmarked(selectedAyahForAction.surahNumber, selectedAyahForAction.numberInSurah) ? 'Hapus Checkpoint' : 'Simpan Checkpoint'}
                       </span>
-                      <span className="text-xs" style={{ color: '#838A96' }}>
-                        Tandai ayat ini sebagai checkpoint
-                      </span>
+                      <span className="text-xs" style={{ color: 'var(--c-text-muted)' }}>Tandai ayat ini sebagai checkpoint</span>
                     </div>
                   </button>
-
-                  <button
-                    onClick={handleMarkLastRead}
-                    className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:bg-gray-50"
-                    style={{
-                      background: selectedAyahForAction && bookmarkedSurah === selectedAyahForAction.surahNumber && bookmarkedAyah === selectedAyahForAction.numberInSurah ? '#F0FDF4' : '#F8F8F7',
-                    }}
-                  >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: '#ECFDF5' }}>
-                      <BookMarked className="h-5 w-5" style={{ color: '#059669' }} />
+                  <button onClick={handleMarkLastRead}
+                    className="w-full rounded-2xl p-4 flex items-center gap-4 text-left transition-colors active:opacity-80"
+                    style={{ background: selectedAyahForAction && bookmarkedSurah === selectedAyahForAction.surahNumber && bookmarkedAyah === selectedAyahForAction.numberInSurah ? 'var(--c-badge-green-bg)' : 'var(--c-surface-alt)' }}>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: 'var(--c-badge-green-bg)' }}>
+                      <BookMarked className="h-5 w-5" style={{ color: 'var(--c-badge-green-medium-text)' }} />
                     </div>
                     <div className="flex flex-col">
-                      <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>
+                      <span className="font-semibold text-sm" style={{ color: 'var(--c-text)' }}>
                         {selectedAyahForAction && bookmarkedSurah === selectedAyahForAction.surahNumber && bookmarkedAyah === selectedAyahForAction.numberInSurah ? 'Sudah Ditandai' : 'Tandai Terakhir Dibaca'}
                       </span>
-                      <span className="text-xs" style={{ color: '#838A96' }}>
-                        Lanjut membaca dari ayat ini nanti
-                      </span>
+                      <span className="text-xs" style={{ color: 'var(--c-text-muted)' }}>Lanjut membaca dari ayat ini nanti</span>
                     </div>
                   </button>
                 </>
@@ -1459,98 +1227,74 @@ const Quran = () => {
   // SURAH LIST / HOME VIEW
   // ──────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-white pb-24 relative overflow-hidden">
+    <div className="min-h-screen pb-24 relative overflow-hidden" style={{ background: 'var(--c-surface)' }}>
       <BgBlobs />
       <div className="relative z-10 flex flex-col pt-6 px-4 gap-4">
         <div className="flex items-center w-full">
           <button onClick={() => navigate(-1)} className="p-2 rounded-full">
-            <ChevronLeft className="h-6 w-6" style={{ color: '#62748E' }} strokeWidth={2} />
+            <ChevronLeft className="h-6 w-6" style={{ color: 'var(--c-text-secondary)' }} strokeWidth={2} />
           </button>
-          <h1 className="text-xl font-bold flex-1 text-center pr-10" style={{ color: '#1D293D', letterSpacing: '-0.44px' }}>Al-Quran</h1>
+          <h1 className="text-xl font-bold flex-1 text-center pr-10" style={{ color: 'var(--c-text)', letterSpacing: '-0.44px' }}>Al-Quran</h1>
         </div>
 
         {progress.lastSurah > 0 && (
-          <motion.button
-          initial={{ y: 10, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            onClick={() => {
-              if (activeKhatam.length > 0) {
-                setShowContinueModal(true);
-              } else {
-                loadSurah(progress.lastSurah);
-              }
-            }}
+          <motion.button initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+            onClick={() => { if (activeKhatam.length > 0) { setShowContinueModal(true); } else { loadSurah(progress.lastSurah); } }}
             className="w-full rounded-3xl p-5 flex items-center gap-4"
-            style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.1)' }}
-          >
-            <div className="flex h-12 w-12 items-center justify-center rounded-full" style={{ background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)', border: '1px solid #FFFFFF', boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.1)' }}>
+            style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)', boxShadow: 'var(--s-card)' }}>
+            <div className="flex h-12 w-12 items-center justify-center rounded-full"
+              style={{ background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)', border: '1px solid #FFFFFF', boxShadow: 'var(--s-small)' }}>
               <BookOpen className="h-5 w-5" style={{ color: '#334258' }} strokeWidth={2} />
             </div>
             <div className="flex flex-col items-start">
-              <span className="font-semibold text-base" style={{ color: '#1D293D' }}>Lanjut Membaca</span>
-              <span className="text-xs" style={{ color: '#838A96' }}>
+              <span className="font-semibold text-base" style={{ color: 'var(--c-text)' }}>Lanjut Membaca</span>
+              <span className="text-xs" style={{ color: 'var(--c-text-muted)' }}>
                 Surah {surahs.find((s) => s.number === progress.lastSurah)?.englishName || progress.lastSurah}
                 {progress.lastAyah > 1 && `, Ayat ${progress.lastAyah}`}
               </span>
             </div>
-            <ChevronRight className="h-5 w-5 ml-auto" style={{ color: '#90A1B9' }} />
+            <ChevronRight className="h-5 w-5 ml-auto" style={{ color: 'var(--c-text-completed)' }} />
           </motion.button>
         )}
 
-        {/* Checkpoint + Khatam 2-column cards */}
         <div className="grid grid-cols-2 gap-3">
-          <motion.button
-            initial={{ y: 10, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
+          <motion.button initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
             onClick={() => setShowCheckpoints(true)}
             className="rounded-2xl p-4 flex flex-col gap-2 text-left"
-            style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}
-          >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: '#FEF3C7' }}>
-              <Flag className="h-4 w-4" style={{ color: '#D97706' }} />
+            style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)', boxShadow: 'var(--s-card-light)' }}>
+            <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: 'var(--c-badge-yellow-bg)' }}>
+              <Flag className="h-4 w-4" style={{ color: 'var(--c-badge-yellow-text)' }} />
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-sm" style={{ color: '#1D293D' }}>Checkpoint</span>
-              <span className="text-xs" style={{ color: '#838A96' }}>
-                {bookmarks.length > 0 ? `${bookmarks.length} surah ditandai` : 'Belum ada'}
-              </span>
+              <span className="font-bold text-sm" style={{ color: 'var(--c-text)' }}>Checkpoint</span>
+              <span className="text-xs" style={{ color: 'var(--c-text-muted)' }}>{bookmarks.length > 0 ? `${bookmarks.length} surah ditandai` : 'Belum ada'}</span>
             </div>
           </motion.button>
 
-          <motion.button
-            initial={{ y: 10, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.05 }}
+          <motion.button initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.05 }}
             onClick={() => setShowKhatam(true)}
             className="rounded-2xl p-4 flex flex-col gap-2 text-left"
-            style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}
-          >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: '#D1FAE5' }}>
-              <Trophy className="h-4 w-4" style={{ color: '#059669' }} />
+            style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)', boxShadow: 'var(--s-card-light)' }}>
+            <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: 'var(--c-badge-green-dark-bg)' }}>
+              <Trophy className="h-4 w-4" style={{ color: 'var(--c-badge-green-medium-text)' }} />
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-sm" style={{ color: '#1D293D' }}>Khatam</span>
-              <span className="text-xs" style={{ color: '#838A96' }}>
-                {activeKhatam.length > 0 ? `${activeKhatam.length} target aktif` : 'Buat target'}
-              </span>
+              <span className="font-bold text-sm" style={{ color: 'var(--c-text)' }}>Khatam</span>
+              <span className="text-xs" style={{ color: 'var(--c-text-muted)' }}>{activeKhatam.length > 0 ? `${activeKhatam.length} target aktif` : 'Buat target'}</span>
             </div>
           </motion.button>
         </div>
 
-        {/* Surah / Juz tabs */}
         <div className="flex gap-2">
           {(["surah", "juz"] as const).map((mode) => (
-            <button
-              key={mode}
-              onClick={() => setViewMode(mode)}
+            <button key={mode} onClick={() => setViewMode(mode)}
               className="flex-1 py-2.5 rounded-2xl text-sm font-semibold transition-all"
               style={{
-                background: viewMode === mode ? 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)' : '#F8F8F7',
-                border: viewMode === mode ? '1px solid #FFFFFF' : '1px solid #F3EDE6',
-                color: viewMode === mode ? '#065F46' : '#62748E',
-                boxShadow: viewMode === mode ? '0px 4px 14px rgba(0, 0, 0, 0.1)' : 'none',
-              }}
-            >
+                background: viewMode === mode ? 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)' : 'var(--c-surface-alt)',
+                border: viewMode === mode ? '1px solid #FFFFFF' : '1px solid var(--c-border-warm)',
+                color: viewMode === mode ? '#065F46' : 'var(--c-text-secondary)',
+                boxShadow: viewMode === mode ? 'var(--s-small)' : 'none',
+              }}>
               {mode === "surah" ? "Surah" : "Juz"}
             </button>
           ))}
@@ -1558,38 +1302,27 @@ const Quran = () => {
 
         {viewMode === "surah" && (
           <>
-            <input
-              type="text"
-              placeholder="Cari surah..."
-              value={searchQuery}
+            <input type="text" placeholder="Cari surah..." value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full rounded-2xl px-4 py-3 text-sm outline-none"
-              style={{ background: '#F8F8F7', border: '1px solid #F3EDE6', color: '#1D293D' }}
-            />
+              style={{ background: 'var(--c-surface-alt)', border: '1px solid var(--c-border-warm)', color: 'var(--c-text)' }} />
             {surahLoading ? (
-              <div className="flex items-center justify-center py-20">
-                <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#34D399' }} />
-              </div>
+              <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin" style={{ color: '#34D399' }} /></div>
             ) : (
               <div className="flex flex-col gap-2 pb-6">
                 {filteredSurahs.map((surah, i) => (
-                  <motion.button
-                    key={surah.number}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
+                  <motion.button key={surah.number} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: Math.min(i * 0.01, 0.3) }}
                     onClick={() => loadSurah(surah.number)}
                     className="w-full rounded-2xl p-4 flex items-center gap-4 text-left"
-                    style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}
-                  >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0 text-sm font-bold" style={{ background: '#F8F8F7', color: '#314158' }}>
-                      {surah.number}
-                    </div>
+                    style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)', boxShadow: 'var(--s-card-light)' }}>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0 text-sm font-bold"
+                      style={{ background: 'var(--c-surface-alt)', color: 'var(--c-text-dark)' }}>{surah.number}</div>
                     <div className="flex flex-col flex-1 min-w-0">
-                      <span className="font-semibold text-sm truncate" style={{ color: '#1D293D' }}>{surah.englishName}</span>
-                      <span className="text-xs truncate" style={{ color: '#838A96' }}>{getSurahTranslation(surah.number) || surah.englishNameTranslation} · {surah.numberOfAyahs} ayat</span>
+                      <span className="font-semibold text-sm truncate" style={{ color: 'var(--c-text)' }}>{surah.englishName}</span>
+                      <span className="text-xs truncate" style={{ color: 'var(--c-text-muted)' }}>{getSurahTranslation(surah.number) || surah.englishNameTranslation} · {surah.numberOfAyahs} ayat</span>
                     </div>
-                    <span className="text-base font-arabic flex-shrink-0" style={{ color: '#1D293D', fontFamily: "'LPMQ IsepMisbah', 'Scheherazade New', serif" }}>{surah.name}</span>
+                    <span className="text-base font-arabic flex-shrink-0" style={{ color: 'var(--c-text)', fontFamily: "'LPMQ IsepMisbah', 'Scheherazade New', serif" }}>{surah.name}</span>
                   </motion.button>
                 ))}
               </div>
@@ -1600,75 +1333,52 @@ const Quran = () => {
         {viewMode === "juz" && (
           <div className="flex flex-col gap-2 pb-6">
             {JUZ_DATA.map((juz, i) => (
-              <motion.button
-                key={juz.number}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
+              <motion.button key={juz.number} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: Math.min(i * 0.02, 0.3) }}
                 onClick={() => loadJuz(juz.number)}
                 className="w-full rounded-2xl p-4 flex items-center gap-4 text-left"
-                style={{ background: '#FFFFFF', border: '1px solid #F3EDE6', boxShadow: '0px 30px 46px rgba(223, 150, 55, 0.05)' }}
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0 text-sm font-bold" style={{ background: '#F8F8F7', color: '#314158' }}>
-                  {juz.number}
-                </div>
+                style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)', boxShadow: 'var(--s-card-light)' }}>
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl flex-shrink-0 text-sm font-bold"
+                  style={{ background: 'var(--c-surface-alt)', color: 'var(--c-text-dark)' }}>{juz.number}</div>
                 <div className="flex flex-col flex-1 min-w-0">
-                  <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>Juz {juz.number}</span>
-                  <span className="text-xs" style={{ color: '#838A96' }}>
-                    {juz.startSurah} : {juz.startAyah} — {juz.endSurah} : {juz.endAyah}
-                  </span>
+                  <span className="font-semibold text-sm" style={{ color: 'var(--c-text)' }}>Juz {juz.number}</span>
+                  <span className="text-xs" style={{ color: 'var(--c-text-muted)' }}>{juz.startSurah} : {juz.startAyah} — {juz.endSurah} : {juz.endAyah}</span>
                 </div>
-                <ChevronRight className="h-4 w-4 flex-shrink-0" style={{ color: '#90A1B9' }} />
+                <ChevronRight className="h-4 w-4 flex-shrink-0" style={{ color: 'var(--c-text-completed)' }} />
               </motion.button>
             ))}
           </div>
         )}
       </div>
 
-      {/* Continue Reading Modal */}
       {showContinueModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center"
-          style={{ background: 'rgba(0,0,0,0.4)' }}
-          onClick={() => setShowContinueModal(false)}
-        >
-          <motion.div
-            initial={{ y: 80, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 80, opacity: 0 }}
+        <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ background: 'var(--c-overlay)' }}
+          onClick={() => setShowContinueModal(false)}>
+          <motion.div initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 80, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
             className="w-full rounded-t-3xl p-6 flex flex-col gap-3"
-            style={{ background: '#FFFFFF', maxWidth: 480 }}
-          >
-            <div className="mx-auto mb-1 h-1.5 w-12 rounded-full" style={{ background: '#E5E7EB' }} />
-            <h2 className="text-base font-bold" style={{ color: '#1D293D' }}>Lanjut Membaca</h2>
-            <p className="text-xs" style={{ color: '#838A96' }}>Pilih mode membaca yang ingin dilanjutkan</p>
+            style={{ background: 'var(--c-surface)', maxWidth: 480 }}>
+            <div className="mx-auto mb-1 h-1.5 w-12 rounded-full" style={{ background: 'var(--c-divider)' }} />
+            <h2 className="text-base font-bold" style={{ color: 'var(--c-text)' }}>Lanjut Membaca</h2>
+            <p className="text-xs" style={{ color: 'var(--c-text-muted)' }}>Pilih mode membaca yang ingin dilanjutkan</p>
 
-            {/* Biasa */}
-            <button
-              onClick={() => {
-                setShowContinueModal(false);
-                loadSurah(progress.lastSurah);
-              }}
+            <button onClick={() => { setShowContinueModal(false); loadSurah(progress.lastSurah); }}
               className="w-full rounded-2xl p-4 flex items-center gap-4 text-left active:scale-[0.99] transition-all"
-              style={{ background: '#F8F8F7', border: '1px solid #F3EDE6' }}
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full flex-shrink-0" style={{ background: '#E0F2FE' }}>
-                <BookOpen className="h-5 w-5" style={{ color: '#0284C7' }} />
+              style={{ background: 'var(--c-surface-alt)', border: '1px solid var(--c-border-warm)' }}>
+              <div className="flex h-10 w-10 items-center justify-center rounded-full flex-shrink-0" style={{ background: 'var(--c-badge-blue-bg)' }}>
+                <BookOpen className="h-5 w-5" style={{ color: 'var(--c-badge-blue-text)' }} />
               </div>
               <div className="flex flex-col">
-                <span className="font-semibold text-sm" style={{ color: '#1D293D' }}>Baca Al-Quran Biasa</span>
-                <span className="text-xs" style={{ color: '#838A96' }}>
+                <span className="font-semibold text-sm" style={{ color: 'var(--c-text)' }}>Baca Al-Quran Biasa</span>
+                <span className="text-xs" style={{ color: 'var(--c-text-muted)' }}>
                   Lanjut dari {surahs.find((s) => s.number === progress.lastSurah)?.englishName || `Surah ${progress.lastSurah}`}
                   {progress.lastAyah > 1 && `, Ayat ${progress.lastAyah}`}
                 </span>
               </div>
             </button>
 
-            {/* Khatam */}
             {activeKhatam.map((session) => (
-              <button
-                key={session.id}
+              <button key={session.id}
                 onClick={() => {
                   setShowContinueModal(false);
                   const surahToLoad = session.checkpointSurah ?? 1;
@@ -1683,14 +1393,13 @@ const Quran = () => {
                   });
                 }}
                 className="w-full rounded-2xl p-4 flex items-center gap-4 text-left active:scale-[0.99] transition-all"
-                style={{ background: '#F0FDF4', border: '1px solid #D1FAE5' }}
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full flex-shrink-0" style={{ background: '#D1FAE5' }}>
-                  <Trophy className="h-5 w-5" style={{ color: '#059669' }} />
+                style={{ background: 'var(--c-badge-green-bg)', border: '1px solid var(--c-badge-green-dark-bg)' }}>
+                <div className="flex h-10 w-10 items-center justify-center rounded-full flex-shrink-0" style={{ background: 'var(--c-badge-green-dark-bg)' }}>
+                  <Trophy className="h-5 w-5" style={{ color: 'var(--c-badge-green-medium-text)' }} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-semibold text-sm" style={{ color: '#065F46' }}>Lanjut Khatam</span>
-                  <span className="text-xs" style={{ color: '#059669' }}>
+                  <span className="font-semibold text-sm" style={{ color: 'var(--c-badge-green-dark-text)' }}>Lanjut Khatam</span>
+                  <span className="text-xs" style={{ color: 'var(--c-badge-green-medium-text)' }}>
                     {session.checkpointSurah
                       ? `${session.checkpointSurahName || `Surah ${session.checkpointSurah}`}, Ayat ${session.checkpointAyah}`
                       : `Mulai dari Al-Fatihah`}
@@ -1700,11 +1409,9 @@ const Quran = () => {
               </button>
             ))}
 
-            <button
-              onClick={() => setShowContinueModal(false)}
+            <button onClick={() => setShowContinueModal(false)}
               className="w-full py-3 rounded-2xl text-sm font-semibold mt-1"
-              style={{ background: '#F8F8F7', color: '#838A96' }}
-            >
+              style={{ background: 'var(--c-surface-alt)', color: 'var(--c-text-muted)' }}>
               Batal
             </button>
           </motion.div>

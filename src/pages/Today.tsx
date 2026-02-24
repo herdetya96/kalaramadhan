@@ -140,7 +140,7 @@ const Today = () => {
                 borderRadius: 40,
               }}
             >
-              <ChevronRightIcon className="h-5 w-5" style={{ color: 'var(--c-text-dark)' }} strokeWidth={2} />
+              <ChevronRightIcon className="h-5 w-5" style={{ color: '#314158' }} strokeWidth={2} />
             </div>
           </div>
           <div className="flex items-center gap-1">
