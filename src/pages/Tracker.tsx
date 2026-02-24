@@ -94,8 +94,8 @@ const Tracker = () => {
                   width: 48, height: 64, borderRadius: isSelected ? 40 : 16,
                   ...(isSelected ? { background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)', border: '1px solid var(--c-surface)', boxShadow: 'var(--s-card)' } : {})
                 }}>
-                <span className="text-[10px] font-medium uppercase" style={{ color: isSelected ? 'var(--c-text-dark)' : 'var(--c-text-dim)', letterSpacing: '0.62px' }}>{DAY_LABELS[d.getDay()]}</span>
-                <span className="text-lg font-bold" style={{ color: 'var(--c-text-dark)', letterSpacing: '-0.44px' }}>{d.getDate()}</span>
+                <span className="text-[10px] font-medium uppercase" style={{ color: isSelected ? '#314158' : 'var(--c-text-dim)', letterSpacing: '0.62px' }}>{DAY_LABELS[d.getDay()]}</span>
+                <span className="text-lg font-bold" style={{ color: isSelected ? '#314158' : 'var(--c-text-dark)', letterSpacing: '-0.44px' }}>{d.getDate()}</span>
                 {isTodayDate && !isSelected && <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--c-green-accent)' }} />}
               </button>
             );
