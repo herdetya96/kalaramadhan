@@ -184,7 +184,7 @@ const Puasa = () => {
                   borderRadius: isSelected ? 40 : 16,
                   ...(isSelected ? {
                     background: 'linear-gradient(180deg, #7DF8AD 0%, #F9FFD2 100%)',
-                    border: '1px solid #FFFFFF',
+                    border: '1px solid #314158',
                     boxShadow: 'var(--s-card)',
                   } : {}),
                 }}>
