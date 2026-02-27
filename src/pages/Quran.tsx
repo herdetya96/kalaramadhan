@@ -571,11 +571,11 @@ const Quran = () => {
                 return (
                   <div key={ayah.number} id={`ayah-${ayah.numberInSurah}`}
                     onClick={() => handleAyahTap(ayah)}
-                    className="rounded-2xl p-4 flex flex-col gap-3 cursor-pointer transition-all active:scale-[0.99]"
+                    className="rounded-2xl p-4 flex flex-col gap-3 cursor-pointer transition-all active:scale-[0.99] relative overflow-hidden"
                     style={{
-                      background: 'var(--c-surface)', border: '1px solid var(--c-border-warm)',
+                      background: isKhatamCp ? 'var(--c-badge-green-dark-bg)' : isLastRead ? 'var(--c-badge-green-bg)' : isSaved ? 'var(--c-badge-yellow-bg)' : 'var(--c-surface)',
+                      border: isKhatamCp ? '1.5px solid var(--c-badge-green-border)' : isLastRead ? '1.5px solid var(--c-badge-green-border)' : isSaved ? '1.5px solid #FDE68A' : '1px solid var(--c-border-warm)',
                       boxShadow: 'var(--s-card-light)',
-                      borderLeft: isKhatamCp ? '3px solid #059669' : isLastRead ? '3px solid #38CA5E' : isSaved ? '3px solid #F59E0B' : '1px solid var(--c-border-warm)',
                     }}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
